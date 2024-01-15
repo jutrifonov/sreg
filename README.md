@@ -1,4 +1,2 @@
 # sreg
-This repo contains the sreg package for R. 
-The package provides an estimor of the average treatment effects (ATEs), where the treatment assignment follows the stratified block randomization design.
-The package allows for multiple treatments and cluster-level treatment assignments. The sreg package provides adjusted variance estimators.
+This repository houses the 'sreg' package for R, offering a robust toolkit for estimating average treatment effects (ATEs) within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR). Designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, the 'sreg' package not only provides ATE estimators but also includes sophisticated features for calculating adjusted variance estimators developed in papers (Bugni, Canay, Shaikh; 2017), (Bugni, Canay, Shaikh, Meehan; 2023) and (Jiang, Linton, Tang, Zhang, 2023).
