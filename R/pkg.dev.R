@@ -51,12 +51,12 @@ sreg.rgen <- function(n, Nmax=50, n.strata,
   if (cluster == T)
   {
     G <- n
-    Nmax <- 50
+    Nmax <- Nmax
     n.treat <- length(tau.vec)
     max.support = Nmax/10-1
     Ng <- gen.cluster.sizes(G, max.support)[,1]
     #Ng <- rep(Nmax, G)                                                            # uncomment and comment the previous line for a equal-size design
-    data.pot <- dgp.po.creg(Ng=Ng, tau.vec = (tau.vec / 0.5), G = G,
+    data.pot <- dgp.po.creg(Ng=Ng, tau.vec = tau.vec, G = G,
                              gamma.vec = gamma.vec, n.treat=n.treat)
     strata <- form.strata.creg(data.pot, n.strata)
     strata.set <- data.frame(strata)

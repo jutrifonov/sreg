@@ -454,30 +454,79 @@ gen.cluster.sizes <-function(G,max.support,s=1.5)
 #-------------------------------------------------------------------
 #%# (2) Potential outcomes generation
 #-------------------------------------------------------------------
+#------------------------------------------------------------------
 dgp.po.creg <- function(Ng, G, tau.vec, sigma1=sqrt(2),
-                         gamma.vec = c(0.4, 0.2, 1, 0.1, 0.8), n.treat)
-  #------------------------------------------------------------------
+                         gamma.vec = c(0.4, 0.2, 1), n.treat)
+#------------------------------------------------------------------
 {
-  x_1 <- rbeta(G, 2, 4)
-  x_2 <- rbeta(G, 2, 4)
-  X <- data.frame(x_1, x_2)
+  for (a in seq_along(tau.vec))
+  {
+    assign(paste("mu.", a, sep = ""), tau.vec[a])                              #create mu.a, where a \in \mathbb{A}
+  }
+
+
+  #eta.0.g <- runif(G)
+  #eta.1.g <- runif(G,0,5)
+  #Z.g.1 <- 2*(runif(G)>0.5)-1;
   beta.rv <- rbeta(G,2,2)
-  Z.g.2 <- x_1
-  mu.0 <- 10 * (x_1 - (1/3)) + 6 * (x_2 - (1/3)) + 2
-  mu.1 <- mu.0
+  Z.g.2 <- (beta.rv - 0.5) * sqrt(20)
+  x_1 <- (rnorm(G, mean = 5, sd = 2) - 5)/2
+  x_2 <- (rnorm(G, mean = 2, sd = 1) - 2)/1
+  #x_3 <- (rnorm(G, mean = 1, sd = 3) - 1)/3
+  #x_4 <- (rnorm(G, mean = 10, sd = 5) - 10)/5
+  X <- data.frame(x_1, x_2)#, x_3, x_4)
 
   cluster.indicator = rep(c(1:G),Ng);
   cl.id <-  cluster.indicator
   total.sample = length(cluster.indicator)
 
-  epsilon.ig.0 = rnorm(total.sample, 0, sigma1);
-  epsilon.ig.1 = rnorm(total.sample, 0, sigma1);
+  for (a in 1:n.treat)
+  {
+    assign(paste("epsilon.ig.", a, sep = ""), rnorm(total.sample,0,sigma1))
+  }
+  #epsilon.ig.1 = rnorm(total.sample,0,sigma1);
+  epsilon.ig.0 = rnorm(total.sample, 0, 1);
 
-  Yig.0 <- rep(mu.0, Ng) + 2 * epsilon.ig.0
-  Yig.1 <- rep(mu.1, Ng) + 2 * epsilon.ig.1
+  m.0 <- gamma.vec[1] * Z.g.2 + gamma.vec[2] * x_1 + gamma.vec[3] * x_2 #+ gamma.vec[4] * x_3 + gamma.vec[5] * x_4 # G=500 obs
 
+  for (a in 1:n.treat)                                                           # create m() functions m.a for every treatment a \in \mathbb{A}
+  {
+    assign(paste("m.", a, sep = ""), m.0)
+  }
+  #m.1 <- (m.1.raw - mean(m.1.raw)) / sd(m.1.raw)
+  # With a different function for m.0
+  #m.0 <- (-gamma) * log(Z.g.2 + 3) * (Z.g.2 <= 0.5)  # G=500 obs
+  # Without a different function for m.0
+  #m.0 <- m.1
+  #m.0 <- (m.0.raw - mean(m.0.raw)) / sd(m.0.raw)
+
+  # Potential outcomes
+  ### With eta and Z.g.1
+  #Yig.0 <- rep(eta.0.g * Z.g.1 + m.0, Ng) + epsilon.ig.0
+  #Yig.1 <- mu.1 + rep(eta.1.g * Z.g.1 + m.1, Ng) + epsilon.ig.1
+  ### Without eta and Z.g.1
+  Yig.0 <- rep(m.0, Ng) + epsilon.ig.0
+
+  for (a in 1:n.treat)
+  {
+    formula <- paste0("mu.", a, "+rep(m.", a, ",Ng)", "+epsilon.ig.", a)
+    result <- eval(parse(text = formula))
+    assign(paste("Yig.", a, sep = ""), result)
+  }
+
+  #Yig.1 <- mu.1 + rep(m.1, Ng) + epsilon.ig.1
+
+  #ret.list <- list( 'Y.0' = Yig.0,
+  #                  'Y.1' = Yig.1,
+  #                  #'Z.1' = Z.g.1,
+  #                  'Z.2' = Z.g.2,
+  #                  'X'   = X,
+  #                  'G'   = G,
+  #                  'cl.id' = cluster.indicator,
+  #                  'Ng' = Ng)
   ret.names <- c(paste("Yig.", 0:n.treat, sep = ""),
-                 "X", "G", "Ng", "cl.id", "Z.g.2", paste("mu.", 0:n.treat, sep = ""))
+                 "Z.g.2", "X", "G", "Ng", "cl.id", paste("m.", 0:n.treat, sep = ""),
+                 paste("mu.", 1:n.treat, sep = ""))
 
   ret.list <- mget(ret.names)
   return (ret.list)
