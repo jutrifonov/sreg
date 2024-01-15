@@ -4,7 +4,7 @@
 \alias{sreg}
 \title{Estimates the ATE}
 \usage{
-sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, exp.option = FALSE)
+sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL)
 }
 \arguments{
 \item{Y}{a numeric vector of the observed outcomes}
@@ -18,8 +18,6 @@ sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, exp.option = FALSE)
 \item{Ng}{a numeric vector of cluster sizes}
 
 \item{X}{a data frame of covariates}
-
-\item{exp.option}{whether clusters are of equal sizes (if TRUE)}
 }
 \value{
 a list containing the results

@@ -10,7 +10,7 @@ sreg.rgen(
   n.strata,
   tau.vec = c(0),
   gamma.vec = c(0.4, 0.2, 1),
-  cluster = T
+  cluster = TRUE
 )
 }
 \arguments{
@@ -22,9 +22,9 @@ sreg.rgen(
 
 \item{tau.vec}{a numeric vector of treatment effects}
 
-\item{gamma.vec}{vector of parameters}
+\item{gamma.vec}{a numeric vector of parameters}
 
-\item{cluster}{a boolean argument indicating whether the dgp should include clusters or not}
+\item{cluster}{a TRUE/FALSE argument indicating whether the dgp should include clusters or not}
 }
 \value{
 a data frame containing the results

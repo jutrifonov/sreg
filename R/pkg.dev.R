@@ -12,21 +12,20 @@ source("~/Desktop/sreg/R/sreg.R")
 #' @param G.id a numeric vector of cluster indicators
 #' @param Ng a numeric vector of cluster sizes
 #' @param X a data frame of covariates
-#' @param exp.option whether clusters are of equal sizes (if TRUE)
 #'
 #' @return a list containing the results
 #' @export
 #'
 #' @examples
 #' test <- sreg(Y,S,D,X)
-sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL, exp.option = FALSE)
+sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL)
 {
   if (is.null(G.id) | is.null(Ng))
   {
     result <- res.sreg(Y,S,D,X)
     summary.sreg(result)
   }else{
-    result <- res.creg(Y,S,D,G.id,Ng,X, exp.option = FALSE)
+    result <- res.creg(Y,S,D,G.id,Ng,X)
     summary.creg(result)
   }
   return(result)
@@ -38,8 +37,8 @@ sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL, exp.option = FALSE)
 #' @param Nmax maximum size of clusters
 #' @param n.strata number of strata
 #' @param tau.vec a numeric vector of treatment effects
-#' @param gamma.vec vector of parameters
-#' @param cluster a boolean argument indicating whether the dgp should include clusters or not
+#' @param gamma.vec a numeric vector of parameters
+#' @param cluster a TRUE/FALSE argument indicating whether the dgp should include clusters or not
 #'
 #' @return a data frame containing the results
 #' @export
@@ -47,7 +46,7 @@ sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL, exp.option = FALSE)
 #' @examples
 #' data <- sreg.rgen(n=1000, tau.vec = c(0), n.strata=4, cluster = T)
 sreg.rgen <- function(n, Nmax=50, n.strata,
-                      tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1), cluster = T)
+                      tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1), cluster = TRUE)
 {
   if (cluster == T)
   {
@@ -74,26 +73,21 @@ sreg.rgen <- function(n, Nmax=50, n.strata,
   }else{
     n.treat <- length(tau.vec)      # number of treatments
     pot.outcomes <- dgp.po.sreg(n = n, tau.vec, gamma = gamma.vec, n.treat = n.treat)   # generate pot. outcomes and W
-    strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata)                       # generate strata
-    strata_set <- data.frame(strata)                                                 # generate strata
-    strata_set$S <- max.col(strata_set)                                              # generate strata
-    pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)                                     # vector of target proportions (equal allocation)
+    strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata)                     # generate strata
+    strata_set <- data.frame(strata)                                                    # generate strata
+    strata_set$S <- max.col(strata_set)                                                 # generate strata
+    pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)                                        # vector of target proportions (equal allocation)
     #pi.vec <- c(0.1, 0.35, 0.2)
-    data.test <- dgp.obs.sreg(pot.outcomes,I.S = strata,                             # simulate observed outcomes
-                         pi.vec = pi.vec, n.treat = n.treat)                         # simulate observed outcomes
-    Y <- as.numeric(data.test$Y)                                                     # Y
-    D <- as.numeric(data.test$D)                                                     # D
-    S <- strata_set$S                                                                # S
+    data.test <- dgp.obs.sreg(pot.outcomes,I.S = strata,                                # simulate observed outcomes
+                         pi.vec = pi.vec, n.treat = n.treat)                            # simulate observed outcomes
+    Y <- as.numeric(data.test$Y)                                                        # Y
+    D <- as.numeric(data.test$D)                                                        # D
+    S <- strata_set$S                                                                   # S
     X <- data.test$X
     data.sim <- data.frame(Y, S, D, X)
   }
   return(data.sim)
 }
 
-#data <- sreg.rgen(n=1000, tau.vec = c(0), n.strata=4, cluster = F)
-#Y <- data$Y
-#S <- data$S
-#D <- data$D
-#X <- data.frame("x_1"= data$x_1, "x_2" = data$x_2)
-#test <- sreg(Y,S,D,G.id = NULL, Ng = NULL, X)
+
 
