@@ -4,7 +4,7 @@
 \alias{sreg}
 \title{Estimates the ATE}
 \usage{
-sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL)
+sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE)
 }
 \arguments{
 \item{Y}{a numeric vector of the observed outcomes}
@@ -18,6 +18,9 @@ sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL)
 \item{Ng}{a numeric vector of cluster sizes}
 
 \item{X}{a data frame of covariates}
+
+\item{Ng.cov}{a TRUE/FALSE argument indicating whether the Ng should be included as the only covariate in linear adjustments
+when X = NULL}
 }
 \value{
 a list containing the results

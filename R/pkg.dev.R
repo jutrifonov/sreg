@@ -1,8 +1,3 @@
-source("~/Desktop/sreg/R/creg.R")
-source("~/Desktop/sreg/R/sreg.R")
-
-
-
 #' Estimates the ATE
 #' @import extraDistr
 #'
@@ -12,20 +7,22 @@ source("~/Desktop/sreg/R/sreg.R")
 #' @param G.id a numeric vector of cluster indicators
 #' @param Ng a numeric vector of cluster sizes
 #' @param X a data frame of covariates
+#' @param Ng.cov a TRUE/FALSE argument indicating whether the Ng should be included as the only covariate in linear adjustments
+#'  when X = NULL
 #'
 #' @return a list containing the results
 #' @export
 #'
 #' @examples
 #' test <- sreg(Y,S,D,X)
-sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL)
+sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL, Ng.cov = FALSE)
 {
   if (is.null(G.id) | is.null(Ng))
   {
     result <- res.sreg(Y,S,D,X)
     summary.sreg(result)
   }else{
-    result <- res.creg(Y,S,D,G.id,Ng,X)
+    result <- res.creg(Y,S,D,G.id,Ng,X,Ng.cov)
     summary.creg(result)
   }
   return(result)
