@@ -31,5 +31,5 @@ Ng <- data$Ng
 G.id <- data$G.id
 
 # Estimate the ATE, s.e., etc.
-test <- sreg(Y, S, D, G.id, Ng, X=NULL, Ng.cov = F)
+test <- sreg(Y, S, D, G.id, Ng, X=NULL, Ng.cov = T)
 

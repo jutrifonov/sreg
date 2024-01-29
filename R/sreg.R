@@ -70,7 +70,7 @@ indicator.sreg <- function(variable, type)
 # NB CHANGE FOR MULTIVARIATE!
 #-------------------------------------------------------------------
 filter.ols.sreg <- function(Y,S,D,X,s,d)
-#-------------------------------------------------------------------
+  #-------------------------------------------------------------------
 {
   X <- as.matrix(X)
   data <- data.frame(Y,S,D,X)
@@ -82,6 +82,12 @@ filter.ols.sreg <- function(Y,S,D,X,s,d)
   return(data.ols)
 }
 
+filter.fnc <- function(data,s)
+{
+  filtered.data <- data[data$S %in% s, ]
+  return(filtered.data)
+}
+
 
 #-------------------------------------------------------------------
 #%# (4) Function that implements the OLS estimation of the
@@ -90,7 +96,7 @@ filter.ols.sreg <- function(Y,S,D,X,s,d)
 #%source function for theta.est.str()
 #-------------------------------------------------------------------
 lm.iter.sreg <- function(Y,S,D,X)
-#-------------------------------------------------------------------
+  #-------------------------------------------------------------------
 {
   theta.list <- rep(list(matrix(NA, ncol = ncol(X), nrow = max(S))), (max(D) + 1))
 
@@ -112,7 +118,7 @@ lm.iter.sreg <- function(Y,S,D,X)
 
 #-------------------------------------------------------------------
 lin.adj.sreg <- function(a, S, X, model)
-#-------------------------------------------------------------------
+  #-------------------------------------------------------------------
 {
   data <- data.frame(S,X)
   theta.mtrx <- model[[a+1]]
@@ -123,8 +129,8 @@ lin.adj.sreg <- function(a, S, X, model)
 
 
 #-------------------------------------------------------------------
-pi.hat.sreg <- function(S,D)
-#-------------------------------------------------------------------
+pi.hat.sreg <- function(S,D, inverse = FALSE)
+  #-------------------------------------------------------------------
 {
   n <- length(D)
   data <- data.frame(S,D)
@@ -135,51 +141,60 @@ pi.hat.sreg <- function(S,D)
     {
       n.1.s <-  length(data[data$D %in% d & data$S %in% data$S[i], 2])
       n.0.s <-  length(data[data$D %in% 0 & data$S %in% data$S[i], 2])
-      n.s <- n.1.s + n.0.s
+      #n.s <- n.1.s + n.0.s
+      n.s <- length(data[data$S %in% data$S[i], 2])
       pi.hat.mtrx[i,d] <- n.1.s / n.s
+      if (inverse == TRUE)
+      {
+        pi.hat.mtrx[i,d] <- n.0.s / n.s
+      }
     }
   }
   return(pi.hat.mtrx)
 }
 
-
 #-------------------------------------------------------------------
 tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
-#-------------------------------------------------------------------
+  #-------------------------------------------------------------------
 {
   tau.hat <- rep(NA, max(D))
   for (d in 1:max(D))
   {
     if(!is.null(X))
     {
-    data <- data.frame(Y,S,D,X)
-    data$pi <- pi.hat.sreg(S,D)[, d]
-    data.bin <- data[data$D %in% c(d,0), ]
-    data.bin$A <- as.numeric(data.bin$D != 0)
-
-    mu.hat.d <- lin.adj.sreg(d, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
-
-    mu.hat.0 <- lin.adj.sreg(0, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
-
-    Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) / data.bin$pi) -
-      (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) / (1 - data.bin$pi)) +
-      mu.hat.d - mu.hat.0
-
-    tau.hat[d] <- mean(Ksi.vec)
-    }else{
-      data <- data.frame(Y,S,D)
+      data <- data.frame(Y,S,D,X)
       data$pi <- pi.hat.sreg(S,D)[, d]
       data.bin <- data[data$D %in% c(d,0), ]
       data.bin$A <- as.numeric(data.bin$D != 0)
 
-      mu.hat.d <- 0
-      mu.hat.0 <- 0
+      mu.hat.d <- lin.adj.sreg(d, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
+
+      mu.hat.0 <- lin.adj.sreg(0, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
 
       Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) / data.bin$pi) -
         (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) / (1 - data.bin$pi)) +
         mu.hat.d - mu.hat.0
 
       tau.hat[d] <- mean(Ksi.vec)
+    }else{
+      data <- data.frame(Y,S,D)
+      data$pi <- pi.hat.sreg(S,D)[,d]
+      data$pi.0 <- pi.hat.sreg(S,D,inverse = T)[, 1]
+      #data$A <- as.numeric(data$D == d)
+      #data.bin <- data
+      data.bin <- data[data$D %in% c(d,0), ]
+      data.bin$A <- as.numeric(data.bin$D != 0)
+      #testim <- data.frame(data$pi, data$pi.0)
+      #data.bin$pi <- pi.hat.sreg(data.bin$S,data.bin$A)
+
+      mu.hat.d <- 0
+      mu.hat.0 <- 0
+
+      Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) / data.bin$pi) -
+        (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) / (data.bin$pi.0)) +
+        mu.hat.d - mu.hat.0
+      tau.hat[d] <- mean(Ksi.vec)
+      tau.hat[d] <- sum(Ksi.vec) / length(Y)
     }
 
   }
@@ -190,7 +205,7 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
 #-------------------------------------------------------------------
 # Variance Estimator
 #-------------------------------------------------------------------
- as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
+as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
 {
   var.vec <- rep(NA, max(D))
   n.vec <- rep(NA, max(D))
@@ -246,6 +261,7 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
     {
       data <- data.frame(Y,S,D)
       data$pi <- pi.hat.sreg(S,D)[, d]
+      data$pi.0 <- pi.hat.sreg(S,D,inverse = T)[, 1]
       data.bin <- data[data$D %in% c(d,0), ]
       data.bin$A <- as.numeric(data.bin$D != 0)
       n.d <- length(data.bin$Y)
@@ -258,9 +274,9 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
         (data.bin$Y / data.bin$pi)
 
       Xi.tilde.0 <- ((1 / (1 - data.bin$pi)) - 1) * mu.hat.0 + mu.hat.d -
-        (data.bin$Y / (1 - data.bin$pi))
+        (data.bin$Y / (data.bin$pi.0))
 
-      data.bin <- data.frame(data.bin, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data.bin$Y)
+      data.bin <- data.frame(data.bin, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data.bin$Y - tau[d] * data.bin$A)
 
       Xi.1.mean <- rep(NA,n.d)
       Xi.0.mean <- rep(NA,n.d)
@@ -269,10 +285,10 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
 
       for (i in 1:n.d)
       {
-        Xi.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.1)
-        Xi.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.0)
-        Y.tau.D.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
-        Y.tau.D.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
+        Xi.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.1) #/ length(data[data$D %in% c(d) & data$S %in% data.bin$S[i], 1])
+        Xi.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.0) #/ length(data[data$D %in% c(0) & data$S %in% data.bin$S[i], 1])
+        Y.tau.D.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D) #/ length(data[data$D %in% c(d) & data$S %in% data.bin$S[i], 1])
+        Y.tau.D.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D) #/ length(data[data$D %in% c(0) & data$S %in% data.bin$S[i], 1])
       }
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
@@ -280,13 +296,14 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
 
-      sigma.hat.sq <-  mean(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2)
+      sigma.hat.sq <-  sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2  + Xi.hat.2^2) / length(Y)
 
-      var.vec[d] <- sigma.hat.sq
-      n.vec[d]   <- n.d
-
+      var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
+      n.vec[d]   <- length(Y)
+      #print(sigma.hat.sq)
     }
   }
+
   se.vec <- sqrt(var.vec/n.vec)
   return(se.vec)
 }
@@ -355,7 +372,7 @@ summary.sreg <- function(model)
 
   if(!is.null(model$data$x_1))
   {
-  cat("Saturated Model Estimation Results under CAR with linear adjustments\n")
+    cat("Saturated Model Estimation Results under CAR with linear adjustments\n")
   }else{
     cat("Saturated Model Estimation Results under CAR\n")
   }
@@ -387,7 +404,7 @@ summary.sreg <- function(model)
                    "Significance" = stars)
   is.df.num.col <- sapply(df, is.numeric)
   df[, is.df.num.col] <- round(df[, is.df.num.col], 5)
-  print(df)
+  #print(df)
   cat("---\n")
   cat(paste("Signif. codes:  0 ‘***’ 0.001 ‘**’",
             "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"))
