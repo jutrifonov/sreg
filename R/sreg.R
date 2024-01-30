@@ -164,6 +164,7 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
     {
       data <- data.frame(Y,S,D,X)
       data$pi <- pi.hat.sreg(S,D)[, d]
+      data$pi.0 <- pi.hat.sreg(S,D,inverse = T)[, 1]
       data.bin <- data[data$D %in% c(d,0), ]
       data.bin$A <- as.numeric(data.bin$D != 0)
 
@@ -172,10 +173,10 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
       mu.hat.0 <- lin.adj.sreg(0, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
 
       Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) / data.bin$pi) -
-        (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) / (1 - data.bin$pi)) +
+        (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) / (data.bin$pi.0)) +
         mu.hat.d - mu.hat.0
 
-      tau.hat[d] <- mean(Ksi.vec)
+      tau.hat[d] <- sum(Ksi.vec) / length(Y)
     }else{
       data <- data.frame(Y,S,D)
       data$pi <- pi.hat.sreg(S,D)[,d]
@@ -193,7 +194,7 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
       Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) / data.bin$pi) -
         (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) / (data.bin$pi.0)) +
         mu.hat.d - mu.hat.0
-      tau.hat[d] <- mean(Ksi.vec)
+      #tau.hat[d] <- mean(Ksi.vec)
       tau.hat[d] <- sum(Ksi.vec) / length(Y)
     }
 
@@ -216,6 +217,7 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
     {
       data <- data.frame(Y,S,D,X)
       data$pi <- pi.hat.sreg(S,D)[, d]
+      data$pi.0 <- pi.hat.sreg(S,D,inverse = T)[, 1]
       data.bin <- data[data$D %in% c(d,0), ]
       data.bin$A <- as.numeric(data.bin$D != 0)
       n.d <- length(data.bin$Y)
@@ -224,13 +226,13 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
       mu.hat.0 <- lin.adj.sreg(0, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
       data.bin <- data.frame(data.bin, mu.hat.d, mu.hat.0)
 
-      Xi.tilde.1 <- (1 - (1/data.bin$pi)) * mu.hat.d - mu.hat.0 +
+      Xi.tilde.1 <- (-(data.bin$pi.0 / data.bin$pi)) * mu.hat.d - mu.hat.0 +
         (data.bin$Y / data.bin$pi)
 
-      Xi.tilde.0 <- ((1 / (1 - data.bin$pi)) - 1) * mu.hat.0 + mu.hat.d -
-        (data.bin$Y / (1 - data.bin$pi))
+      Xi.tilde.0 <- (data.bin$pi / data.bin$pi.0) * mu.hat.0 + mu.hat.d -
+        (data.bin$Y / data.bin$pi.0)
 
-      data.bin <- data.frame(data.bin, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data.bin$Y)
+      data.bin <- data.frame(data.bin, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data.bin$Y - tau[d] * data.bin$A)
 
       Xi.1.mean <- rep(NA,n.d)
       Xi.0.mean <- rep(NA,n.d)
@@ -250,10 +252,10 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
 
-      sigma.hat.sq <-  mean(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2)
+      sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2  + Xi.hat.2^2) / length(Y)
 
-      var.vec[d] <- sigma.hat.sq
-      n.vec[d]   <- n.d
+      var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S) + ncol(X))))
+      n.vec[d]   <- length(Y)
 
     }
   }else{
@@ -404,7 +406,7 @@ summary.sreg <- function(model)
                    "Significance" = stars)
   is.df.num.col <- sapply(df, is.numeric)
   df[, is.df.num.col] <- round(df[, is.df.num.col], 5)
-  #print(df)
+  print(df)
   cat("---\n")
   cat(paste("Signif. codes:  0 ‘***’ 0.001 ‘**’",
             "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"))
@@ -419,7 +421,7 @@ summary.sreg <- function(model)
 #-------------------------------------------------------------------
 #%# (1) Potential outcomes generation
 #-------------------------------------------------------------------
-dgp.po.sreg <- function(n, theta.vec, gamma.vec, n.treat)
+dgp.po.sreg <- function(n, theta.vec, gamma.vec, n.treat, is.cov = TRUE)
   #-------------------------------------------------------------------
 {
   if (n.treat !=length(theta.vec))
@@ -442,8 +444,13 @@ dgp.po.sreg <- function(n, theta.vec, gamma.vec, n.treat)
   x_2 <- rnorm(n, mean = 2, sd = 1)
   #x_3 <- rnorm(n, mean = 1, sd = 3)
   #x_4 <- rnorm(n, mean = 10, sd = 5)
+  if(is.cov == TRUE)
+  {
   X <- data.frame(x_1, x_2)#, x_3, x_4)
   m.0 <- gamma.vec[1] * W + gamma.vec[2] * x_1 + gamma.vec[3] * x_2 #+ gamma.vec[4] * x_3 + gamma.vec[5] * x_4
+  }else{
+    m.0 <- gamma.vec[1] * W
+  }
   #m.0 <- gamma.vec[1] * W
   for (a in 1:n.treat)                                                           # create m() functions m.a for every treatment a \in \mathbb{A}
   {
@@ -459,9 +466,16 @@ dgp.po.sreg <- function(n, theta.vec, gamma.vec, n.treat)
     assign(paste("Y.", a, sep = ""), result)
   }
 
+  if(is.cov == TRUE)
+  {
   ret.names <- c(paste("Y.", 0:n.treat, sep = ""),
                  "W", "X", paste("m.", 0:n.treat, sep = ""),
                  paste("mu.", 1:n.treat, sep = ""))
+  }else{
+    ret.names <- c(paste("Y.", 0:n.treat, sep = ""),
+                   "W", paste("m.", 0:n.treat, sep = ""),
+                   paste("mu.", 1:n.treat, sep = ""))
+  }
   ret.list <- mget(ret.names)
   return (ret.list)
 }
@@ -528,7 +542,7 @@ gen.rubin.formula.sreg <- function(n.treat) {
 #%#     matrix of strata assignments, pi.vec, and
 #%#     number of treatments
 #-------------------------------------------------------------------
-dgp.obs.sreg <- function(baseline, I.S, pi.vec, n.treat)
+dgp.obs.sreg <- function(baseline, I.S, pi.vec, n.treat, is.cov = TRUE)
   #-------------------------------------------------------------------
 {
   if (n.treat != length(pi.vec))
@@ -562,9 +576,15 @@ dgp.obs.sreg <- function(baseline, I.S, pi.vec, n.treat)
   formula <- gen.rubin.formula.sreg(n.treat)
   Y.obs <- eval(parse(text = formula))
 
+  if(is.cov == TRUE)
+  {
   ret.list <- list('Y' = Y.obs,
                    'D' = A,
                    'X' = baseline$X)
+  }else{
+    ret.list <- list('Y' = Y.obs,
+                     'D' = A)
+  }
   return(ret.list)
 }
 #-------------------------------------------------------------------

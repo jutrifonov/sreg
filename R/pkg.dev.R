@@ -36,6 +36,7 @@ sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL, Ng.cov = FALSE)
 #' @param tau.vec a numeric vector of treatment effects
 #' @param gamma.vec a numeric vector of parameters
 #' @param cluster a TRUE/FALSE argument indicating whether the dgp should include clusters or not
+#' @param is.cov a TRUE/FALSE argument indicating whether the dgp should include covariates or not
 #'
 #' @return a data frame containing the results
 #' @export
@@ -43,7 +44,8 @@ sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL, Ng.cov = FALSE)
 #' @examples
 #' data <- sreg.rgen(n=1000, tau.vec = c(0), n.strata=4, cluster = T)
 sreg.rgen <- function(n, Nmax=50, n.strata,
-                      tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1), cluster = TRUE)
+                      tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
+                      cluster = TRUE, is.cov = TRUE)
 {
   if (cluster == T)
   {
@@ -69,19 +71,25 @@ sreg.rgen <- function(n, Nmax=50, n.strata,
     data.sim <- data.frame(Y, S, D, G.id, Ng, X)
   }else{
     n.treat <- length(tau.vec)      # number of treatments
-    pot.outcomes <- dgp.po.sreg(n = n, tau.vec, gamma = gamma.vec, n.treat = n.treat)   # generate pot. outcomes and W
+    pot.outcomes <- dgp.po.sreg(n = n, tau.vec, gamma = gamma.vec,
+                                n.treat = n.treat, is.cov = is.cov)                     # generate pot. outcomes and W
     strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata)                     # generate strata
     strata_set <- data.frame(strata)                                                    # generate strata
     strata_set$S <- max.col(strata_set)                                                 # generate strata
     pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)                                        # vector of target proportions (equal allocation)
     #pi.vec <- c(0.1, 0.35, 0.2)
     data.test <- dgp.obs.sreg(pot.outcomes,I.S = strata,                                # simulate observed outcomes
-                         pi.vec = pi.vec, n.treat = n.treat)                            # simulate observed outcomes
+                         pi.vec = pi.vec, n.treat = n.treat, is.cov = is.cov)           # simulate observed outcomes
     Y <- as.numeric(data.test$Y)                                                        # Y
     D <- as.numeric(data.test$D)                                                        # D
     S <- strata_set$S                                                                   # S
-    X <- data.test$X
-    data.sim <- data.frame(Y, S, D, X)
+    if(is.cov == TRUE)
+    {
+      X <- data.test$X
+      data.sim <- data.frame(Y, S, D, X)
+    }else{
+      data.sim <- data.frame(Y, S, D)
+    }
   }
   return(data.sim)
 }

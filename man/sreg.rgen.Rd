@@ -10,7 +10,8 @@ sreg.rgen(
   n.strata,
   tau.vec = c(0),
   gamma.vec = c(0.4, 0.2, 1),
-  cluster = TRUE
+  cluster = TRUE,
+  is.cov = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ sreg.rgen(
 \item{gamma.vec}{a numeric vector of parameters}
 
 \item{cluster}{a TRUE/FALSE argument indicating whether the dgp should include clusters or not}
+
+\item{is.cov}{a TRUE/FALSE argument indicating whether the dgp should include covariates or not}
 }
 \value{
 a data frame containing the results
