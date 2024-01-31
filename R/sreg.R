@@ -252,9 +252,9 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
 
-      sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2  + Xi.hat.2^2) / length(Y)
+      sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)  + (sum(Xi.hat.2^2) / n.d)
 
-      var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S) + ncol(X))))
+      var.vec[d] <- sigma.hat.sq #* (length(Y) / (length(Y) - (max(S) + max(D) * max(S) + ncol(X))))
       n.vec[d]   <- length(Y)
 
     }
