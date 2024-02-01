@@ -9,20 +9,22 @@
 #' @param X a data frame of covariates
 #' @param Ng.cov a TRUE/FALSE argument indicating whether the Ng should be included as the only covariate in linear adjustments
 #'  when X = NULL
+#' @param HC1 a TRUE/FALSE argument indicating whether the small sample correction should be applied to the variance estimator.
+#'
 #'
 #' @return a list containing the results
 #' @export
 #'
 #' @examples
 #' test <- sreg(Y,S,D,X)
-sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL, Ng.cov = FALSE)
+sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL, Ng.cov = FALSE, HC1 = FALSE)
 {
   if (is.null(G.id) | is.null(Ng))
   {
-    result <- res.sreg(Y,S,D,X)
+    result <- res.sreg(Y,S,D,X,HC1)
     summary.sreg(result)
   }else{
-    result <- res.creg(Y,S,D,G.id,Ng,X,Ng.cov)
+    result <- res.creg(Y,S,D,G.id,Ng,X,Ng.cov, HC1)
     summary.creg(result)
   }
   return(result)

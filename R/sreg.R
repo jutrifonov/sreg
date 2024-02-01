@@ -206,7 +206,7 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
 #-------------------------------------------------------------------
 # Variance Estimator
 #-------------------------------------------------------------------
-as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
+as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
 {
   var.vec <- rep(NA, max(D))
   n.vec <- rep(NA, max(D))
@@ -226,10 +226,10 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
       mu.hat.0 <- lin.adj.sreg(0, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
       data.bin <- data.frame(data.bin, mu.hat.d, mu.hat.0)
 
-      Xi.tilde.1 <- (-(data.bin$pi.0 / data.bin$pi)) * mu.hat.d - mu.hat.0 +
+      Xi.tilde.1 <- (1 - (1 / data.bin$pi)) * mu.hat.d - mu.hat.0 +
         (data.bin$Y / data.bin$pi)
 
-      Xi.tilde.0 <- (data.bin$pi / data.bin$pi.0) * mu.hat.0 + mu.hat.d -
+      Xi.tilde.0 <- ((1 / (1 - data.bin$pi)) - 1) * mu.hat.0 + mu.hat.d -
         (data.bin$Y / data.bin$pi.0)
 
       data.bin <- data.frame(data.bin, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data.bin$Y - tau[d] * data.bin$A)
@@ -254,7 +254,12 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
 
       sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)  + (sum(Xi.hat.2^2) / n.d)
 
-      var.vec[d] <- sigma.hat.sq #* (length(Y) / (length(Y) - (max(S) + max(D) * max(S) + ncol(X))))
+      if (HC1 == TRUE)
+      {
+        var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
+      }else{
+        var.vec[d] <- sigma.hat.sq
+      }
       n.vec[d]   <- length(Y)
 
     }
@@ -302,8 +307,12 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
       #problem <- sum(Xi.hat.2^2) / n.d
 #print(decomp)
 #print(problem)
-
-      var.vec[d] <- sigma.hat.sq #* (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
+      if (HC1 == TRUE)
+      {
+        var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
+      }else{
+        var.vec[d] <- sigma.hat.sq
+      }
       n.vec[d]   <- length(Y)
       #print(sigma.hat.sq)
     }
@@ -317,7 +326,7 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau)
 #%# (10) The core function. It provides estimates of ATE, their s.e.,
 #%#     calculates t-stats and corresponding p-values
 #-------------------------------------------------------------------
-res.sreg <- function(Y,S,D,X=NULL)
+res.sreg <- function(Y,S,D,X=NULL, HC1)
   #-------------------------------------------------------------------
 {
   n <- length(Y)
@@ -325,7 +334,7 @@ res.sreg <- function(Y,S,D,X=NULL)
   {
     model <- lm.iter.sreg(Y,S,D,X)
     tau.est <- tau.hat.sreg(Y,S,D,X,model)
-    se.rob <- as.var.sreg(Y,S,D,X,model,tau.est)
+    se.rob <- as.var.sreg(Y,S,D,X,model,tau.est, HC1)
 
     t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
@@ -341,7 +350,7 @@ res.sreg <- function(Y,S,D,X=NULL)
                      'data' = data.frame(Y,S,D,X))
   }else{
     tau.est <- tau.hat.sreg(Y,S,D,X=NULL,model=NULL)
-    se.rob <- as.var.sreg(Y,S,D,X=NULL,model=NULL,tau.est)
+    se.rob <- as.var.sreg(Y,S,D,X=NULL,model=NULL,tau.est, HC1)
 
     t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
