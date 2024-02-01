@@ -30,10 +30,20 @@ data.clean <- data.clean %>%
 Y = data.clean$Y
 D = data.clean$D
 S = data.clean$S
+table(D = data.clean$D, S = data.clean$S)
 #%#%#%#%#%#%#%#%#%#%
 result <- sreg::sreg(Y,S,D, HC1 = T)
 #%#%#%#%#%#%#%#%#%#%
 
+
+
+
+
+
+
+
+
+################################################################################
 ##v.1.4
 #result <- sreg(Y,D,S)                                                            # estimate the ATEs
 #summary.sreg(result)
