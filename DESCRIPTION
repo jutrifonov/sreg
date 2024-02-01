@@ -16,3 +16,5 @@ LazyData: true
 RoxygenNote: 7.2.3
 Imports: 
     extraDistr
+Depends: 
+    R (>= 2.10)
