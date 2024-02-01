@@ -4,7 +4,7 @@
 \alias{sreg}
 \title{Estimates the ATE}
 \usage{
-sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE)
+sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE, HC1 = FALSE)
 }
 \arguments{
 \item{Y}{a numeric vector of the observed outcomes}
@@ -21,6 +21,8 @@ sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE)
 
 \item{Ng.cov}{a TRUE/FALSE argument indicating whether the Ng should be included as the only covariate in linear adjustments
 when X = NULL}
+
+\item{HC1}{a TRUE/FALSE argument indicating whether the small sample correction should be applied to the variance estimator.}
 }
 \value{
 a list containing the results
