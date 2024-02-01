@@ -1,6 +1,7 @@
 install.packages("devtools")                                                    # install sreg
 install.packages("haven")
 install.packages("dplyr")
+library(devtools)
 install_github("yurytrifonov/sreg")                                             # install sreg
 
 library(devtools)                                                               # load devtools
