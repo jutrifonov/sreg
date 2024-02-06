@@ -155,7 +155,7 @@ pi.hat.sreg <- function(S,D, inverse = FALSE)
 
 #-------------------------------------------------------------------
 tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
-  #-------------------------------------------------------------------
+#-------------------------------------------------------------------
 {
   tau.hat <- rep(NA, max(D))
   for (d in 1:max(D))
@@ -169,24 +169,19 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
       data.bin$A <- as.numeric(data.bin$D != 0)
 
       mu.hat.d <- lin.adj.sreg(d, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
-
       mu.hat.0 <- lin.adj.sreg(0, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
 
       Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) / data.bin$pi) -
         (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) / (data.bin$pi.0)) +
-        mu.hat.d - mu.hat.0
+         (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
 
       tau.hat[d] <- sum(Ksi.vec) / length(Y)
     }else{
       data <- data.frame(Y,S,D)
       data$pi <- pi.hat.sreg(S,D)[,d]
       data$pi.0 <- pi.hat.sreg(S,D,inverse = T)[, 1]
-      #data$A <- as.numeric(data$D == d)
-      #data.bin <- data
       data.bin <- data[data$D %in% c(d,0), ]
       data.bin$A <- as.numeric(data.bin$D != 0)
-      #testim <- data.frame(data$pi, data$pi.0)
-      #data.bin$pi <- pi.hat.sreg(data.bin$S,data.bin$A)
 
       mu.hat.d <- 0
       mu.hat.0 <- 0
@@ -194,7 +189,7 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
       Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) / data.bin$pi) -
         (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) / (data.bin$pi.0)) +
         mu.hat.d - mu.hat.0
-      #tau.hat[d] <- mean(Ksi.vec)
+
       tau.hat[d] <- sum(Ksi.vec) / length(Y)
     }
 
@@ -222,15 +217,18 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
       data.bin$A <- as.numeric(data.bin$D != 0)
       n.d <- length(data.bin$Y)
 
+
       mu.hat.d <- lin.adj.sreg(d, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
       mu.hat.0 <- lin.adj.sreg(0, data.bin$S, data.bin[4:(4+ncol(X)-1)], model)
+
       data.bin <- data.frame(data.bin, mu.hat.d, mu.hat.0)
 
-      Xi.tilde.1 <- (1 - (1 / data.bin$pi)) * mu.hat.d - mu.hat.0 +
-        (data.bin$Y / data.bin$pi)
+      Xi.tilde.1 <- (- data.bin$pi.0 / data.bin$pi) * mu.hat.d -  mu.hat.0 / (data.bin$pi + data.bin$pi.0)  +
+       (data.bin$Y/ data.bin$pi)
 
-      Xi.tilde.0 <- ((1 / (1 - data.bin$pi)) - 1) * mu.hat.0 + mu.hat.d -
-        (data.bin$Y / data.bin$pi.0)
+      Xi.tilde.0 <- (data.bin$pi / data.bin$pi.0) * mu.hat.0 + mu.hat.d / (data.bin$pi + data.bin$pi.0) -
+         (data.bin$Y/ data.bin$pi.0)
+
 
       data.bin <- data.frame(data.bin, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data.bin$Y - tau[d] * data.bin$A)
 
@@ -300,13 +298,8 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
-
-      #sigma.hat.sq <-  sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2  + Xi.hat.2^2) / length(Y)
       sigma.hat.sq <-  sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)  + (sum(Xi.hat.2^2) / n.d)
-      #decomp <- c(sum(data.bin$A * (Xi.hat.1)^2) / length(Y), sum((1 - data.bin$A) * (Xi.hat.0)^2) / length(Y), sum(Xi.hat.2^2) / length(Y))
-      #problem <- sum(Xi.hat.2^2) / n.d
-#print(decomp)
-#print(problem)
+
       if (HC1 == TRUE)
       {
         var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
@@ -314,7 +307,7 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
         var.vec[d] <- sigma.hat.sq
       }
       n.vec[d]   <- length(Y)
-      #print(sigma.hat.sq)
+
     }
   }
 
