@@ -68,23 +68,27 @@ sim.func <- function(sim.id)
 {
   seed <- 1000 + sim.id
   set.seed(seed)
-  n = 200
-  tau.vec <- c(0.8, 0.4)
+
+  n = 1000
+  tau.vec <- c(0.4)
   n.treat <- length(tau.vec)
-  n.strata <- 2
-  data <- sreg.rgen(n=n, tau.vec=tau.vec, n.strata=n.strata, cluster = F, is.cov = TRUE)
+  n.strata <- 4
+  data <- sreg.rgen(n=n, Nmax = 50, n.strata = n.strata, tau.vec = tau.vec, cluster = T, is.cov = TRUE)
   Y <- data$Y
   S <- data$S
   D <- data$D
   X <- data.frame("x_1"= data$x_1, "x_2" = data$x_2)
+  Ng <- data$Ng
+  G.id <- data$G.id
+
 
   # Estimate the ATE, s.e., etc.
   #test <- sreg(Y,S,D,G.id = NULL, Ng = NULL, X = NULL)
-#test$tau.hat
+  #test$tau.hat
 
   #model <- lm.iter(Y,D,S,G.id,Ng,X, exp.option =T) # change for exp.option = T if the equal-size design
   #fit <- tau.hat(Y,D,S,G.id,Ng,X,model, exp.option = T)
-  result <- tryCatch({sreg(Y,S,D,G.id = NULL, Ng = NULL, X = X)}, error = function(e) { # tryCatch to avoid errors that stop the execution
+  result <- tryCatch({sreg(Y, S, D, G.id, Ng, X, Ng.cov = T, HC1 = FALSE)}, error = function(e) { # tryCatch to avoid errors that stop the execution
     # Print the error message if an error occurs
     cat("Simulation", sim.id, "encountered an error:", conditionMessage(e), "\n")
     # Return a default value or NULL when an error occurs
@@ -128,7 +132,7 @@ sim.func <- function(sim.id)
 }
 
 # Parallelize the simulations and store the results
-simres <- parLapply(cl, 1:10000, sim.func)
+simres <- parLapply(cl, 1:5000, sim.func)
 #mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
 save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/sreg/adj/100.RData")
 ###################
@@ -141,16 +145,19 @@ stopCluster(cl)
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
+mean(tau)
+sd(tau)
+mean(se)
+mean(ci.hit)
+mean(ci.hit[1:10000])
+
 rowMeans(tau)
 apply(tau, 1, sd)
 rowMeans(se)
 rowMeans(ci.hit)
 
 
-mean(tau)
-sd(tau)
-mean(se)
-mean(ci.hit)
+
 G = 1000
 Nmax=500;
 tau.vec <- c(0)
@@ -209,4 +216,3 @@ Ng <- data$Ng
 G.id <- data$G.id
 
 test <- sreg(Y, S, D, G.id, Ng, X, Ng.cov = T, HC1 = FALSE)
-
