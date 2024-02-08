@@ -88,7 +88,7 @@ sim.func <- function(sim.id)
 
   #model <- lm.iter(Y,D,S,G.id,Ng,X, exp.option =T) # change for exp.option = T if the equal-size design
   #fit <- tau.hat(Y,D,S,G.id,Ng,X,model, exp.option = T)
-  result <- tryCatch({sreg(Y, S, D, G.id, Ng, X, Ng.cov = T, HC1 = FALSE)}, error = function(e) { # tryCatch to avoid errors that stop the execution
+  result <- tryCatch({sreg(Y, S, D, G.id, Ng, X=NULL, Ng.cov = T, HC1 = FALSE)}, error = function(e) { # tryCatch to avoid errors that stop the execution
     # Print the error message if an error occurs
     cat("Simulation", sim.id, "encountered an error:", conditionMessage(e), "\n")
     # Return a default value or NULL when an error occurs
@@ -134,7 +134,7 @@ sim.func <- function(sim.id)
 # Parallelize the simulations and store the results
 simres <- parLapply(cl, 1:5000, sim.func)
 #mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
-save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/sreg/adj/100.RData")
+save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/creg/2000.RData")
 ###################
 # Close the cluster
 stopCluster(cl)
@@ -149,7 +149,6 @@ mean(tau)
 sd(tau)
 mean(se)
 mean(ci.hit)
-mean(ci.hit[1:10000])
 
 rowMeans(tau)
 apply(tau, 1, sd)
