@@ -305,19 +305,11 @@ as.var.creg <- function(model=NULL, fit)
 
          n.d <- length(data.filter$G.id)
 
-         N.g.bar.cl <- rep(NA, n.d)
-
-         #for (i in 1:n.d)
-         #{
-         #  N.g.bar.cl[i] <- mean(data.filter[data.filter$S %in% data.filter$S[i], ]$Ng)
-         #}
-         #print(N.g.bar.cl)
-
          Xi.tilde.1 <- (1 - (1/pi.hat)) * mu.hat.d - mu.hat.0 +
-           (data.filter$Ng * Y.bar.g / pi.hat) #- tau.est[d] * (data.filter$Ng - N.g.bar.cl)
+           (data.filter$Ng * Y.bar.g / pi.hat) #- tau.est[d] * data.filter$Ng
 
          Xi.tilde.0 <- ((1 / (1 - pi.hat)) - 1) * mu.hat.0 + mu.hat.d -
-           (data.filter$Ng * Y.bar.g / (1 - pi.hat)) #- tau.est[d] * (data.filter$Ng - N.g.bar.cl)
+           (data.filter$Ng * Y.bar.g / (1 - pi.hat)) #- tau.est[d] * data.filter$Ng
 
          data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng, Ng.cl = data.filter$Ng)
 
@@ -364,12 +356,12 @@ as.var.creg <- function(model=NULL, fit)
       mu.hat.d <- 0
 
       Xi.tilde.1 <- (1 - (1/pi.hat)) * mu.hat.d - mu.hat.0 +
-        (data.filter$Ng * Y.bar.g / pi.hat) - tau.est[d] * data.filter$Ng
+        (data.filter$Ng * Y.bar.g / pi.hat) #- tau.est[d] * data.filter$Ng
 
       Xi.tilde.0 <- ((1 / (1 - pi.hat)) - 1) * mu.hat.0 + mu.hat.d -
-        (data.filter$Ng * Y.bar.g / (1 - pi.hat)) - tau.est[d] * data.filter$Ng
+        (data.filter$Ng * Y.bar.g / (1 - pi.hat)) #- tau.est[d] * data.filter$Ng
 
-      data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng - tau.est[d] * data.filter$Ng)
+      data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng, Ng.cl = data.filter$Ng)
 
       n.d <- length(data.bin$G.id)
       Ng.d <-data.bin$Ng
@@ -378,6 +370,7 @@ as.var.creg <- function(model=NULL, fit)
       Xi.0.mean <- rep(NA,n.d)
       Y.g.bar.cl.1 <- rep(NA,n.d)
       Y.g.bar.cl.0 <- rep(NA,n.d)
+      N.g.bar.cl <- rep(NA, n.d)
       Y.g.mean.1 <- rep(NA,n.d)
       Y.g.mean.0 <- rep(NA,n.d)
 
@@ -387,11 +380,12 @@ as.var.creg <- function(model=NULL, fit)
         Xi.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.0)
         Y.g.bar.cl.1[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
         Y.g.bar.cl.0[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
+        N.g.bar.cl[i] <- mean(data.bin[data.bin$S %in% data.bin$S[i], ]$Ng.cl)
       }
 
-      Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
-      Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
-      Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0
+      Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
+      Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
+      Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
       sigma.hat.sq <-  mean((data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2)) /  (mean(Ng.d))^2
 
