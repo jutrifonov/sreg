@@ -206,6 +206,7 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
           working.df <- data.frame(Y,S,D,G.id,Ng)
           Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)
           cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')]) # created data on a cluster level for estimating pi.hat(s)
+          Ng.full <- cl.lvl.data$Ng
 
           for (d in 1:max(D))
           {
@@ -215,6 +216,7 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
 
             data <- cl.lvl.data
             data$pi <- pi.hat.creg(cl.lvl.data)[, d]
+            data$pi.0 <- pi.hat.creg(cl.lvl.data, inverse = T)[, 1]
             data.bin <- data[data$D %in% c(d,0), ]
             data.bin$A <- as.numeric(data.bin$D != 0)
             data.bin.mu <- working.df[working.df$D %in% c(d,0), ]
@@ -226,18 +228,21 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
 
             mu.hat.0 <- lin.adj.creg(0, data = data.bin.mu, model, Ng.cov = TRUE)
 
-            Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) - (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (1 - data.bin$pi)) + mu.hat.d - mu.hat.0
+            Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
+                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
+                    (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
 
             mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0,mu.hat.d), ncol = 2)
 
             Ng.ind <- data.bin$Ng
-            tau.hat <- sum(Xi.g) / sum(Ng.ind)
+            tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
 
             tau.hat.vec[d] <- tau.hat
           }
           rtrn.list <- list('tau.hat' = tau.hat.vec,
                             'mu.hat' = mu.hat.list,
                             'pi.hat' = pi.hat.list,
+                            'pi.hat.0' = data$pi.0,
                             'Y.bar.g' = Y.bar.g.list,
                             'data.bin' = data.bin.list,
                             'Y.bar.full' = Y.bar.full)
