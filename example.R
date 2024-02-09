@@ -21,7 +21,7 @@ X <- data.frame("x_1"= data$x_1, "x_2" = data$x_2)
 test <- sreg(Y,S,D,G.id = NULL, Ng = NULL, X)
 
 # Generate a pseudo-random sample with clusters and two treatments = c(0.2, 0.8)
-data <- sreg.rgen(n=1000, tau.vec = c(0.4),
+data <- sreg.rgen(n=1000, tau.vec = c(0.2, 0.8),
                   n.strata=4, cluster = T, Nmax = 50)
 Y <- data$Y
 S <- data$S
