@@ -21,8 +21,8 @@
 #  "parallel",
 #  "progress"), dependencies = TRUE)
 install.packages(devtools)                                                      # install devtools
-library(devtools)                                                               # install devtools
 install_github("yurytrifonov/sreg")                                             # install sreg
+library(devtools)                                                               # install devtools
 library(sreg)
 library(sandwich)
 library(lubridate)
@@ -69,15 +69,15 @@ sim.func <- function(sim.id)
   seed <- 1000 + sim.id
   set.seed(seed)
 
-  n = 1000
-  tau.vec <- c(0.4)
+  n = 500
+  tau.vec <- c(0.2, 0.8)
   n.treat <- length(tau.vec)
-  n.strata <- 4
-  data <- sreg.rgen(n=n, Nmax = 50, n.strata = n.strata, tau.vec = tau.vec, cluster = T, is.cov = TRUE)
+  n.strata <- 2
+  data <- sreg.rgen(n=n, Nmax = 50, n.strata = n.strata, tau.vec = tau.vec, cluster = T, is.cov = FALSE)
   Y <- data$Y
   S <- data$S
   D <- data$D
-  X <- data.frame("x_1"= data$x_1, "x_2" = data$x_2)
+  #X <- data.frame("x_1"= data$x_1, "x_2" = data$x_2)
   Ng <- data$Ng
   G.id <- data$G.id
 
@@ -88,7 +88,7 @@ sim.func <- function(sim.id)
 
   #model <- lm.iter(Y,D,S,G.id,Ng,X, exp.option =T) # change for exp.option = T if the equal-size design
   #fit <- tau.hat(Y,D,S,G.id,Ng,X,model, exp.option = T)
-  result <- tryCatch({sreg(Y, S, D, G.id, Ng, X=NULL, Ng.cov = T, HC1 = FALSE)}, error = function(e) { # tryCatch to avoid errors that stop the execution
+  result <- tryCatch({sreg(Y, S, D, G.id, Ng, X=NULL, Ng.cov = F, HC1 = FALSE)}, error = function(e) { # tryCatch to avoid errors that stop the execution
     # Print the error message if an error occurs
     cat("Simulation", sim.id, "encountered an error:", conditionMessage(e), "\n")
     # Return a default value or NULL when an error occurs
