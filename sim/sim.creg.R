@@ -69,8 +69,8 @@ sim.func <- function(sim.id)
   seed <- 1000 + sim.id
   set.seed(seed)
 
-  n = 500
-  tau.vec <- c(0.2, 0.8)
+  n = 200
+  tau.vec <- c(0.4, 0.8)
   n.treat <- length(tau.vec)
   n.strata <- 2
   data <- sreg.rgen(n=n, Nmax = 50, n.strata = n.strata, tau.vec = tau.vec, cluster = T, is.cov = FALSE)
@@ -136,7 +136,7 @@ simres <- parLapply(cl, 1:5000, sim.func)
 #mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
 save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/creg/2000.RData")
 ###################
-# Close the cluster
+# Close the clusterx
 stopCluster(cl)
 # Close the cluster
 ###################
