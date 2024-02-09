@@ -125,7 +125,7 @@ lin.adj.creg <- function(a,data,model, Ng.cov = FALSE)
   return(mu.hat)
 }
 #-------------------------------------------------------------------
-pi.hat.creg <- function(cl.lvl.data)
+pi.hat.creg <- function(cl.lvl.data, inverse = FALSE)
 #-------------------------------------------------------------------
 {
   S <- cl.lvl.data$S
@@ -140,8 +140,13 @@ pi.hat.creg <- function(cl.lvl.data)
     {
       n.1.s <-  length(data[data$D %in% d & data$S %in% data$S[i], 2])
       n.0.s <-  length(data[data$D %in% 0 & data$S %in% data$S[i], 2])
-      n.s <- n.1.s + n.0.s
+      #n.s <- n.1.s + n.0.s
+      n.s <- length(data[data$S %in% data$S[i], 2])
       pi.hat.mtrx[i,d] <- n.1.s / n.s
+      if (inverse == TRUE)
+      {
+        pi.hat.mtrx[i,d] <- n.0.s / n.s
+      }
     }
   }
   return(pi.hat.mtrx)
@@ -159,7 +164,7 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
   if(!is.null(X))
   {
     working.df <- data.frame(Y,S,D,G.id,Ng,X)
-
+    Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)
     cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')]) # created data on a cluster level for estimating pi.hat(s)
 
     for (d in 1:max(D))
@@ -199,7 +204,7 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
         if(Ng.cov == TRUE)
         {
           working.df <- data.frame(Y,S,D,G.id,Ng)
-
+          Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)
           cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')]) # created data on a cluster level for estimating pi.hat(s)
 
           for (d in 1:max(D))
@@ -234,10 +239,13 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
                             'mu.hat' = mu.hat.list,
                             'pi.hat' = pi.hat.list,
                             'Y.bar.g' = Y.bar.g.list,
-                            'data.bin' = data.bin.list)
+                            'data.bin' = data.bin.list,
+                            'Y.bar.full' = Y.bar.full)
         }else{
           working.df <- data.frame(Y,S,D,G.id,Ng)
+          Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)
           cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')]) # created data on a cluster level for estimating pi.hat(s)
+          Ng.full <- cl.lvl.data$Ng
 
           for (d in 1:max(D))
           {
@@ -247,31 +255,35 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
 
             data <- cl.lvl.data
             data$pi <- pi.hat.creg(cl.lvl.data)[, d]
+            data$pi.0 <- pi.hat.creg(cl.lvl.data, inverse = T)[, 1]
             data.bin <- data[data$D %in% c(d,0), ]
             data.bin$A <- as.numeric(data.bin$D != 0)
             data.bin.mu <- working.df[working.df$D %in% c(d,0), ]
             pi.hat.list[[d]] <- data.bin$pi
             data.bin.list[[d]] <- data.bin
 
+
             mu.hat.d <- 0
             mu.hat.0 <- 0
 
             Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
-                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (1 - data.bin$pi)) +
+                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
                     mu.hat.d - mu.hat.0
 
             mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0,mu.hat.d), ncol = 2)
 
             Ng.ind <- data.bin$Ng
-            tau.hat <- sum(Xi.g) / sum(Ng.ind)
+            tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
 
             tau.hat.vec[d] <- tau.hat
           }
           rtrn.list <- list('tau.hat' = tau.hat.vec,
                             'mu.hat' = mu.hat.list,
                             'pi.hat' = pi.hat.list,
+                            'pi.hat.0' = data$pi.0,
                             'Y.bar.g' = Y.bar.g.list,
-                            'data.bin' = data.bin.list)
+                            'data.bin' = data.bin.list,
+                            'Y.bar.full' = Y.bar.full)
         }
       }
   return(rtrn.list)
@@ -345,21 +357,20 @@ as.var.creg <- function(model=NULL, fit)
     for (d in 1:length(fit$tau.hat))
     {
       Y.bar.g <- fit$Y.bar.g[[d]]
-      pi.hat <- fit$pi.hat[[d]]
       tau.est <- fit$tau.hat
 
       data.filter <- fit$data.bin[[d]]
+      pi.hat <- data.filter$pi
+      pi.hat.0 <- data.filter$pi.0
 
       n.d <- length(data.filter$G.id)
 
       mu.hat.0 <- 0
       mu.hat.d <- 0
 
-      Xi.tilde.1 <- (1 - (1/pi.hat)) * mu.hat.d - mu.hat.0 +
-        (data.filter$Ng * Y.bar.g / pi.hat) #- tau.est[d] * data.filter$Ng
+      Xi.tilde.1 <- (data.filter$Ng * Y.bar.g / pi.hat) #- tau.est[d] * data.filter$Ng
 
-      Xi.tilde.0 <- ((1 / (1 - pi.hat)) - 1) * mu.hat.0 + mu.hat.d -
-        (data.filter$Ng * Y.bar.g / (1 - pi.hat)) #- tau.est[d] * data.filter$Ng
+      Xi.tilde.0 <- - (data.filter$Ng * Y.bar.g / pi.hat.0) #- tau.est[d] * data.filter$Ng
 
       data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng, Ng.cl = data.filter$Ng)
 
@@ -387,10 +398,10 @@ as.var.creg <- function(model=NULL, fit)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
-      sigma.hat.sq <-  mean((data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2)) /  (mean(Ng.d))^2
+      sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + (sum(Xi.hat.2^2) / n.d)) /  (mean(Ng.d))^2
 
       var.vec[d] <- sigma.hat.sq
-      n.vec[d]   <- n.d
+      n.vec[d]   <- length(fit$Y.bar.full$Y)
     }
   }
   se.vec <- sqrt(var.vec/n.vec)
