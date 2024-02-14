@@ -204,7 +204,8 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
                       'pi.hat.0' = data$pi.0,
                       'Y.bar.g' = Y.bar.g.list,
                       'data.bin' = data.bin.list,
-                      'Y.bar.full' = Y.bar.full)
+                      'Y.bar.full' = Y.bar.full,
+                      "Ng.full" = Ng.full)
   }else{
         if(Ng.cov == TRUE)
         {
@@ -330,11 +331,17 @@ as.var.creg <- function(model=NULL, fit)
 
          n.d <- length(data.filter$G.id)
 
-         Xi.tilde.1 <- (- pi.hat.0 / pi.hat) * mu.hat.d - mu.hat.0 / (pi.hat + pi.hat.0)  +
-           (data.filter$Ng * Y.bar.g / pi.hat) #- tau.est[d] * data.filter$Ng
+        #Xi.tilde.1 <- (- pi.hat.0 / pi.hat) * mu.hat.d - mu.hat.0 / (pi.hat + pi.hat.0)  +
+        #   (data.filter$Ng * Y.bar.g / pi.hat)
+        #Xi.tilde.0 <- (pi.hat / pi.hat.0) * mu.hat.0 + mu.hat.d / (pi.hat + pi.hat.0) -
+        #   (data.filter$Ng * Y.bar.g / pi.hat.0)
 
-         Xi.tilde.0 <- (pi.hat / pi.hat.0) * mu.hat.0 + mu.hat.d / (pi.hat + pi.hat.0) -
-           (data.filter$Ng * Y.bar.g / pi.hat.0) #- tau.est[d] * data.filter$Ng
+        Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) + 
+        (data.filter$Ng * Y.bar.g - mu.hat.d) / pi.hat
+        
+        Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) - 
+        (data.filter$Ng * Y.bar.g - mu.hat.0) / pi.hat.0   
+        
 
          data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng, Ng.cl = data.filter$Ng)
 
@@ -361,8 +368,8 @@ as.var.creg <- function(model=NULL, fit)
          Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
          Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
-         sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + (sum(Xi.hat.2^2) / n.d)) /  (mean(Ng.d))^2
-
+         sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
+         #sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + Xi.hat.2^2) / length(fit$Y.bar.full$Y)) /  (sum(Ng.d) / length(fit$Y.bar.full$Y))^2
          var.vec[d] <- sigma.hat.sq
          n.vec[d]   <- length(fit$Y.bar.full$Y)
        }

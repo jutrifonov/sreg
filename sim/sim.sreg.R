@@ -40,6 +40,7 @@ library(SimDesign)
 #                  file with functions on your PC
 #                    ↓↓↓↓↓↓↓↓↓↓↓HERE↓↓↓↓↓↓↓↓↓↓↓
 rm(list = ls())
+
 #%##%##%##%###%##%##%##%###%##%##%##%###%##%#%##%##%##%###%##%##%##%##
 #%##%##%##%###%##%##%##%###%##%##%##%###%##%#%##%##%##%###%##%##%##%##
 
@@ -68,7 +69,7 @@ sim.func <- function(sim.id)
 {
   seed <- 1000 + sim.id
   set.seed(seed)
-  n = 200
+  n = 1000
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
@@ -128,9 +129,9 @@ sim.func <- function(sim.id)
 }
 
 # Parallelize the simulations and store the results
-simres <- parLapply(cl, 1:10000, sim.func)
+simres <- parLapply(cl, 1:5000, sim.func)
 #mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
-save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/sreg/adj/100.RData")
+save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/sreg/adj/New version/2000.RData")
 ###################
 # Close the cluster
 stopCluster(cl)
