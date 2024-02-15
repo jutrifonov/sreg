@@ -69,8 +69,8 @@ sim.func <- function(sim.id)
   seed <- 1000 + sim.id
   set.seed(seed)
 
-  n = 1000
-  tau.vec <- c(0.4, 0.8)
+  n = 250
+  tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
   data <- sreg.rgen(n=n, Nmax = 50, n.strata = n.strata, tau.vec = tau.vec, cluster = T, is.cov = TRUE)
@@ -125,7 +125,7 @@ sim.func <- function(sim.id)
                     CI.left = CI.left,
                     CI.right = CI.right,
                     ci.hit = ci.hit)}
-  message(paste("Simulation", sim.id, "completed succesfully"))
+  message(paste("Simulation", sim.id, "is completed succesfully"))
 
   return(results)
 
@@ -134,9 +134,9 @@ sim.func <- function(sim.id)
 # Parallelize the simulations and store the results
 simres <- parLapply(cl, 1:5000, sim.func)
 #mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
-save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/creg/adj/new version/500.RData")
+save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/creg/adj/new version/250.RData")
 ###################
-# Close the clusterx
+# Close the cluster
 stopCluster(cl)
 # Close the cluster
 ###################
@@ -145,15 +145,17 @@ stopCluster(cl)
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
+rowMeans(tau)
+apply(tau, 1, sd)
+rowMeans(se)
+rowMeans(ci.hit[, 1:5000])
+
 mean(tau)
 sd(tau)
 mean(se)
 mean(ci.hit)
 
-rowMeans(tau)
-apply(tau, 1, sd)
-rowMeans(se)
-rowMeans(ci.hit[, 1:5000])
+
 
 
 G = 1000
