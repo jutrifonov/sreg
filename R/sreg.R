@@ -237,12 +237,20 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
       #Xi.tilde.0 <- (data.bin$pi / data.bin$pi.0) * mu.hat.0 + mu.hat.d / (data.bin$pi + data.bin$pi.0) -
       #   (data.bin$Y/ data.bin$pi.0)
 
-    Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (data.bin$pi + data.bin$pi.0) + 
-        (data.bin$Y - mu.hat.d) / data.bin$pi
+    #Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (data.bin$pi + data.bin$pi.0) + 
+    #    (data.bin$Y - mu.hat.d) / data.bin$pi
         
-    Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (data.bin$pi + data.bin$pi.0) - 
-        (data.bin$Y - mu.hat.0) / data.bin$pi.0 
+    #Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (data.bin$pi + data.bin$pi.0) - 
+    #    (data.bin$Y - mu.hat.0) / data.bin$pi.0 
 
+    Xi.tilde.1 <- (mu.hat.d - mu.hat.0) + 
+        (data.bin$Y - mu.hat.d) * (data.bin$pi + data.bin$pi.0) / data.bin$pi
+        
+    Xi.tilde.0 <- (mu.hat.d - mu.hat.0) - 
+        (data.bin$Y - mu.hat.0) * (data.bin$pi + data.bin$pi.0) / data.bin$pi.0 
+
+
+    
       data.bin <- data.frame(data.bin, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data.bin$Y - tau[d] * data.bin$A)
 
       Xi.1.mean <- rep(NA,n.d)
@@ -263,8 +271,8 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
 
-      sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)  + (sum(Xi.hat.2^2) / n.d)
-
+      #sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)  + (sum(Xi.hat.2^2) / n.d)
+       sigma.hat.sq <- mean(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2)
       if (HC1 == TRUE)
       {
         var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
@@ -273,8 +281,8 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
       }else{
         var.vec[d] <- sigma.hat.sq
       }
-      n.vec[d]   <- length(Y)
-
+      #n.vec[d]   <- length(Y)
+       n.vec[d]   <- n.d
     }
   }else{
     for (d in 1:max(D))
