@@ -199,7 +199,7 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
 
       Ng.ind <- data.bin$Ng
       #tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
-       tau.hat <- mean(Xi.g) / mean(Ng.ind)
+      tau.hat <- mean(Xi.g) / mean(Ng.ind)
       tau.hat.vec[d] <- tau.hat
     }
     rtrn.list <- list('tau.hat' = tau.hat.vec,
@@ -830,7 +830,3 @@ form.strata.creg <- function(baseline,num.strata)
 
   return(I.S)
 }
-
-
-
-
