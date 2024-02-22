@@ -69,7 +69,7 @@ sim.func <- function(sim.id)
   seed <- 1000 + sim.id
   set.seed(seed)
 
-  n = 3000
+  n = 500
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
