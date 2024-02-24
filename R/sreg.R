@@ -195,7 +195,7 @@ tau.hat.sreg <- function(Y,S,D,X=NULL, model=NULL)
 
       Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) / data.bin$pi) -
         (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) / (data.bin$pi.0)) +
-        (mu.hat.d - mu.hat.0)
+         (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
 
       tau.hat[d] <- sum(Ksi.vec) / length(Y)
       #Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) * (data.bin$pi + data.bin$pi.0) / data.bin$pi) -
@@ -302,9 +302,11 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
       mu.hat.0 <- 0
       data.bin <- data.frame(data.bin, mu.hat.d, mu.hat.0)
 
-      Xi.tilde.1 <- (data.bin$Y / data.bin$pi)
-
-      Xi.tilde.0 <- - (data.bin$Y / (data.bin$pi.0))
+     Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (data.bin$pi + data.bin$pi.0) + 
+          (data.bin$Y - mu.hat.d) / data.bin$pi
+        
+     Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (data.bin$pi + data.bin$pi.0) - 
+          (data.bin$Y - mu.hat.0) / data.bin$pi.0 
 
       data.bin <- data.frame(data.bin, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data.bin$Y - tau[d] * data.bin$A)
 
@@ -325,12 +327,12 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
-      sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)  + (sum(Xi.hat.2^2) / n.d)
+      sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)  + (mean(Xi.hat.2^2))
       if (HC1 == TRUE)
       {
         #var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
         var.vec[d] <- (sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)) * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))  + 
-        (sum(Xi.hat.2^2) / n.d)
+        (mean(Xi.hat.2^2))
       }else{
         var.vec[d] <- sigma.hat.sq
       }

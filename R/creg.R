@@ -238,14 +238,14 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
 
             mu.hat.0 <- lin.adj.creg(0, data = data.bin.mu, model, Ng.cov = TRUE)
 
-            Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) * (data.bin$pi + data.bin$pi.0) / data.bin$pi) -
-                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) * (data.bin$pi + data.bin$pi.0) / (data.bin$pi.0)) +
-                    (mu.hat.d - mu.hat.0)
+            Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
+                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
+                    (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
 
             mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0,mu.hat.d), ncol = 2)
 
             Ng.ind <- data.bin$Ng
-            tau.hat <- mean(Xi.g) / mean(Ng.ind)
+            tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
 
             tau.hat.vec[d] <- tau.hat
           }
@@ -281,14 +281,14 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
             mu.hat.d <- 0
             mu.hat.0 <- 0
 
-            Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) * (data.bin$pi + data.bin$pi.0) / data.bin$pi) -
-                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) * (data.bin$pi + data.bin$pi.0) / (data.bin$pi.0)) +
-                    (mu.hat.d - mu.hat.0)
+            Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
+                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
+                    (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
 
             mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0,mu.hat.d), ncol = 2)
 
             Ng.ind <- data.bin$Ng
-            tau.hat <- mean(Xi.g) / mean(Ng.ind)
+            tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
 
             tau.hat.vec[d] <- tau.hat
           }
@@ -400,11 +400,11 @@ as.var.creg <- function(model=NULL, fit)
       mu.hat.0 <- 0
       mu.hat.d <- 0
 
-      Xi.tilde.1 <- (mu.hat.d - mu.hat.0) + 
-        ((data.filter$Ng * Y.bar.g - mu.hat.d) * (pi.hat + pi.hat.0)) / pi.hat
+      Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) + 
+        (data.filter$Ng * Y.bar.g - mu.hat.d) / pi.hat
 
-      Xi.tilde.0 <- (mu.hat.d - mu.hat.0) - 
-        ((data.filter$Ng * Y.bar.g - mu.hat.0) * (pi.hat + pi.hat.0)) / pi.hat.0 
+      Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) - 
+        (data.filter$Ng * Y.bar.g - mu.hat.0) / pi.hat.0 
 
       data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng, Ng.cl = data.filter$Ng)
 
@@ -432,10 +432,10 @@ as.var.creg <- function(model=NULL, fit)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
-      sigma.hat.sq <-  mean(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2) / (mean(Ng.d))^2
+      sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
 
       var.vec[d] <- sigma.hat.sq
-      n.vec[d]   <- n.d
+      n.vec[d]   <- length(fit$Y.bar.full$Y)
     }
   }
   se.vec <- sqrt(var.vec/n.vec)

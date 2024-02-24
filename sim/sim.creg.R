@@ -69,7 +69,7 @@ sim.func <- function(sim.id)
   seed <- 1000 + sim.id
   set.seed(seed)
 
-  n = 500
+  n = 100
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
@@ -134,7 +134,7 @@ sim.func <- function(sim.id)
 # Parallelize the simulations and store the results
 simres <- parLapply(cl, 1:5000, sim.func)
 #mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
-save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/creg/adj/new version/3000.RData")
+save(simres, file = "/Users/trifonovjuri/Desktop/creg.adj/100.RData")
 ###################
 # Close the cluster
 stopCluster(cl) 

@@ -25,17 +25,20 @@ View(data)
 Y <- data$gradesq34
 D <- data$treatment
 S <- data$class_level
-data.clean <- data.frame(Y,D,S)
+x_1 <- data$pills_taken
+x_2 <- data$age_months
+data.clean <- data.frame(Y,D,S,x_1,x_2)
 data.clean <- data.clean %>%
   mutate(D = ifelse(D == 3, 0, D))
 Y = data.clean$Y
 D = data.clean$D
 S = data.clean$S
+X = data.frame(data.clean$x_1, data.clean$x_2)
 table(D = data.clean$D, S = data.clean$S)
 #%#%#%#%#%#%#%#%#%#%
 result <- sreg::sreg(Y,S,D, HC1 = T)
 #%#%#%#%#%#%#%#%#%#%
-
+result <- sreg::sreg(Y = Y,S = S,D = D,X = X, HC1 = T)
 
 
 

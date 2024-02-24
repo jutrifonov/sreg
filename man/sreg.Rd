@@ -31,5 +31,43 @@ a list containing the results
 Estimates the ATE
 }
 \examples{
-test <- sreg(Y,S,D,X)
+library("sreg")
+library("dplyr")
+library("haven")
+### Example 1. Simulated Data.
+data <- sreg.rgen(n=1000, tau.vec = c(0), n.strata=4, cluster = FALSE)
+result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
+### Example 2. Data taken from Chong et al. (2016).
+## Data description
+?AEJapp
+## Upload the data from the package
+data("AEJapp")   
+head(data)
+## Replicate the empirical illustration from (Bugni et al, 2019)
+# Prepare the data
+Y <- data$gradesq34
+D <- data$treatment
+S <- data$class_level
+data.clean <- data.frame(Y, D, S)
+data.clean <- data.clean \%>\%
+                mutate(D = ifelse(D == 3, 0, D))
+Y = data.clean$Y
+D = data.clean$D
+S = data.clean$S
+# Look at the frequency table
+table(D = data.clean$D, S = data.clean$S)
+# Replicate the results from (Bugni et al, 2019)
+result <- sreg::sreg(Y, S, D, HC1 = TRUE)
+
+## Besides that, it is possible to add linear adjustments (covariates)
+x_1 <- data$pills_taken
+x_2 <- data$age_months
+data.clean <- data.frame(Y, D, S, x_1, x_2)
+data.clean <- data.clean \%>\%
+                mutate(D = ifelse(D == 3, 0, D))
+Y = data.clean$Y
+D = data.clean$D
+S = data.clean$S
+X = data.frame(data.clean$x_1, data.clean$x_2)
+result <- sreg::sreg(Y, S, D, X = X, HC1 = TRUE)
 }
