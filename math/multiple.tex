@@ -18,13 +18,24 @@
 \maketitle
 
 \section{CAR without Clusters}
+\subsection*{Notation}
+
+Let us introduce some additional notations besides the notation used in (Juang et al., 2017).
+\begin{align}
+& N_a := \sum_{i \in[N]} \mathbb I\{A_i = a\},\;\forall a \in \mathcal{A}  \nonumber \\
+& N_0 := \sum_{i \in[N]} \mathbb I\{A_i = 0\} \nonumber \\
+& I_{\{a,0\}} := \{i \in[N]: A_i = a\} \cup \{i \in[N]: A_i = 0\}, \;\forall a \in \mathcal{A} \nonumber \\
+& \hat{\pi}_a(s) := \frac{N_a(s)}{N(s)}, \; \hat{\pi}_0(s) := \frac{N_0(s)}{N(s)},\;\forall a \in \mathcal{A} \; \text{and} \; \forall s \in \mathcal S   \nonumber \\
+& \tilde{A}_i = \begin{cases}1\text{, if }A_i = a, \; \forall a \in \mathcal{A} \\ 0\text{, otherwise.}\end{cases} \nonumber
+\end{align}
+
 \subsection*{ATE Estimator}
 
 Let us recall the version for a binary treatment case:
 \[\hat{\tau} \equiv \frac{1}{N} \sum_{i = 1}^{N} \left[ \frac{A_i (Y_i - \hat{\mu}(1, S_i, X_i))}{\hat{\pi}(S_i)} - \frac{(1 - A_i) (Y_i- \hat{\mu}(0,S_i,X_i))}{1 - \hat{\pi}(S_i)}  + \hat{\mu}(1, S_i, X_i) - \hat{\mu}(0, S_i, X_i)\right].\]
 
-Since in the case with multiple treatments $\hat{\pi}_a(s) + \hat{\pi}_0(s) \neq 1$, we should make the following corrections to the expression. First, instead of $1 - \hat{\pi}(s)$ we should directly use $\hat{\pi}_0 = \frac{n_0(s)}{n(s)}$. Second, in the original expression, the numerator of the first two terms implies that $\hat{\pi}(s) + (1 - \hat{\pi}(s)) = 1$. Since in or setting the last equality does not hold, we need to multiply the last two terms by $\hat{\pi}_a(s) + \hat{\pi}_0(s)$. Thus, the estimator for any treatment $a \in \mathcal A$ (relative to control) becomes:
-\[\hat{\tau}_a \equiv \frac{1}{N_a + N_0} \sum_{i \in I_{a,0}} \left[(\hat{\pi}_0(S_i) + \hat{\pi}_a(S_i)) \times \left( \frac{\tilde{A}_i (Y_i - \hat{\mu}(a, S_i, X_i))}{\hat{\pi}_a(S_i)} - \frac{(1 - \tilde{A}_i) (Y_i- \hat{\mu}(0,S_i,X_i))}{\hat{\pi}_0(S_i)} \right)  + \hat{\mu}(a, S_i, X_i) - \hat{\mu}(0, S_i, X_i)\right],\]
+Since in the case with multiple treatments $\hat{\pi}_a(s) + \hat{\pi}_0(s) \neq 1$, we should make the following corrections to the expression. First, instead of $1 - \hat{\pi}(s)$ we should directly use $\hat{\pi}_0 = \frac{n_0(s)}{n(s)}$. Second, in the original expression, the last two terms imply that $\hat{\pi}(s) + (1 - \hat{\pi}(s)) = 1$ and that's why they are not normalized, i.e $\frac{\hat{\mu}(1, S_i, X_i)- \hat{\mu}(0, S_i, X_i)}{\hat{\pi}(S_i) + (1 - \hat{\pi}(S_i))} = \hat{\mu}(1, S_i, X_i)- \hat{\mu}(0, S_i, X_i)$. Since for the multiple treatment setup the last equality does not hold, we need to divide the last two terms by $\hat{\pi}_a(s) + \hat{\pi}_0(s)$. Thus, the estimator for any treatment $a \in \mathcal A$ (relative to control) becomes:
+\[\hat{\tau}_a \equiv \frac{1}{N} \sum_{i \in I_{\{a,0\}}} \left[\frac{\tilde{A}_i (Y_i - \hat{\mu}(a, S_i, X_i))}{\hat{\pi}_a(S_i)} - \frac{(1 - \tilde{A}_i) (Y_i- \hat{\mu}(0,S_i,X_i))}{\hat{\pi}_0(S_i)} + \frac{\hat{\mu}(a, S_i, X_i) - \hat{\mu}(0, S_i, X_i)}{\hat{\pi}_a(S_i) + \hat{\pi}_0(S_i) }\right],\]
 where 
 \[\tilde{A}_i = \begin{cases}1\text{, if }A_i = a, \; \forall a \in \mathcal{A} \\ 0\text{, otherwise.}\end{cases}\]
 
@@ -58,20 +69,21 @@ For the same reasoning as before, to generalize these terms for the multiple tre
 
 %$1 - \frac{1}{\hat{\pi}(s)} = \frac{\hat{\pi}(s) - 1}{\hat{\pi}(s)}$ and $\frac{1}{1 - \hat{\pi}(s)} - 1 = \frac{\hat{\pi}(s)}{1 - \hat{\pi}(s)}$. Since in the multiple treatment case $\hat{\pi}_a(s) + \hat{\pi}_0(s) \neq 1$, we can specify these two expressions as $\frac{-\hat{\pi}_0(s)} {\hat{\pi}_a(s)}$ and $\frac{\hat{\pi}_a(s)}{\hat{\pi}_0(s)}$ respectively.
 
-Second, for the same reason as before, we need to multiply terms $\frac{Y_i - \hat{\mu}(a,s,X_i)}{\hat{\pi}_a(s)}$ and $ \frac{Y_i - \hat{\mu}(0,s,X_i)}{\hat{\pi}_0(s)}$ in expressions for $\tilde{\Xi}_{a}$ and $\tilde{\Xi}_{0}$ by $\hat{\pi}_0(s) + \hat{\pi}_a(s)$.
+Second, for the same reason as before, we need to normalize the difference $\hat{\mu}(1,s,X_i) - \hat{\mu}(0,s,X_i)$ in expressions for $\tilde{\Xi}_{a}$ and $\tilde{\Xi}_{0}$ by $\hat{\pi}_0(s) + \hat{\pi}_a(s)$.
+
+Further, notice that since the term $\hat{\Xi}_2$ does not involve $\hat{\pi}_a(s)$ or $\hat{\pi}_0(s)$, the estimator for $\mathbb E[\Xi^2_2]$ becomes the sample average among the treated and control for every treatment $a \in \mathcal A$, i.e $\frac{1}{N_a + N_0} \sum_{i \in I_{a,0}} \hat{\Xi}^2_2$. In contrast, the terms $\hat{\Xi}_0$ and $\hat{\Xi}_a$ involve $\hat{\pi}_{0}(s)$ and $\hat{\pi}_{a}(s)$. Analogously to the case of $\hat{\tau}_a$, the estimators for $\mathbb E[\pi_a(S_i)\Xi^2_a]$ and $\mathbb E[\pi_0(S_i)\Xi^2_0]$ become $\frac{1}{N}\sum_{i \in I_{a,0}} \tilde{A}_i\hat{\Xi}_a^2(\mathcal D_i, S_i)$ and $\frac{1}{N}\sum_{i \in I_{a,0}} (1-\tilde{A}_i)\hat{\Xi}_0^2(\mathcal D_i, S_i)$, respecrtively\footnote{Notice that in a binary treatment case $N_a + N_0 = N, \text{where} \; a = 1$, so the estimator is simplified to the original version with a binary treatment.}.
 
 Combining the corrections, we get the following expression of the variance estimator for every treatment $a \in \mathcal A$:
-
 \begin{align}
-	\hat{\sigma}_a^2 = \frac{1}{N_a + N_0} \sum_{i \in I_{a,0}} \left[\tilde{A}_i\hat{\Xi}_{a}^2(\mathcal D_i, S_i) + (1-\tilde{A}_i) \hat{\Xi}_{0}^2(\mathcal D_i, S_i) + \hat{\Xi}_2^2(\mathcal D_i, S_i)\right], \nonumber
+	\hat{\sigma}_a^2 = \frac{1}{N} \sum_{i \in I_{\{a,0\}}} \left[\tilde{A}_i\hat{\Xi}_{a}^2(\mathcal D_i, S_i) + (1-\tilde{A}_i) \hat{\Xi}_{0}^2(\mathcal D_i, S_i)\right] + \frac{1}{N_a + N_0} \sum_{i \in I_{\{a,0\}}}\hat{\Xi}_2^2(\mathcal D_i, S_i), \nonumber
 \end{align}
 where 
 \begin{align}
 	&\hat{\Xi}_{a}(\mathcal D_i, s) = \tilde{\Xi}_{a}(s) - \frac{1}{N_a(s)} \sum_{j \in I_a(s)} \tilde{\Xi}_{a,j}(\mathcal D_i, s) \nonumber, \\
 	&\hat{\Xi}_{0}(\mathcal D_i, s) = \tilde{\Xi}_{0}(s) - \frac{1}{N_0(s)} \sum_{j \in I_0(s)} \tilde{\Xi}_{0,j}(\mathcal D_i, s) \nonumber , \\
-	& \hat{\Xi}_2 = \left(\frac{1}{N_a(s)} \sum_{j \in I_a(s)} (Y_j - \hat{\tau} \tilde{A}_j) \right) - \left(\frac{1}{N_0(s)} \sum_{j \in I_0(s)} (Y_j - \hat{\tau} \tilde{A}_j)\right), \nonumber \\
-	& \tilde{\Xi}_a(\mathcal D_i,s) = \hat{\mu}(a,s,X_i) - \hat{\mu}(0,s,X_i) + \left[Y_i - \hat{\mu}(a,s,X_i)\right] \times \frac{\hat{\pi}_a(s) + \hat{\pi}_o(s)}{\hat{\pi}_a(s)}, \nonumber \\
-& \tilde{\Xi}_0(\mathcal D_i,s) = \hat{\mu}(a,s,X_i) - \hat{\mu}(0,s,X_i) - \left[Y_i - \hat{\mu}(0,s,X_i)\right] \times \frac{\hat{\pi}_a(s) + \hat{\pi}_o(s)}{\hat{\pi}_0(s)}, \nonumber
+	& \hat{\Xi}_2 = \left(\frac{1}{N_a(s)} \sum_{j \in I_a(s)} (Y_j - \hat{\tau}_a \tilde{A}_j) \right) - \left(\frac{1}{N_0(s)} \sum_{j \in I_0(s)} (Y_j - \hat{\tau}_a  \tilde{A}_j)\right), \nonumber \\
+	& \tilde{\Xi}_a(\mathcal D_i,s) = \frac{\hat{\mu}(a,s,X_i) - \hat{\mu}(0,s,X_i)}{\hat{\pi}_a(s) + \hat{\pi}_0(s)} + \frac{Y_i - \hat{\mu}(a,s,X_i)}{\hat{\pi}_a(s)}, \nonumber \\
+& \tilde{\Xi}_0(\mathcal D_i,s) = \frac{\hat{\mu}(a,s,X_i) - \hat{\mu}(0,s,X_i)}{\hat{\pi}_a(s) + \hat{\pi}_0(s)} - \frac{Y_i - \hat{\mu}(0,s,X_i)}{\hat{\pi}_0(s)} , \nonumber
 	%- \hat{\tau} \left[N_g - \frac{1}{G(s)} \sum_{k \in I(s)} N_k\right] 
 	%& \hat{\Xi}_{2}(\mathcal D_g, s) = \left( \frac{1}{G_1(s)} \sum_{j \in I_1(s)} N_j \bar{Y}_j  -  \frac{1}{G_0(s)} \sum_{j \in I_0 (s)} N_j \bar{Y}_j \right) + \hat{\tau} \frac{1}{G} \sum_{g=1}^G N_g, \nonumber \\
 	%&\tilde{\Xi}_{1}(\mathcal D_i, s) = \left( - \frac{\hat{\pi}_0(s)}{\hat{\pi}_a(s)}\right) \times \hat{\mu}(1,s,X_i) - \frac{\hat{\mu}(0,s,X_i)}{\hat{\pi}_0 + \hat{\pi}_a} + \frac{Y_i}{\hat{\pi}_a(s)}, \nonumber \\
@@ -86,9 +98,10 @@ where
 Using the same reasoning as before, we can generalize the ATE and variance estimators for the case with clusters and multiple treatments as follows.
 \subsection*{ATE Estimator}
 \begin{align}
-\hat{\tau}_a &= \frac{1}{\sum_{j \in I_{\{a,0\}}}N_j} \sum_{g \in I_{\{a,0\}}} \hat{\Xi}_g, \nonumber \\
-\hat{\Xi}_g &= (\hat{\pi}_0(S_i) + \hat{\pi}_a(S_i)) \times \left[\frac{\tilde{A}_g \left(N_g\bar{Y}_g - \hat{\mu}(a,S_g,X_g,N_g)\right)}{\hat{\pi}_a(S_g)} - \frac{(1 - \tilde{A}_g) \left(N_g\bar{Y}_g - \hat{\mu}(0,S_g,X_g,N_g)\right)}{\hat{\pi}_0(S_g)}\right] \nonumber \\
- &+ \hat{\mu}(a,S_g,X_g,N_g) - \hat{\mu}(0,S_g,X_g,N_g), \nonumber
+\hat{\tau}_a &= \frac{\sum_{g \in I_{\{a,0\}}} \hat{\Xi}_g}{\sum_{j \in I_{\{a,0\}}}N_j} \times \frac{G_a + G_0}{G}= \frac{\frac{1}{G}\sum_{g \in I_{\{a,0\}}}\hat{\Xi}_g}{\frac{1}{G_a + G_0}\sum_{j \in I_{\{a,0\}}}N_j} , \nonumber \\
+%\hat{\tau}_a &= \frac{1}{\sum_{j \in I_{\{a,0\}}}N_j} \sum_{g \in I_{\{a,0\}}} \hat{\Xi}_g, \nonumber \\
+\hat{\Xi}_g &= \frac{\tilde{A}_g \left(N_g\bar{Y}_g - \hat{\mu}(a,S_g,X_g,N_g)\right)}{\hat{\pi}_a(S_g)} - \frac{(1 - \tilde{A}_g) \left(N_g\bar{Y}_g - \hat{\mu}(0,S_g,X_g,N_g)\right)}{\hat{\pi}_0(S_g)}\nonumber \\
+ &+ \frac{\hat{\mu}(a,S_g,X_g,N_g) - \hat{\mu}(0,S_g,X_g,N_g)}{\hat{\pi}_a(S_g) + \hat{\pi}_0(S_g)}, \nonumber
 \end{align}
 where 
 \[\tilde{A}_g = \begin{cases}1\text{, if }A_g = a, \; \forall a \in \mathcal{A} \\ 0\text{, otherwise.}\end{cases}\]
@@ -96,17 +109,17 @@ where
 
 \subsection*{Variance Estimator}
 \begin{align}
-	\hat{\sigma}_a^2 = \frac{\frac{1}{G_a + G_0} \sum_{g \in I_{\{a,0\}}}\left[\tilde{A}_g\hat{\Xi}_{a}^2(\mathcal D_g, S_g) + (1-\tilde{A}_g) \hat{\Xi}_{0}^2(\mathcal D_g, S_g) + \hat{\Xi}_2^2(\mathcal D_g, S_g) \right]}{\left(\frac{1}{G_a + G_0}\sum_{g \in I_{\{a,0\}}} N_g\right)^2}, \nonumber
+	\hat{\sigma}_a^2 = \frac{\frac{1}{G} \sum_{g \in I_{\{a,0\}}}\left[\tilde{A}_g\hat{\Xi}_{a}^2(\mathcal D_g, S_g) + (1-\tilde{A}_g) \hat{\Xi}_{0}^2(\mathcal D_g, S_g)\right] + \frac{1}{G_a + G_0} \sum_{g \in I_{\{a,0\}}}\hat{\Xi}_2^2(\mathcal D_g, S_g)}{\left(\frac{1}{G_a + G_0}\sum_{g \in I_{\{a,0\}}} N_g\right)^2}, \nonumber
 \end{align}
 where 
 \begin{align}
-	&\hat{\Xi}_{a}(\mathcal D_g, s) = \tilde{\Xi}_{a}(s) - \frac{1}{G_1(s)} \sum_{j \in I_1(s)} \tilde{\Xi}_{1,j}(s)  - \hat{\tau} \left(N_g - \frac{1}{G(s)} \sum_{j \in I(s)} N_j \right)\nonumber, \\
-	&\hat{\Xi}_{0}(\mathcal D_g, s) = \tilde{\Xi}_{0}(s) - \frac{1}{G_0(s)} \sum_{j \in I_0(s)} \tilde{\Xi}_{0,j}(s)  - \hat{\tau} \left(N_g - \frac{1}{G(s)} \sum_{j \in I(s)} N_j \right)\nonumber , \\
-	& \hat{\Xi}_2(s) = \left(\frac{1}{G_1(s)} \sum_{j \in I_1(s)} N_j \bar{Y}_j\right) - \left(\frac{1}{G_0(s)} \sum_{j \in I_0(s)} N_j \bar{Y}_j\right) - \hat{\tau} \times \left(\frac{1}{G(s)}\sum_{j \in I(s)} N_j \right), \nonumber \\
+	&\hat{\Xi}_{a}(\mathcal D_g, s) = \tilde{\Xi}_{a}(s) - \frac{1}{G_1(s)} \sum_{j \in I_1(s)} \tilde{\Xi}_{1,j}(s)  - \hat{\tau}_a \left(N_g - \frac{1}{G(s)} \sum_{j \in I(s)} N_j \right)\nonumber, \\
+	&\hat{\Xi}_{0}(\mathcal D_g, s) = \tilde{\Xi}_{0}(s) - \frac{1}{G_0(s)} \sum_{j \in I_0(s)} \tilde{\Xi}_{0,j}(s)  - \hat{\tau}_a \left(N_g - \frac{1}{G(s)} \sum_{j \in I(s)} N_j \right)\nonumber , \\
+	& \hat{\Xi}_2(s) = \left(\frac{1}{G_1(s)} \sum_{j \in I_1(s)} N_j \bar{Y}_j\right) - \left(\frac{1}{G_0(s)} \sum_{j \in I_0(s)} N_j \bar{Y}_j\right) - \hat{\tau}_a \times \left(\frac{1}{G(s)}\sum_{j \in I(s)} N_j \right), \nonumber \\
 	%- \hat{\tau} \left[N_g - \frac{1}{G(s)} \sum_{k \in I(s)} N_k\right] 
 	%& \hat{\Xi}_{2}(\mathcal D_g, s) = \left( \frac{1}{G_1(s)} \sum_{j \in I_1(s)} N_j \bar{Y}_j  -  \frac{1}{G_0(s)} \sum_{j \in I_0 (s)} N_j \bar{Y}_j \right) + \hat{\tau} \frac{1}{G} \sum_{g=1}^G N_g, \nonumber \\
-	&\tilde{\Xi}_{a}(\mathcal D_g, s) =\hat{\mu}(a,s,X_g,N_g) - \hat{\mu}(0,s,X_g,N_g) + \left[N_g \bar{Y}_g - \hat{\mu}(a,s,X_g,N_g)\right] \times \frac{\hat{\pi}_a(s) + \hat{\pi}_o(s)}{\hat{\pi}_a(s)}, \nonumber \\
-	& \tilde{\Xi}_{0}(\mathcal D_g, s) =\hat{\mu}(a,s,X_g,N_g) - \hat{\mu}(0,s,X_g,N_g) - \left[N_g \bar{Y}_g - \hat{\mu}(0,s,X_g,N_g)\right] \times \frac{\hat{\pi}_a(s) + \hat{\pi}_o(s)}{\hat{\pi}_a(s)}, \nonumber
+	&\tilde{\Xi}_{a}(\mathcal D_g, s) =\frac{\hat{\mu}(a,s,X_g,N_g) - \hat{\mu}(0,s,X_g,N_g)}{\hat{\pi}_a(s) + \hat{\pi}_0(s)} + \frac{N_g \bar{Y}_g - \hat{\mu}(a,s,X_g,N_g)}{\hat{\pi}_a(s)}, \nonumber \\
+	& \tilde{\Xi}_{0}(\mathcal D_g, s) =\frac{\hat{\mu}(a,s,X_g,N_g) - \hat{\mu}(0,s,X_g,N_g)}{\hat{\pi}_a(s) + \hat{\pi}_0(s)} - \frac{N_g \bar{Y}_g - \hat{\mu}(0,s,X_g,N_g)}{\hat{\pi}_0(s)}, \nonumber
 	\end{align}
 	where 
 \[\tilde{A}_g = \begin{cases}1\text{, if }A_g = a,\; \forall a \in \mathcal A \\ 0\text{, otherwise.}\end{cases}\]
