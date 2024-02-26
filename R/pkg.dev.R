@@ -89,7 +89,7 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
     Nmax <- Nmax
     n.treat <- length(tau.vec)
     max.support <- Nmax / 10 - 1
-    Ng <- gen.cluster.sizes(G, max.support)[, 1]
+    Ng <- gen.cluster.sizes(G, max.support)#[, 1]
     # Ng <- rep(Nmax, G)                                                            # uncomment and comment the previous line for a equal-size design
     data.pot <- dgp.po.creg(
       Ng = Ng, tau.vec = tau.vec, G = G,

@@ -20,7 +20,7 @@
 #-------------------------------------------------------------------
 #------------------------------------------------------------------
 # %# (1) Auxiliary function providing the appropriate data.frame
-# %#     for the subsequent iterative OLS estimation. Takes into account
+# %#     for the subsequent iterative OLS estimation. Accounts for
 # %#     the number of observations and creates indicators.
 # %source function for theta.est.str()
 #-------------------------------------------------------------------
@@ -136,7 +136,6 @@ pi.hat.creg <- function(cl.lvl.data, inverse = FALSE)
     {
       n.1.s <- length(data[data$D %in% d & data$S %in% data$S[i], 2])
       n.0.s <- length(data[data$D %in% 0 & data$S %in% data$S[i], 2])
-      # n.s <- n.1.s + n.0.s
       n.s <- length(data[data$S %in% data$S[i], 2])
       pi.hat.mtrx[i, d] <- n.1.s / n.s
       if (inverse == TRUE) {
@@ -184,16 +183,11 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL, Ng.cov = FALSE)
       Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
         (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
         (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
-      # Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) * (data.bin$pi + data.bin$pi.0) / data.bin$pi) -
-      #              (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) * (data.bin$pi + data.bin$pi.0) / (data.bin$pi.0)) +
-      #              (mu.hat.d - mu.hat.0)
-
-
+    
       mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0, mu.hat.d), ncol = 2)
 
       Ng.ind <- data.bin$Ng
       tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
-      # tau.hat <- mean(Xi.g) / mean(Ng.ind)
       tau.hat.vec[d] <- tau.hat
     }
     rtrn.list <- list(
@@ -304,9 +298,9 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL, Ng.cov = FALSE)
 }
 
 #-------------------------------------------------------------------
-# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
-# %##%##%##%##%##%#    II. Variance  estimator     #%##%##%##%##%##%#
-# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
+# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##
+# %##%##%##%##%##%#    II. Variance  estimator     #%##%##%##%##%##%
+# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##
 #-------------------------------------------------------------------
 
 #-------------------------------------------------------------------
@@ -322,33 +316,19 @@ as.var.creg <- function(model = NULL, fit, HC1) {
       Y.bar.g <- fit$Y.bar.g[[d]]
       mu.hat.0 <- fit$mu.hat[[d]][, 1]
       mu.hat.d <- fit$mu.hat[[d]][, 2]
-      # pi.hat <- fit$pi.hat[[d]]
       tau.est <- fit$tau.hat
 
       data.filter <- fit$data.bin[[d]]
       pi.hat <- data.filter$pi
       pi.hat.0 <- data.filter$pi.0
 
-
       n.d <- length(data.filter$G.id)
-
-      # Xi.tilde.1 <- (- pi.hat.0 / pi.hat) * mu.hat.d - mu.hat.0 / (pi.hat + pi.hat.0)  +
-      #   (data.filter$Ng * Y.bar.g / pi.hat)
-      # Xi.tilde.0 <- (pi.hat / pi.hat.0) * mu.hat.0 + mu.hat.d / (pi.hat + pi.hat.0) -
-      #   (data.filter$Ng * Y.bar.g / pi.hat.0)
 
       Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) +
         (data.filter$Ng * Y.bar.g - mu.hat.d) / pi.hat
 
       Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) -
         (data.filter$Ng * Y.bar.g - mu.hat.0) / pi.hat.0
-
-      # Xi.tilde.1 <- (mu.hat.d - mu.hat.0) +
-      # ((data.filter$Ng * Y.bar.g - mu.hat.d) * (pi.hat + pi.hat.0)) / pi.hat
-
-      # Xi.tilde.0 <- (mu.hat.d - mu.hat.0) -
-      # ((data.filter$Ng * Y.bar.g - mu.hat.0) * (pi.hat + pi.hat.0)) / pi.hat.0
-
 
       data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng, Ng.cl = data.filter$Ng)
 
@@ -375,15 +355,16 @@ as.var.creg <- function(model = NULL, fit, HC1) {
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
-      sigma.hat.sq <- (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
-      # sigma.hat.sq <- mean(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2) / (mean(Ng.d))^2
+      sigma.hat.sq <- (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / 
+                        (mean(Ng.d))^2
+
       if (HC1 == TRUE) {
         var.vec[d] <- ((sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y)) *
-          (length(Y) / (length(Y) - (max(S) + max(D) * max(S)))) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
+          (length(Y) / (length(Y) - (max(S) + max(D) * max(S)))) + mean(Xi.hat.2^2)) / 
+            (mean(Ng.d))^2
       } else {
         var.vec[d] <- sigma.hat.sq
       }
-      # n.vec[d] <- n.d
       n.vec[d] <- length(fit$Y.bar.full$Y)
     }
   } else {
@@ -595,32 +576,13 @@ summary.creg <- function(model)
 #-------------------------------------------------------------------
 # %# (1) Cluster sizes generation
 #-------------------------------------------------------------------
-gen.cluster.sizes <- function(G, max.support, s=1.5)
+gen.cluster.sizes <- function(G, max.support)
 #-------------------------------------------------------------------
 {
-  #-------------------------------------------------------------------
-  # X-plain: Draws G clusters with a maximum sample size Nmax given Z
-  #-------------------------------------------------------------------
-  # INPUTS: - G: the number of clusters
-  #         - max.support: n-1 in the beta binomial | Nmax = 10*(max.support +1)
-  #         - s is the parameter in the zeta distribution (s-1 in wiki notation)
-  #------------------------------------------------------------------
-  # RETURNS: 4 designs for sample sizes for G clusters.
-  #          The output is a (G x 4) matrix
-  #------------------------------------------------------------------
-  # Setup sample sizes per cluster
-
-  # Design 1: Beta binomial uniform
-  sample.1 <- 10 * (rbbinom(G, max.support, alpha = 1, beta = 1) + 1)
-  sample.2 <- 10 * (rbbinom(G, max.support, alpha = 0.4, beta = 0.4) + 1)
-  sample.3 <- 10 * (rbbinom(G, max.support, alpha = 10, beta = 100) + 1)
-  # sample.4 = rzeta(G,s)*10;
-
-  samples <- matrix(c(sample.1, sample.2, sample.3), G, 3)
-
-  # Return the data frame
-  return(samples)
+  sample <- 10 * (rbbinom(G, max.support, alpha = 1, beta = 1) + 1)
+  return(sample)
 }
+
 #-------------------------------------------------------------------
 # %# (2) Potential outcomes generation
 #-------------------------------------------------------------------
@@ -634,17 +596,11 @@ dgp.po.creg <- function(Ng, G, tau.vec, sigma1 = sqrt(2),
     assign(paste("mu.", a, sep = ""), tau.vec[a]) # create mu.a, where a \in \mathbb{A}
   }
 
-
-  # eta.0.g <- runif(G)
-  # eta.1.g <- runif(G,0,5)
-  # Z.g.1 <- 2*(runif(G)>0.5)-1;
   beta.rv <- rbeta(G, 2, 2)
   Z.g.2 <- (beta.rv - 0.5) * sqrt(20)
   x_1 <- (rnorm(G, mean = 5, sd = 2) - 5) / 2
   x_2 <- (rnorm(G, mean = 2, sd = 1) - 2) / 1
-  # x_3 <- (rnorm(G, mean = 1, sd = 3) - 1)/3
-  # x_4 <- (rnorm(G, mean = 10, sd = 5) - 10)/5
-  X <- data.frame(x_1, x_2) # , x_3, x_4)
+  X <- data.frame(x_1, x_2)
 
   cluster.indicator <- rep(c(1:G), Ng)
   cl.id <- cluster.indicator
@@ -654,27 +610,16 @@ dgp.po.creg <- function(Ng, G, tau.vec, sigma1 = sqrt(2),
   {
     assign(paste("epsilon.ig.", a, sep = ""), rnorm(total.sample, 0, sigma1))
   }
-  # epsilon.ig.1 = rnorm(total.sample,0,sigma1);
+
   epsilon.ig.0 <- rnorm(total.sample, 0, 1)
 
-  m.0 <- gamma.vec[1] * Z.g.2 + gamma.vec[2] * x_1 + gamma.vec[3] * x_2 #+ gamma.vec[4] * x_3 + gamma.vec[5] * x_4 # G=500 obs
+  m.0 <- gamma.vec[1] * Z.g.2 + gamma.vec[2] * x_1 + gamma.vec[3] * x_2
 
   for (a in 1:n.treat) # create m() functions m.a for every treatment a \in \mathbb{A}
   {
     assign(paste("m.", a, sep = ""), m.0)
   }
-  # m.1 <- (m.1.raw - mean(m.1.raw)) / sd(m.1.raw)
-  # With a different function for m.0
-  # m.0 <- (-gamma) * log(Z.g.2 + 3) * (Z.g.2 <= 0.5)  # G=500 obs
-  # Without a different function for m.0
-  # m.0 <- m.1
-  # m.0 <- (m.0.raw - mean(m.0.raw)) / sd(m.0.raw)
-
-  # Potential outcomes
-  ### With eta and Z.g.1
-  # Yig.0 <- rep(eta.0.g * Z.g.1 + m.0, Ng) + epsilon.ig.0
-  # Yig.1 <- mu.1 + rep(eta.1.g * Z.g.1 + m.1, Ng) + epsilon.ig.1
-  ### Without eta and Z.g.1
+ 
   Yig.0 <- rep(m.0, Ng) + epsilon.ig.0
 
   for (a in 1:n.treat)
@@ -684,16 +629,6 @@ dgp.po.creg <- function(Ng, G, tau.vec, sigma1 = sqrt(2),
     assign(paste("Yig.", a, sep = ""), result)
   }
 
-  # Yig.1 <- mu.1 + rep(m.1, Ng) + epsilon.ig.1
-
-  # ret.list <- list( 'Y.0' = Yig.0,
-  #                  'Y.1' = Yig.1,
-  #                  #'Z.1' = Z.g.1,
-  #                  'Z.2' = Z.g.2,
-  #                  'X'   = X,
-  #                  'G'   = G,
-  #                  'cl.id' = cluster.indicator,
-  #                  'Ng' = Ng)
   ret.names <- c(
     paste("Yig.", 0:n.treat, sep = ""),
     "Z.g.2", "X", "G", "Ng", "cl.id", paste("m.", 0:n.treat, sep = ""),
@@ -785,7 +720,6 @@ dgp.obs.creg <- function(baseline, I.S, pi.vec, n.treat)
   l.seq <- num.strata / 2
 
   pi.matr <- matrix(1, ncol = num.strata, nrow = n.treat)
-  # pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)
   pi.matr.w <- pi.matr * pi.vec
 
   for (k in 1:num.strata)
@@ -811,7 +745,7 @@ dgp.obs.creg <- function(baseline, I.S, pi.vec, n.treat)
   S <- merged.data$S
   X <- merged.data[5:ncol(merged.data)]
   Ng <- merged.data$Ng
-  # now we need to generate observed outcomes via Rubin model
+  # now we need to generate observed outcomes via the Rubin model
   for (a in 0:n.treat)
   {
     assign(paste("Y.", a, sep = ""), baseline[[paste("Yig.", a, sep = "")]])

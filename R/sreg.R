@@ -135,7 +135,6 @@ pi.hat.sreg <- function(S, D, inverse = FALSE)
     {
       n.1.s <- length(data[data$D %in% d & data$S %in% data$S[i], 2])
       n.0.s <- length(data[data$D %in% 0 & data$S %in% data$S[i], 2])
-      # n.s <- n.1.s + n.0.s
       n.s <- length(data[data$S %in% data$S[i], 2])
       pi.hat.mtrx[i, d] <- n.1.s / n.s
       if (inverse == TRUE) {
@@ -168,13 +167,6 @@ tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
         (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
 
       tau.hat[d] <- sum(Ksi.vec) / length(Y)
-      # tau.hat[d] <- mean(Ksi.vec)
-
-      # Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) * (data.bin$pi + data.bin$pi.0) / data.bin$pi) -
-      #  (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) * (data.bin$pi + data.bin$pi.0)  / (data.bin$pi.0)) +
-      #   (mu.hat.d - mu.hat.0)
-
-      # tau.hat[d] <- mean(Ksi.vec)
     } else {
       data <- data.frame(Y, S, D)
       data$pi <- pi.hat.sreg(S, D)[, d]
@@ -190,11 +182,6 @@ tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
         (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
 
       tau.hat[d] <- sum(Ksi.vec) / length(Y)
-      # Ksi.vec <- ((data.bin$A * (data.bin$Y - mu.hat.d)) * (data.bin$pi + data.bin$pi.0) / data.bin$pi) -
-      #  (((1 - data.bin$A) * (data.bin$Y - mu.hat.0)) * (data.bin$pi + data.bin$pi.0)  / (data.bin$pi.0)) +
-      #   (mu.hat.d - mu.hat.0)
-
-      # tau.hat[d] <- mean(Ksi.vec)
     }
   }
   return(tau.hat)
@@ -224,25 +211,11 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 
       data.bin <- data.frame(data.bin, mu.hat.d, mu.hat.0)
 
-      # Xi.tilde.1 <- (- data.bin$pi.0 / data.bin$pi) * mu.hat.d -  mu.hat.0 / (data.bin$pi + data.bin$pi.0)  +
-      # (data.bin$Y/ data.bin$pi)
-
-      # Xi.tilde.0 <- (data.bin$pi / data.bin$pi.0) * mu.hat.0 + mu.hat.d / (data.bin$pi + data.bin$pi.0) -
-      #   (data.bin$Y/ data.bin$pi.0)
-
       Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (data.bin$pi + data.bin$pi.0) +
         (data.bin$Y - mu.hat.d) / data.bin$pi
 
       Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (data.bin$pi + data.bin$pi.0) -
         (data.bin$Y - mu.hat.0) / data.bin$pi.0
-
-      # Xi.tilde.1 <- (mu.hat.d - mu.hat.0) +
-      #    (data.bin$Y - mu.hat.d) * (data.bin$pi + data.bin$pi.0) / data.bin$pi
-
-      # Xi.tilde.0 <- (mu.hat.d - mu.hat.0) -
-      #    (data.bin$Y - mu.hat.0) * (data.bin$pi + data.bin$pi.0) / data.bin$pi.0
-
-
 
       data.bin <- data.frame(data.bin, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data.bin$Y - tau[d] * data.bin$A)
 
@@ -265,16 +238,14 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 
 
       sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y) + (sum(Xi.hat.2^2) / n.d)
-      # sigma.hat.sq <- mean(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2)
+     
       if (HC1 == TRUE) {
-        # var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
         var.vec[d] <- (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)) * (length(Y) / (length(Y) - (max(S) + max(D) * max(S)))) +
           (mean(Xi.hat.2^2))
       } else {
         var.vec[d] <- sigma.hat.sq
       }
       n.vec[d] <- length(Y)
-      # n.vec[d]   <- n.d
     }
   } else {
     for (d in 1:max(D))
@@ -317,8 +288,8 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 
       sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y) + (mean(Xi.hat.2^2))
       if (HC1 == TRUE) {
-        # var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
-        var.vec[d] <- (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)) * (length(Y) / (length(Y) - (max(S) + max(D) * max(S)))) +
+        var.vec[d] <- (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)) * 
+        (length(Y) / (length(Y) - (max(S) + max(D) * max(S)))) +
           (mean(Xi.hat.2^2))
       } else {
         var.vec[d] <- sigma.hat.sq
@@ -471,15 +442,14 @@ dgp.po.sreg <- function(n, theta.vec, gamma.vec, n.treat, is.cov = TRUE)
   W <- sqrt(20) * (rbeta(n, 2, 2) - 1 / 2)
   x_1 <- rnorm(n, mean = 5, sd = 2)
   x_2 <- rnorm(n, mean = 2, sd = 1)
-  # x_3 <- rnorm(n, mean = 1, sd = 3)
-  # x_4 <- rnorm(n, mean = 10, sd = 5)
+
   if (is.cov == TRUE) {
-    X <- data.frame(x_1, x_2) # , x_3, x_4)
-    m.0 <- gamma.vec[1] * W + gamma.vec[2] * x_1 + gamma.vec[3] * x_2 #+ gamma.vec[4] * x_3 + gamma.vec[5] * x_4
+    X <- data.frame(x_1, x_2)
+    m.0 <- gamma.vec[1] * W + gamma.vec[2] * x_1 + gamma.vec[3] * x_2
   } else {
     m.0 <- gamma.vec[1] * W
   }
-  # m.0 <- gamma.vec[1] * W
+
   for (a in 1:n.treat) # create m() functions m.a for every treatment a \in \mathbb{A}
   {
     assign(paste("m.", a, sep = ""), m.0)
@@ -588,7 +558,6 @@ dgp.obs.sreg <- function(baseline, I.S, pi.vec, n.treat, is.cov = TRUE)
   l.seq <- num.strata / 2
 
   pi.matr <- matrix(1, ncol = num.strata, nrow = n.treat)
-  # pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)
   pi.matr.w <- pi.matr * pi.vec
 
   for (k in 1:num.strata)
