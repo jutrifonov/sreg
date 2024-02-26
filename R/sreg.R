@@ -276,12 +276,12 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
 
 
       sigma.hat.sq <- sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)  + (sum(Xi.hat.2^2) / n.d)
-       #sigma.hat.sq <- mean(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2)
+      #sigma.hat.sq <- mean(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2)
       if (HC1 == TRUE)
       {
-        var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
-        #var.vec[d] <- (sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)) * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))  + 
-        #(sum(Xi.hat.2^2) / n.d)
+        #var.vec[d] <- sigma.hat.sq * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))
+        var.vec[d] <- (sum(data.bin$A * (Xi.hat.1)^2  + (1 - data.bin$A) * (Xi.hat.0)^2) / length(Y)) * (length(Y) / (length(Y) - (max(S) + max(D) * max(S))))  + 
+        (mean(Xi.hat.2^2))
       }else{
         var.vec[d] <- sigma.hat.sq
       }
@@ -317,10 +317,10 @@ as.var.sreg <- function(Y,S,D,X=NULL, model=NULL, tau, HC1)
 
       for (i in 1:n.d)
       {
-        Xi.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.1) #/ length(data[data$D %in% c(d) & data$S %in% data.bin$S[i], 1])
-        Xi.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.0) #/ length(data[data$D %in% c(0) & data$S %in% data.bin$S[i], 1])
-        Y.tau.D.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)#/ length(data[data$D %in% c(1,0) & data$S %in% data.bin$S[i], 1])
-        Y.tau.D.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)#/ length(data[data$D %in% c(0) & data$S %in% data.bin$S[i], 1])
+        Xi.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.1) 
+        Xi.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.0) 
+        Y.tau.D.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
+        Y.tau.D.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
       }
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
