@@ -1,50 +1,48 @@
-#%##%##%##%###%##%##%##%###%##%##%##%###%##%
+# %##%##%##%###%##%##%##%###%##%##%##%###%##%
 ### This R file provides the collection ####
 ### of functions to estimate the ATE    ####
 ### under CAR with multiple treatments  ####
 ###        & cluster-level treatment    ####
-#%##%##%##%###%##%##%##%###%##%##%##%###%##%
+# %##%##%##%###%##%##%##%###%##%##%##%###%##%
 ####      The code is developed by      ####
 ####      @Juri Trifonov, UChicago      ####
 ####            Supervisors:            ####
 ####      @Azeem Shaikh, UChicago       ####
 ####    @Max Tabord-Meehan, UChicago    ####
-#%##%##%##%###%##%##%##%###%##%##%##%###%##%
-#%##%##%##%##
-#%# v.5.0 #%#
-#%##%##%##%##
+# %##%##%##%###%##%##%##%###%##%##%##%###%##%
+# %##%##%##%##
+# %# v.1.1.0#%#
+# %##%##%##%##
 #-------------------------------------------------------------------
-#%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
-#%##%##%##%##%##%#      I. ATE  estimator     #%##%##%##%##%##%##%##
-#%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
+# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
+# %##%##%##%##%##%#      I. ATE  estimator     #%##%##%##%##%##%##%##
+# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
 #-------------------------------------------------------------------
 #------------------------------------------------------------------
-#%# (1) Auxiliary function providing the appropriate data.frame
-#%#     for the subsequent iterative OLS estimation. Takes into account
-#%#     the number of observations and creates indicators.
-#%source function for theta.est.str()
-# NB CHANGE FOR MULTIVARIATE!
+# %# (1) Auxiliary function providing the appropriate data.frame
+# %#     for the subsequent iterative OLS estimation. Takes into account
+# %#     the number of observations and creates indicators.
+# %source function for theta.est.str()
 #-------------------------------------------------------------------
-filter.ols.creg <- function(Y,S,D,G.id,Ng,X=NULL,s,d)
-  #-------------------------------------------------------------------
+filter.ols.creg <- function(Y, S, D, G.id, Ng, X=NULL, s, d)
+#-------------------------------------------------------------------
 {
-  if(!is.null(X))
-  {
-    working.df <- data.frame(Y,S,D,G.id,Ng,X)
+  if (!is.null(X)) {
+    working.df <- data.frame(Y, S, D, G.id, Ng, X)
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')])              # created data on a cluster level for estimating pi.hat(s)
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")]) # created data on a cluster level for estimating pi.hat(s)
     X.unique <- unique(working.df[, 6:ncol(working.df)])
-    cl.lvl.data <- data.frame(cl.lvl.data, 'Y.bar' = Y.bar.g$Y, X.unique)
+    cl.lvl.data <- data.frame(cl.lvl.data, "Y.bar" = Y.bar.g$Y, X.unique)
     data <- cl.lvl.data
 
     keep.s <- s
     keep.d <- d
     filtered.data <- data[data$D %in% keep.d & data$S %in% keep.s, ]
-  }else{
-    working.df <- data.frame(Y,S,D,G.id,Ng)
+  } else {
+    working.df <- data.frame(Y, S, D, G.id, Ng)
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')])              # created data on a cluster level for estimating pi.hat(s)
-    cl.lvl.data <- data.frame(cl.lvl.data, 'Y.bar' = Y.bar.g$Y)
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")]) # created data on a cluster level for estimating pi.hat(s)
+    cl.lvl.data <- data.frame(cl.lvl.data, "Y.bar" = Y.bar.g$Y)
     data <- cl.lvl.data
 
     keep.s <- s
@@ -55,34 +53,33 @@ filter.ols.creg <- function(Y,S,D,G.id,Ng,X=NULL,s,d)
   return(data.ols)
 }
 #-------------------------------------------------------------------
-lm.iter.creg <- function(Y,S,D,G.id,Ng,X=NULL, Ng.cov = FALSE)
+lm.iter.creg <- function(Y, S, D, G.id, Ng, X=NULL, Ng.cov = FALSE)
 #-------------------------------------------------------------------
 {
-  if(Ng.cov == TRUE)
-  {
+  if (Ng.cov == TRUE) {
     theta.list <- rep(list(matrix(NA, ncol = 1, nrow = max(S))), (max(D) + 1))
     for (d in 0:max(D))
     {
       for (s in 1:max(S))
       {
-        data.filtered <- filter.ols.creg(Y,S,D,G.id,Ng,X=NULL,s,d)
+        data.filtered <- filter.ols.creg(Y, S, D, G.id, Ng, X = NULL, s, d)
         data.filtered.adj <- data.frame(Y.bar.Ng = data.filtered$Y.bar * data.filtered$Ng, Ng = data.filtered$Ng)
 
         result <- lm(Y.bar.Ng ~ ., data = data.filtered.adj)
-        theta.list[[d+1]][s, ] <- coef(result)[2]
+        theta.list[[d + 1]][s, ] <- coef(result)[2]
       }
     }
-  }else{
+  } else {
     theta.list <- rep(list(matrix(NA, ncol = ncol(X) + 1, nrow = max(S))), (max(D) + 1))
     for (d in 0:max(D))
     {
       for (s in 1:max(S))
       {
-        data.filtered <- filter.ols.creg(Y,S,D,G.id,Ng,X,s,d)
-        data.X <- data.filtered[, 6:(6 + ncol(X)-1)]
+        data.filtered <- filter.ols.creg(Y, S, D, G.id, Ng, X, s, d)
+        data.X <- data.filtered[, 6:(6 + ncol(X) - 1)]
         data.filtered.adj <- data.frame(Y.bar.Ng = data.filtered$Y.bar * data.filtered$Ng, Ng = data.filtered$Ng, data.X)
         result <- lm(Y.bar.Ng ~ ., data = data.filtered.adj)
-        theta.list[[d+1]][s, ] <- coef(result)[2:(2 + ncol(X))]
+        theta.list[[d + 1]][s, ] <- coef(result)[2:(2 + ncol(X))]
       }
     }
   }
@@ -91,31 +88,30 @@ lm.iter.creg <- function(Y,S,D,G.id,Ng,X=NULL, Ng.cov = FALSE)
   return(list.rtrn)
 }
 #-------------------------------------------------------------------
-lin.adj.creg <- function(a,data,model, Ng.cov = FALSE)
-  #-------------------------------------------------------------------
+lin.adj.creg <- function(a, data, model, Ng.cov = FALSE)
+#-------------------------------------------------------------------
 {
-  if(Ng.cov == TRUE)
-  {
+  if (Ng.cov == TRUE) {
     working.df <- data
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')])              # created data on a cluster level for estimating pi.hat(s)
-    cl.lvl.data <- data.frame(cl.lvl.data, 'Y.bar' = Y.bar.g$Y)
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")]) # created data on a cluster level for estimating pi.hat(s)
+    cl.lvl.data <- data.frame(cl.lvl.data, "Y.bar" = Y.bar.g$Y)
     data <- cl.lvl.data
 
-    theta.mtrx <- model[[a+1]]
+    theta.mtrx <- model[[a + 1]]
     theta.vec.matched <- theta.mtrx[data$S, ]
     Ng.hat <- theta.vec.matched * data$Ng
     mu.hat <- Ng.hat
-  }else{
+  } else {
     working.df <- data
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')])              # created data on a cluster level for estimating pi.hat(s)
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")]) # created data on a cluster level for estimating pi.hat(s)
     X.unique <- unique(working.df[, 6:ncol(working.df)])
-    cl.lvl.data <- data.frame(cl.lvl.data, 'Y.bar' = Y.bar.g$Y, X.unique)
+    cl.lvl.data <- data.frame(cl.lvl.data, "Y.bar" = Y.bar.g$Y, X.unique)
     data <- cl.lvl.data
     X.data <- cl.lvl.data[, 6:ncol(cl.lvl.data)]
 
-    theta.mtrx <- model[[a+1]]
+    theta.mtrx <- model[[a + 1]]
     theta.vec.matched <- theta.mtrx[data$S, ]
     Ng.hat <- theta.vec.matched[, 1] * data$Ng
     X.hat <- diag(as.matrix(X.data) %*% t(theta.vec.matched[, -1]))
@@ -131,55 +127,53 @@ pi.hat.creg <- function(cl.lvl.data, inverse = FALSE)
   S <- cl.lvl.data$S
   D <- cl.lvl.data$D
   n <- length(S)
-  data <- data.frame(S,D)
+  data <- data.frame(S, D)
 
   pi.hat.mtrx <- matrix(NA, nrow = n, ncol = max(D))
   for (d in 1:max(D))
   {
     for (i in 1:n)
     {
-      n.1.s <-  length(data[data$D %in% d & data$S %in% data$S[i], 2])
-      n.0.s <-  length(data[data$D %in% 0 & data$S %in% data$S[i], 2])
-      #n.s <- n.1.s + n.0.s
+      n.1.s <- length(data[data$D %in% d & data$S %in% data$S[i], 2])
+      n.0.s <- length(data[data$D %in% 0 & data$S %in% data$S[i], 2])
+      # n.s <- n.1.s + n.0.s
       n.s <- length(data[data$S %in% data$S[i], 2])
-      pi.hat.mtrx[i,d] <- n.1.s / n.s
-      if (inverse == TRUE)
-      {
-        pi.hat.mtrx[i,d] <- n.0.s / n.s
+      pi.hat.mtrx[i, d] <- n.1.s / n.s
+      if (inverse == TRUE) {
+        pi.hat.mtrx[i, d] <- n.0.s / n.s
       }
     }
   }
   return(pi.hat.mtrx)
 }
 #-------------------------------------------------------------------
-tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
-  #-------------------------------------------------------------------
+tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL, Ng.cov = FALSE)
+#-------------------------------------------------------------------
 {
   tau.hat.vec <- rep(NA, max(D))
-  Y.bar.g.list <- rep(list(NA),max(D))
-  mu.hat.list <- rep(list(NA),max(D))
-  pi.hat.list <- rep(list(NA),max(D))
-  data.bin.list <- rep(list(NA),max(D))
+  Y.bar.g.list <- rep(list(NA), max(D))
+  mu.hat.list <- rep(list(NA), max(D))
+  pi.hat.list <- rep(list(NA), max(D))
+  data.bin.list <- rep(list(NA), max(D))
 
-  if(!is.null(X))
-  {
-    working.df <- data.frame(Y,S,D,G.id,Ng,X)
+  if (!is.null(X)) {
+    working.df <- data.frame(Y, S, D, G.id, Ng, X)
     Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')]) # created data on a cluster level for estimating pi.hat(s)
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")]) # created data on a cluster level for estimating pi.hat(s)
     Ng.full <- cl.lvl.data$Ng
 
     for (d in 1:max(D))
     {
-      data.Y.bar <- working.df[working.df$D %in% c(d,0), ]
+      data.Y.bar <- working.df[working.df$D %in% c(d, 0), ]
       Y.bar.g <- aggregate(Y ~ G.id, data.Y.bar, mean)
       Y.bar.g.list[[d]] <- Y.bar.g$Y
 
       data <- cl.lvl.data
       data$pi <- pi.hat.creg(cl.lvl.data)[, d]
       data$pi.0 <- pi.hat.creg(cl.lvl.data, inverse = T)[, 1]
-      data.bin <- data[data$D %in% c(d,0), ]
+      data.bin <- data[data$D %in% c(d, 0), ]
       data.bin$A <- as.numeric(data.bin$D != 0)
-      data.bin.mu <- working.df[working.df$D %in% c(d,0), ]
+      data.bin.mu <- working.df[working.df$D %in% c(d, 0), ]
       pi.hat.list[[d]] <- data.bin$pi
       data.bin.list[[d]] <- data.bin
 
@@ -188,209 +182,211 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
       mu.hat.0 <- lin.adj.creg(0, data = data.bin.mu, model)
 
       Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
-                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
-                    (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
-      #Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) * (data.bin$pi + data.bin$pi.0) / data.bin$pi) -
+        (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
+        (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
+      # Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) * (data.bin$pi + data.bin$pi.0) / data.bin$pi) -
       #              (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) * (data.bin$pi + data.bin$pi.0) / (data.bin$pi.0)) +
       #              (mu.hat.d - mu.hat.0)
 
 
-      mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0,mu.hat.d), ncol = 2)
+      mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0, mu.hat.d), ncol = 2)
 
       Ng.ind <- data.bin$Ng
       tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
-      #tau.hat <- mean(Xi.g) / mean(Ng.ind)
+      # tau.hat <- mean(Xi.g) / mean(Ng.ind)
       tau.hat.vec[d] <- tau.hat
     }
-    rtrn.list <- list('tau.hat' = tau.hat.vec,
-                      'mu.hat' = mu.hat.list,
-                      'pi.hat' = pi.hat.list,
-                      'pi.hat.0' = data$pi.0,
-                      'Y.bar.g' = Y.bar.g.list,
-                      'data.bin' = data.bin.list,
-                      'Y.bar.full' = Y.bar.full,
-                      "Ng.full" = Ng.full)
-  }else{
-        if(Ng.cov == TRUE)
-        {
-          working.df <- data.frame(Y,S,D,G.id,Ng)
-          Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)
-          cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')]) # created data on a cluster level for estimating pi.hat(s)
-          Ng.full <- cl.lvl.data$Ng
+    rtrn.list <- list(
+      "tau.hat" = tau.hat.vec,
+      "mu.hat" = mu.hat.list,
+      "pi.hat" = pi.hat.list,
+      "pi.hat.0" = data$pi.0,
+      "Y.bar.g" = Y.bar.g.list,
+      "data.bin" = data.bin.list,
+      "Y.bar.full" = Y.bar.full,
+      "Ng.full" = Ng.full
+    )
+  } else {
+    if (Ng.cov == TRUE) {
+      working.df <- data.frame(Y, S, D, G.id, Ng)
+      Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)
+      cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")]) # created data on a cluster level for estimating pi.hat(s)
+      Ng.full <- cl.lvl.data$Ng
 
-          for (d in 1:max(D))
-          {
-            data.Y.bar <- working.df[working.df$D %in% c(d,0), ]
-            Y.bar.g <- aggregate(Y ~ G.id, data.Y.bar, mean)
-            Y.bar.g.list[[d]] <- Y.bar.g$Y
+      for (d in 1:max(D))
+      {
+        data.Y.bar <- working.df[working.df$D %in% c(d, 0), ]
+        Y.bar.g <- aggregate(Y ~ G.id, data.Y.bar, mean)
+        Y.bar.g.list[[d]] <- Y.bar.g$Y
 
-            data <- cl.lvl.data
-            data$pi <- pi.hat.creg(cl.lvl.data)[, d]
-            data$pi.0 <- pi.hat.creg(cl.lvl.data, inverse = T)[, 1]
-            data.bin <- data[data$D %in% c(d,0), ]
-            data.bin$A <- as.numeric(data.bin$D != 0)
-            data.bin.mu <- working.df[working.df$D %in% c(d,0), ]
-            pi.hat.list[[d]] <- data.bin$pi
-            data.bin.list[[d]] <- data.bin
-
-
-            mu.hat.d <- lin.adj.creg(d, data = data.bin.mu, model, Ng.cov = TRUE)
-
-            mu.hat.0 <- lin.adj.creg(0, data = data.bin.mu, model, Ng.cov = TRUE)
-
-            Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
-                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
-                    (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
-
-            mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0,mu.hat.d), ncol = 2)
-
-            Ng.ind <- data.bin$Ng
-            tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
-
-            tau.hat.vec[d] <- tau.hat
-          }
-          rtrn.list <- list('tau.hat' = tau.hat.vec,
-                            'mu.hat' = mu.hat.list,
-                            'pi.hat' = pi.hat.list,
-                            'pi.hat.0' = data$pi.0,
-                            'Y.bar.g' = Y.bar.g.list,
-                            'data.bin' = data.bin.list,
-                            'Y.bar.full' = Y.bar.full)
-        }else{
-          working.df <- data.frame(Y,S,D,G.id,Ng)
-          Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)
-          cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", 'Ng')]) # created data on a cluster level for estimating pi.hat(s)
-          Ng.full <- cl.lvl.data$Ng
-
-          for (d in 1:max(D))
-          {
-            data.Y.bar <- working.df[working.df$D %in% c(d,0), ]
-            Y.bar.g <- aggregate(Y ~ G.id, data.Y.bar, mean)
-            Y.bar.g.list[[d]] <- Y.bar.g$Y
-
-            data <- cl.lvl.data
-            data$pi <- pi.hat.creg(cl.lvl.data)[, d]
-            data$pi.0 <- pi.hat.creg(cl.lvl.data, inverse = T)[, 1]
-            data.bin <- data[data$D %in% c(d,0), ]
-            data.bin$A <- as.numeric(data.bin$D != 0)
-            data.bin.mu <- working.df[working.df$D %in% c(d,0), ]
-            pi.hat.list[[d]] <- data.bin$pi
-            data.bin.list[[d]] <- data.bin
+        data <- cl.lvl.data
+        data$pi <- pi.hat.creg(cl.lvl.data)[, d]
+        data$pi.0 <- pi.hat.creg(cl.lvl.data, inverse = T)[, 1]
+        data.bin <- data[data$D %in% c(d, 0), ]
+        data.bin$A <- as.numeric(data.bin$D != 0)
+        data.bin.mu <- working.df[working.df$D %in% c(d, 0), ]
+        pi.hat.list[[d]] <- data.bin$pi
+        data.bin.list[[d]] <- data.bin
 
 
-            mu.hat.d <- 0
-            mu.hat.0 <- 0
+        mu.hat.d <- lin.adj.creg(d, data = data.bin.mu, model, Ng.cov = TRUE)
 
-            Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
-                    (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
-                    (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
+        mu.hat.0 <- lin.adj.creg(0, data = data.bin.mu, model, Ng.cov = TRUE)
 
-            mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0,mu.hat.d), ncol = 2)
+        Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
+          (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
+          (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
 
-            Ng.ind <- data.bin$Ng
-            tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
+        mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0, mu.hat.d), ncol = 2)
 
-            tau.hat.vec[d] <- tau.hat
-          }
-          rtrn.list <- list('tau.hat' = tau.hat.vec,
-                            'mu.hat' = mu.hat.list,
-                            'pi.hat' = pi.hat.list,
-                            'pi.hat.0' = data$pi.0,
-                            'Y.bar.g' = Y.bar.g.list,
-                            'data.bin' = data.bin.list,
-                            'Y.bar.full' = Y.bar.full)
-        }
+        Ng.ind <- data.bin$Ng
+        tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
+
+        tau.hat.vec[d] <- tau.hat
       }
+      rtrn.list <- list(
+        "tau.hat" = tau.hat.vec,
+        "mu.hat" = mu.hat.list,
+        "pi.hat" = pi.hat.list,
+        "pi.hat.0" = data$pi.0,
+        "Y.bar.g" = Y.bar.g.list,
+        "data.bin" = data.bin.list,
+        "Y.bar.full" = Y.bar.full
+      )
+    } else {
+      working.df <- data.frame(Y, S, D, G.id, Ng)
+      Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)
+      cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")]) # created data on a cluster level for estimating pi.hat(s)
+      Ng.full <- cl.lvl.data$Ng
+
+      for (d in 1:max(D))
+      {
+        data.Y.bar <- working.df[working.df$D %in% c(d, 0), ]
+        Y.bar.g <- aggregate(Y ~ G.id, data.Y.bar, mean)
+        Y.bar.g.list[[d]] <- Y.bar.g$Y
+
+        data <- cl.lvl.data
+        data$pi <- pi.hat.creg(cl.lvl.data)[, d]
+        data$pi.0 <- pi.hat.creg(cl.lvl.data, inverse = T)[, 1]
+        data.bin <- data[data$D %in% c(d, 0), ]
+        data.bin$A <- as.numeric(data.bin$D != 0)
+        data.bin.mu <- working.df[working.df$D %in% c(d, 0), ]
+        pi.hat.list[[d]] <- data.bin$pi
+        data.bin.list[[d]] <- data.bin
+
+
+        mu.hat.d <- 0
+        mu.hat.0 <- 0
+
+        Xi.g <- ((data.bin$A * (Y.bar.g$Y * data.bin$Ng - mu.hat.d)) / data.bin$pi) -
+          (((1 - data.bin$A) * (Y.bar.g$Y * data.bin$Ng - mu.hat.0)) / (data.bin$pi.0)) +
+          (mu.hat.d - mu.hat.0) / (data.bin$pi.0 + data.bin$pi)
+
+        mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0, mu.hat.d), ncol = 2)
+
+        Ng.ind <- data.bin$Ng
+        tau.hat <- (sum(Xi.g) * (1 / length(Y.bar.full$Y))) / mean(Ng.ind)
+
+        tau.hat.vec[d] <- tau.hat
+      }
+      rtrn.list <- list(
+        "tau.hat" = tau.hat.vec,
+        "mu.hat" = mu.hat.list,
+        "pi.hat" = pi.hat.list,
+        "pi.hat.0" = data$pi.0,
+        "Y.bar.g" = Y.bar.g.list,
+        "data.bin" = data.bin.list,
+        "Y.bar.full" = Y.bar.full
+      )
+    }
+  }
   return(rtrn.list)
 }
 
 #-------------------------------------------------------------------
-#%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
-#%##%##%##%##%##%#    II. Variance  estimator     #%##%##%##%##%##%#
-#%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
+# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
+# %##%##%##%##%##%#    II. Variance  estimator     #%##%##%##%##%##%#
+# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%
 #-------------------------------------------------------------------
 
 #-------------------------------------------------------------------
 # Variance Estimator
 #-------------------------------------------------------------------
-as.var.creg <- function(model=NULL, fit, HC1)
-{
+as.var.creg <- function(model = NULL, fit, HC1) {
   var.vec <- rep(NA, length(fit$tau.hat))
   n.vec <- rep(NA, length(fit$tau.hat))
 
-  if(!is.null(model))
-  {
-       for (d in 1:length(fit$tau.hat))
-       {
-         Y.bar.g <- fit$Y.bar.g[[d]]
-         mu.hat.0 <- fit$mu.hat[[d]][,1]
-         mu.hat.d <- fit$mu.hat[[d]][,2]
-         #pi.hat <- fit$pi.hat[[d]]
-         tau.est <- fit$tau.hat
+  if (!is.null(model)) {
+    for (d in 1:length(fit$tau.hat))
+    {
+      Y.bar.g <- fit$Y.bar.g[[d]]
+      mu.hat.0 <- fit$mu.hat[[d]][, 1]
+      mu.hat.d <- fit$mu.hat[[d]][, 2]
+      # pi.hat <- fit$pi.hat[[d]]
+      tau.est <- fit$tau.hat
 
-         data.filter <- fit$data.bin[[d]]
-         pi.hat <- data.filter$pi
-         pi.hat.0 <- data.filter$pi.0
+      data.filter <- fit$data.bin[[d]]
+      pi.hat <- data.filter$pi
+      pi.hat.0 <- data.filter$pi.0
 
 
-         n.d <- length(data.filter$G.id)
+      n.d <- length(data.filter$G.id)
 
-        #Xi.tilde.1 <- (- pi.hat.0 / pi.hat) * mu.hat.d - mu.hat.0 / (pi.hat + pi.hat.0)  +
-        #   (data.filter$Ng * Y.bar.g / pi.hat)
-        #Xi.tilde.0 <- (pi.hat / pi.hat.0) * mu.hat.0 + mu.hat.d / (pi.hat + pi.hat.0) -
-        #   (data.filter$Ng * Y.bar.g / pi.hat.0)
+      # Xi.tilde.1 <- (- pi.hat.0 / pi.hat) * mu.hat.d - mu.hat.0 / (pi.hat + pi.hat.0)  +
+      #   (data.filter$Ng * Y.bar.g / pi.hat)
+      # Xi.tilde.0 <- (pi.hat / pi.hat.0) * mu.hat.0 + mu.hat.d / (pi.hat + pi.hat.0) -
+      #   (data.filter$Ng * Y.bar.g / pi.hat.0)
 
-        Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) + 
+      Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) +
         (data.filter$Ng * Y.bar.g - mu.hat.d) / pi.hat
-        
-        Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) - 
-        (data.filter$Ng * Y.bar.g - mu.hat.0) / pi.hat.0   
 
-        #Xi.tilde.1 <- (mu.hat.d - mu.hat.0) + 
-        #((data.filter$Ng * Y.bar.g - mu.hat.d) * (pi.hat + pi.hat.0)) / pi.hat
-        
-        #Xi.tilde.0 <- (mu.hat.d - mu.hat.0) - 
-        #((data.filter$Ng * Y.bar.g - mu.hat.0) * (pi.hat + pi.hat.0)) / pi.hat.0   
-        
+      Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) -
+        (data.filter$Ng * Y.bar.g - mu.hat.0) / pi.hat.0
 
-         data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng, Ng.cl = data.filter$Ng)
+      # Xi.tilde.1 <- (mu.hat.d - mu.hat.0) +
+      # ((data.filter$Ng * Y.bar.g - mu.hat.d) * (pi.hat + pi.hat.0)) / pi.hat
 
-         n.d <- length(data.bin$G.id)
-         Ng.d <-data.bin$Ng
+      # Xi.tilde.0 <- (mu.hat.d - mu.hat.0) -
+      # ((data.filter$Ng * Y.bar.g - mu.hat.0) * (pi.hat + pi.hat.0)) / pi.hat.0
 
-         Xi.1.mean <- rep(NA,n.d)
-         Xi.0.mean <- rep(NA,n.d)
-         Y.g.bar.cl.1 <- rep(NA,n.d)
-         Y.g.bar.cl.0 <- rep(NA,n.d)
-         N.g.bar.cl <- rep(NA, n.d)
-         Y.g.mean.1 <- rep(NA,n.d)
-         Y.g.mean.0 <- rep(NA,n.d)
 
-         for (i in 1:n.d)
-         {
-           Xi.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.1)
-           Xi.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.0)
-           Y.g.bar.cl.1[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
-           Y.g.bar.cl.0[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
-           N.g.bar.cl[i] <- mean(data.bin[data.bin$S %in% data.bin$S[i], ]$Ng.cl)
-         }
-         Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
-         Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
-         Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
+      data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng, Ng.cl = data.filter$Ng)
 
-         sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
-         #sigma.hat.sq <- mean(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2) / (mean(Ng.d))^2
-         if (HC1 == TRUE)
-         {
-          var.vec[d] <-  ((sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y)) * 
+      n.d <- length(data.bin$G.id)
+      Ng.d <- data.bin$Ng
+
+      Xi.1.mean <- rep(NA, n.d)
+      Xi.0.mean <- rep(NA, n.d)
+      Y.g.bar.cl.1 <- rep(NA, n.d)
+      Y.g.bar.cl.0 <- rep(NA, n.d)
+      N.g.bar.cl <- rep(NA, n.d)
+      Y.g.mean.1 <- rep(NA, n.d)
+      Y.g.mean.0 <- rep(NA, n.d)
+
+      for (i in 1:n.d)
+      {
+        Xi.1.mean[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.1)
+        Xi.0.mean[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Xi.tilde.0)
+        Y.g.bar.cl.1[i] <- mean(data.bin[data.bin$A %in% 1 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
+        Y.g.bar.cl.0[i] <- mean(data.bin[data.bin$A %in% 0 & data.bin$S %in% data.bin$S[i], ]$Y.tau.D)
+        N.g.bar.cl[i] <- mean(data.bin[data.bin$S %in% data.bin$S[i], ]$Ng.cl)
+      }
+      Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
+      Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
+      Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
+
+      sigma.hat.sq <- (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
+      # sigma.hat.sq <- mean(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2) / (mean(Ng.d))^2
+      if (HC1 == TRUE) {
+        var.vec[d] <- ((sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y)) *
           (length(Y) / (length(Y) - (max(S) + max(D) * max(S)))) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
-         }else{
-         var.vec[d] <- sigma.hat.sq
-         }
-         #n.vec[d] <- n.d
-         n.vec[d]   <- length(fit$Y.bar.full$Y)
-       }
-  }else{
+      } else {
+        var.vec[d] <- sigma.hat.sq
+      }
+      # n.vec[d] <- n.d
+      n.vec[d] <- length(fit$Y.bar.full$Y)
+    }
+  } else {
     for (d in 1:length(fit$tau.hat))
     {
       Y.bar.g <- fit$Y.bar.g[[d]]
@@ -405,24 +401,24 @@ as.var.creg <- function(model=NULL, fit, HC1)
       mu.hat.0 <- 0
       mu.hat.d <- 0
 
-      Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) + 
+      Xi.tilde.1 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) +
         (data.filter$Ng * Y.bar.g - mu.hat.d) / pi.hat
 
-      Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) - 
-        (data.filter$Ng * Y.bar.g - mu.hat.0) / pi.hat.0 
+      Xi.tilde.0 <- (mu.hat.d - mu.hat.0) / (pi.hat + pi.hat.0) -
+        (data.filter$Ng * Y.bar.g - mu.hat.0) / pi.hat.0
 
       data.bin <- data.frame(data.filter, Xi.tilde.1, Xi.tilde.0, Y.tau.D = Y.bar.g * data.filter$Ng, Ng.cl = data.filter$Ng)
 
       n.d <- length(data.bin$G.id)
-      Ng.d <-data.bin$Ng
+      Ng.d <- data.bin$Ng
 
-      Xi.1.mean <- rep(NA,n.d)
-      Xi.0.mean <- rep(NA,n.d)
-      Y.g.bar.cl.1 <- rep(NA,n.d)
-      Y.g.bar.cl.0 <- rep(NA,n.d)
+      Xi.1.mean <- rep(NA, n.d)
+      Xi.0.mean <- rep(NA, n.d)
+      Y.g.bar.cl.1 <- rep(NA, n.d)
+      Y.g.bar.cl.0 <- rep(NA, n.d)
       N.g.bar.cl <- rep(NA, n.d)
-      Y.g.mean.1 <- rep(NA,n.d)
-      Y.g.mean.0 <- rep(NA,n.d)
+      Y.g.mean.1 <- rep(NA, n.d)
+      Y.g.mean.0 <- rep(NA, n.d)
 
       for (i in 1:n.d)
       {
@@ -437,119 +433,127 @@ as.var.creg <- function(model=NULL, fit, HC1)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (data.filter$Ng - N.g.bar.cl)
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
-      sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
-      if (HC1 == TRUE)
-      {
-        var.vec[d] <-  ((sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y)) * 
+      sigma.hat.sq <- (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
+      if (HC1 == TRUE) {
+        var.vec[d] <- ((sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y)) *
           (length(Y) / (length(Y) - (max(S) + max(D) * max(S)))) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
-      } else{
+      } else {
         var.vec[d] <- sigma.hat.sq
       }
-      n.vec[d]   <- length(fit$Y.bar.full$Y)
+      n.vec[d] <- length(fit$Y.bar.full$Y)
     }
   }
-  se.vec <- sqrt(var.vec/n.vec)
+  se.vec <- sqrt(var.vec / n.vec)
   return(se.vec)
 }
 
 #-------------------------------------------------------------------
-#%# (10) The core function. It provides estimates of ATE, their s.e.,
-#%#     calculates t-stats and corresponding p-values
+# %# (10) The core function. It provides estimates of ATE, their s.e.,
+# %#     calculates t-stats and corresponding p-values
 #-------------------------------------------------------------------
-res.creg <- function(Y,S,D,G.id,Ng,X, Ng.cov = FALSE, HC1)
+res.creg <- function(Y, S, D, G.id, Ng, X, Ng.cov = FALSE, HC1)
 #-------------------------------------------------------------------
 {
   n <- length(Y)
-  if(!is.null(X))
-  {
-    model <- lm.iter.creg(Y,S,D,G.id,Ng,X)
-    fit <- tau.hat.creg(Y,S,D,G.id,Ng,X,model)
+  if (!is.null(X)) {
+    model <- lm.iter.creg(Y, S, D, G.id, Ng, X)
+    fit <- tau.hat.creg(Y, S, D, G.id, Ng, X, model)
     tau.est <- fit$tau.hat
-    se.rob <- as.var.creg(model,fit,HC1)
+    se.rob <- as.var.creg(model, fit, HC1)
     t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
-    res.list <- list('tau.hat' = tau.est,
-                     'se.rob'  = se.rob,
-                     't.stat'  = t.stat,
-                     'p.value' = p.value,
-                     'as.CI'   = c(CI.left, CI.right),
-                     'CI.left' = CI.left,
-                     'CI.right'= CI.right,
-                     'data' = data.frame(Y,S,D,G.id,Ng,X),
-                     'lin.adj' = data.frame(Ng, X))
-  }else{
-    if(Ng.cov == T)
-    {
-      model <- lm.iter.creg(Y,S,D,G.id,Ng,X=NULL, Ng.cov = T)
-      fit <-  tau.hat.creg(Y,S,D,G.id,Ng,X=NULL,model, Ng.cov = T)
+    res.list <- list(
+      "tau.hat" = tau.est,
+      "se.rob" = se.rob,
+      "t.stat" = t.stat,
+      "p.value" = p.value,
+      "as.CI" = c(CI.left, CI.right),
+      "CI.left" = CI.left,
+      "CI.right" = CI.right,
+      "data" = data.frame(Y, S, D, G.id, Ng, X),
+      "lin.adj" = data.frame(Ng, X)
+    )
+  } else {
+    if (Ng.cov == T) {
+      model <- lm.iter.creg(Y, S, D, G.id, Ng, X = NULL, Ng.cov = T)
+      fit <- tau.hat.creg(Y, S, D, G.id, Ng, X = NULL, model, Ng.cov = T)
       tau.est <- fit$tau.hat
-      se.rob <- as.var.creg(model,fit,HC1)
+      se.rob <- as.var.creg(model, fit, HC1)
       t.stat <- tau.est / se.rob
       p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
       CI.left <- tau.est - qnorm(0.975) * se.rob
       CI.right <- tau.est + qnorm(0.975) * se.rob
-      res.list <- list('tau.hat' = tau.est,
-                       'se.rob'  = se.rob,
-                       't.stat'  = t.stat,
-                       'p.value' = p.value,
-                       'as.CI'   = c(CI.left, CI.right),
-                       'CI.left' = CI.left,
-                       'CI.right'= CI.right,
-                       'data' = data.frame(Y,S,D,G.id,Ng),
-                       'lin.adj' = data.frame(Ng))
-    }else{
-    fit <- tau.hat.creg(Y,S,D,G.id,Ng,X=NULL,model=NULL)
-    tau.est <- fit$tau.hat
-    se.rob <- as.var.creg(model=NULL,fit, HC1)
-    t.stat <- tau.est / se.rob
-    p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
-    CI.left <- tau.est - qnorm(0.975) * se.rob
-    CI.right <- tau.est + qnorm(0.975) * se.rob
-    res.list <- list('tau.hat' = tau.est,
-                     'se.rob'  = se.rob,
-                     't.stat'  = t.stat,
-                     'p.value' = p.value,
-                     'as.CI'   = c(CI.left, CI.right),
-                     'CI.left' = CI.left,
-                     'CI.right'= CI.right,
-                     'data' = data.frame(Y,S,D,G.id,Ng),
-                     'lin.adj' = NULL)
+      res.list <- list(
+        "tau.hat" = tau.est,
+        "se.rob" = se.rob,
+        "t.stat" = t.stat,
+        "p.value" = p.value,
+        "as.CI" = c(CI.left, CI.right),
+        "CI.left" = CI.left,
+        "CI.right" = CI.right,
+        "data" = data.frame(Y, S, D, G.id, Ng),
+        "lin.adj" = data.frame(Ng)
+      )
+    } else {
+      fit <- tau.hat.creg(Y, S, D, G.id, Ng, X = NULL, model = NULL)
+      tau.est <- fit$tau.hat
+      se.rob <- as.var.creg(model = NULL, fit, HC1)
+      t.stat <- tau.est / se.rob
+      p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
+      CI.left <- tau.est - qnorm(0.975) * se.rob
+      CI.right <- tau.est + qnorm(0.975) * se.rob
+      res.list <- list(
+        "tau.hat" = tau.est,
+        "se.rob" = se.rob,
+        "t.stat" = t.stat,
+        "p.value" = p.value,
+        "as.CI" = c(CI.left, CI.right),
+        "CI.left" = CI.left,
+        "CI.right" = CI.right,
+        "data" = data.frame(Y, S, D, G.id, Ng),
+        "lin.adj" = NULL
+      )
     }
   }
   return(res.list)
 }
 
 #-------------------------------------------------------------------
-#%# (11) Summary method for sreg(). Provide the output table.
+# %# (11) Summary method for sreg(). Provide the output table.
 #-------------------------------------------------------------------
 summary.creg <- function(model)
 #-------------------------------------------------------------------
 {
-  n         <- length(model$data$Y)
-  G         <- length(unique(model$data$G.id))
-  tau.hat   <- as.vector(model$tau.hat)
-  se.rob    <- as.vector(model$se.rob)
-  t.stat    <- as.vector(model$t.stat)
-  p.value   <- as.vector(model$p.value)
-  CI.left   <- as.vector(model$CI.left)
-  CI.right  <- as.vector(model$CI.right)
+  n <- length(model$data$Y)
+  G <- length(unique(model$data$G.id))
+  tau.hat <- as.vector(model$tau.hat)
+  se.rob <- as.vector(model$se.rob)
+  t.stat <- as.vector(model$t.stat)
+  p.value <- as.vector(model$p.value)
+  CI.left <- as.vector(model$CI.left)
+  CI.right <- as.vector(model$CI.right)
 
-  if(!is.null(model$lin.adj))
-  {
+  if (!is.null(model$lin.adj)) {
     cat("Saturated Model Estimation Results under CAR with clusters and linear adjustments\n")
-  }else{
+  } else {
     cat("Saturated Model Estimation Results under CAR with clusters\n")
   }
   cat(paste("Observations:", n, "\n"))
   cat(paste("Clusters:", G, "\n"))
-  cat(paste("Number of treatments:",
-            max(model$data$D), "\n"))
-  cat(paste("Number of strata:",
-            max(model$data$S), "\n"))
-  cat(paste0("Covariates used in linear adjustments: ",
-             paste(names(model$lin.adj), collapse = ", "), "\n"))
+  cat(paste(
+    "Number of treatments:",
+    max(model$data$D), "\n"
+  ))
+  cat(paste(
+    "Number of strata:",
+    max(model$data$S), "\n"
+  ))
+  cat(paste0(
+    "Covariates used in linear adjustments: ",
+    paste(names(model$lin.adj), collapse = ", "), "\n"
+  ))
 
   cat("---\n")
 
@@ -563,31 +567,35 @@ summary.creg <- function(model)
   stars[(p.value > 0.01) & (p.value <= 0.05)] <- "*"
   stars[(p.value > 0.05) & (p.value <= 0.1)] <- "."
 
-  df <- data.frame("Tau" = tau.hat,
-                   "As.se" = se.rob,
-                   "T-stat" = t.stat,
-                   "P-value" = p.value,
-                   "CI.left" = CI.left,
-                   "CI.right" = CI.right,
-                   "Significance" = stars)
+  df <- data.frame(
+    "Tau" = tau.hat,
+    "As.se" = se.rob,
+    "T-stat" = t.stat,
+    "P-value" = p.value,
+    "CI.left" = CI.left,
+    "CI.right" = CI.right,
+    "Significance" = stars
+  )
   is.df.num.col <- sapply(df, is.numeric)
   df[, is.df.num.col] <- round(df[, is.df.num.col], 5)
   print(df)
   cat("---\n")
-  cat(paste("Signif. codes:  0 ‘***’ 0.001 ‘**’",
-            "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"))
+  cat(paste(
+    "Signif. codes:  0 ‘***’ 0.001 ‘**’",
+    "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"
+  ))
 }
 
 #-------------------------------------------------------------------------------
-#%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%#%##%##%##%#
-#%##%##%##%##%##%## III. DGP functions for simulations #%##%##%##%##%##%##%##%#%
-#%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%#%##%##%##%#
+# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%#%##%##%##%#
+# %##%##%##%##%##%## III. DGP functions for simulations #%##%##%##%##%##%##%##%#%
+# %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%#%##%##%##%#
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------
-#%# (1) Cluster sizes generation
+# %# (1) Cluster sizes generation
 #-------------------------------------------------------------------
-gen.cluster.sizes <-function(G,max.support,s=1.5)
+gen.cluster.sizes <- function(G, max.support, s=1.5)
 #-------------------------------------------------------------------
 {
   #-------------------------------------------------------------------
@@ -603,69 +611,69 @@ gen.cluster.sizes <-function(G,max.support,s=1.5)
   # Setup sample sizes per cluster
 
   # Design 1: Beta binomial uniform
-  sample.1 = 10*(rbbinom(G,max.support, alpha = 1, beta = 1)+1);
-  sample.2 = 10*(rbbinom(G,max.support, alpha = 0.4, beta = 0.4)+1);
-  sample.3 = 10*(rbbinom(G,max.support, alpha = 10, beta = 100)+1);
-  #sample.4 = rzeta(G,s)*10;
+  sample.1 <- 10 * (rbbinom(G, max.support, alpha = 1, beta = 1) + 1)
+  sample.2 <- 10 * (rbbinom(G, max.support, alpha = 0.4, beta = 0.4) + 1)
+  sample.3 <- 10 * (rbbinom(G, max.support, alpha = 10, beta = 100) + 1)
+  # sample.4 = rzeta(G,s)*10;
 
-  samples = matrix(c(sample.1,sample.2,sample.3),G,3)
+  samples <- matrix(c(sample.1, sample.2, sample.3), G, 3)
 
   # Return the data frame
-  return(samples);
+  return(samples)
 }
 #-------------------------------------------------------------------
-#%# (2) Potential outcomes generation
+# %# (2) Potential outcomes generation
 #-------------------------------------------------------------------
 #------------------------------------------------------------------
-dgp.po.creg <- function(Ng, G, tau.vec, sigma1=sqrt(2),
-                         gamma.vec = c(0.4, 0.2, 1), n.treat)
+dgp.po.creg <- function(Ng, G, tau.vec, sigma1 = sqrt(2),
+                        gamma.vec = c(0.4, 0.2, 1), n.treat)
 #------------------------------------------------------------------
 {
   for (a in seq_along(tau.vec))
   {
-    assign(paste("mu.", a, sep = ""), tau.vec[a])                              #create mu.a, where a \in \mathbb{A}
+    assign(paste("mu.", a, sep = ""), tau.vec[a]) # create mu.a, where a \in \mathbb{A}
   }
 
 
-  #eta.0.g <- runif(G)
-  #eta.1.g <- runif(G,0,5)
-  #Z.g.1 <- 2*(runif(G)>0.5)-1;
-  beta.rv <- rbeta(G,2,2)
+  # eta.0.g <- runif(G)
+  # eta.1.g <- runif(G,0,5)
+  # Z.g.1 <- 2*(runif(G)>0.5)-1;
+  beta.rv <- rbeta(G, 2, 2)
   Z.g.2 <- (beta.rv - 0.5) * sqrt(20)
-  x_1 <- (rnorm(G, mean = 5, sd = 2) - 5)/2
-  x_2 <- (rnorm(G, mean = 2, sd = 1) - 2)/1
-  #x_3 <- (rnorm(G, mean = 1, sd = 3) - 1)/3
-  #x_4 <- (rnorm(G, mean = 10, sd = 5) - 10)/5
-  X <- data.frame(x_1, x_2)#, x_3, x_4)
+  x_1 <- (rnorm(G, mean = 5, sd = 2) - 5) / 2
+  x_2 <- (rnorm(G, mean = 2, sd = 1) - 2) / 1
+  # x_3 <- (rnorm(G, mean = 1, sd = 3) - 1)/3
+  # x_4 <- (rnorm(G, mean = 10, sd = 5) - 10)/5
+  X <- data.frame(x_1, x_2) # , x_3, x_4)
 
-  cluster.indicator = rep(c(1:G),Ng);
-  cl.id <-  cluster.indicator
-  total.sample = length(cluster.indicator)
+  cluster.indicator <- rep(c(1:G), Ng)
+  cl.id <- cluster.indicator
+  total.sample <- length(cluster.indicator)
 
   for (a in 1:n.treat)
   {
-    assign(paste("epsilon.ig.", a, sep = ""), rnorm(total.sample,0,sigma1))
+    assign(paste("epsilon.ig.", a, sep = ""), rnorm(total.sample, 0, sigma1))
   }
-  #epsilon.ig.1 = rnorm(total.sample,0,sigma1);
-  epsilon.ig.0 = rnorm(total.sample, 0, 1);
+  # epsilon.ig.1 = rnorm(total.sample,0,sigma1);
+  epsilon.ig.0 <- rnorm(total.sample, 0, 1)
 
   m.0 <- gamma.vec[1] * Z.g.2 + gamma.vec[2] * x_1 + gamma.vec[3] * x_2 #+ gamma.vec[4] * x_3 + gamma.vec[5] * x_4 # G=500 obs
 
-  for (a in 1:n.treat)                                                           # create m() functions m.a for every treatment a \in \mathbb{A}
+  for (a in 1:n.treat) # create m() functions m.a for every treatment a \in \mathbb{A}
   {
     assign(paste("m.", a, sep = ""), m.0)
   }
-  #m.1 <- (m.1.raw - mean(m.1.raw)) / sd(m.1.raw)
+  # m.1 <- (m.1.raw - mean(m.1.raw)) / sd(m.1.raw)
   # With a different function for m.0
-  #m.0 <- (-gamma) * log(Z.g.2 + 3) * (Z.g.2 <= 0.5)  # G=500 obs
+  # m.0 <- (-gamma) * log(Z.g.2 + 3) * (Z.g.2 <= 0.5)  # G=500 obs
   # Without a different function for m.0
-  #m.0 <- m.1
-  #m.0 <- (m.0.raw - mean(m.0.raw)) / sd(m.0.raw)
+  # m.0 <- m.1
+  # m.0 <- (m.0.raw - mean(m.0.raw)) / sd(m.0.raw)
 
   # Potential outcomes
   ### With eta and Z.g.1
-  #Yig.0 <- rep(eta.0.g * Z.g.1 + m.0, Ng) + epsilon.ig.0
-  #Yig.1 <- mu.1 + rep(eta.1.g * Z.g.1 + m.1, Ng) + epsilon.ig.1
+  # Yig.0 <- rep(eta.0.g * Z.g.1 + m.0, Ng) + epsilon.ig.0
+  # Yig.1 <- mu.1 + rep(eta.1.g * Z.g.1 + m.1, Ng) + epsilon.ig.1
   ### Without eta and Z.g.1
   Yig.0 <- rep(m.0, Ng) + epsilon.ig.0
 
@@ -676,9 +684,9 @@ dgp.po.creg <- function(Ng, G, tau.vec, sigma1=sqrt(2),
     assign(paste("Yig.", a, sep = ""), result)
   }
 
-  #Yig.1 <- mu.1 + rep(m.1, Ng) + epsilon.ig.1
+  # Yig.1 <- mu.1 + rep(m.1, Ng) + epsilon.ig.1
 
-  #ret.list <- list( 'Y.0' = Yig.0,
+  # ret.list <- list( 'Y.0' = Yig.0,
   #                  'Y.1' = Yig.1,
   #                  #'Z.1' = Z.g.1,
   #                  'Z.2' = Z.g.2,
@@ -686,17 +694,19 @@ dgp.po.creg <- function(Ng, G, tau.vec, sigma1=sqrt(2),
   #                  'G'   = G,
   #                  'cl.id' = cluster.indicator,
   #                  'Ng' = Ng)
-  ret.names <- c(paste("Yig.", 0:n.treat, sep = ""),
-                 "Z.g.2", "X", "G", "Ng", "cl.id", paste("m.", 0:n.treat, sep = ""),
-                 paste("mu.", 1:n.treat, sep = ""))
+  ret.names <- c(
+    paste("Yig.", 0:n.treat, sep = ""),
+    "Z.g.2", "X", "G", "Ng", "cl.id", paste("m.", 0:n.treat, sep = ""),
+    paste("mu.", 1:n.treat, sep = "")
+  )
 
   ret.list <- mget(ret.names)
-  return (ret.list)
+  return(ret.list)
 }
 
 #-------------------------------------------------------------------
-#%# (3) Random Treatment Assignment
-#%source function for dgp.obs()
+# %# (3) Random Treatment Assignment
+# %source function for dgp.obs()
 #-------------------------------------------------------------------
 gen.treat.creg <- function(pi.matr.w, ns, k)
 #-------------------------------------------------------------------
@@ -706,14 +716,19 @@ gen.treat.creg <- function(pi.matr.w, ns, k)
 
   for (i in 1:rows)
   {
-    code.elements[i] <- paste0("rep(", i,
-                               ", floor(pi.matr.w[", i, ",", k, "]*ns))")
+    code.elements[i] <- paste0(
+      "rep(", i,
+      ", floor(pi.matr.w[", i, ",", k, "]*ns))"
+    )
   }
 
-  code.elements[rows + 1] <- paste0("rep(0, (ns - ",
-                                    paste0("floor(pi.matr.w[", 1:rows,
-                                           ",",  k, "]*ns)",
-                                           collapse = " - "), "))")
+  code.elements[rows + 1] <- paste0(
+    "rep(0, (ns - ",
+    paste0("floor(pi.matr.w[", 1:rows,
+      ",", k, "]*ns)",
+      collapse = " - "
+    ), "))"
+  )
 
   code <- paste(code.elements, collapse = ", ")
 
@@ -723,8 +738,8 @@ gen.treat.creg <- function(pi.matr.w, ns, k)
 }
 
 #-------------------------------------------------------------------
-#%# (4) Generate the formula for Y.obs (Rubin model)
-#%source function for dgp.obs()
+# %# (4) Generate the formula for Y.obs (Rubin model)
+# %source function for dgp.obs()
 #-------------------------------------------------------------------
 gen.rubin.formula.creg <- function(n.treat)
 #-------------------------------------------------------------------
@@ -738,16 +753,13 @@ gen.rubin.formula.creg <- function(n.treat)
   # Generate the formula dynamically with indicators
   for (a in A.values)
   {
-    if (a == 0)
-    {
+    if (a == 0) {
       formula <- paste(formula, paste0("Y.", a, " * (A == 0)"))
-    } else
-    {
+    } else {
       formula <- paste(formula, paste0("Y.", a, " * (A == ", a, ")"))
     }
 
-    if (a < n.treat)
-    {
+    if (a < n.treat) {
       formula <- paste(formula, " + ")
     }
   }
@@ -755,50 +767,51 @@ gen.rubin.formula.creg <- function(n.treat)
 }
 
 #-------------------------------------------------------------------
-#%# (5) Generate observed outcomes,
-#%#     by taking as input the potential outcomes,
-#%#     matrix of strata assignments, pi.vec, and
-#%#     number of treatments
+# %# (5) Generate observed outcomes,
+# %#     by taking as input the potential outcomes,
+# %#     matrix of strata assignments, pi.vec, and
+# %#     number of treatments
 #-------------------------------------------------------------------
 dgp.obs.creg <- function(baseline, I.S, pi.vec, n.treat)
-  #-------------------------------------------------------------------
+#-------------------------------------------------------------------
 {
-  if (n.treat != length(pi.vec))
-  {
+  if (n.treat != length(pi.vec)) {
     return(print("The number of treatments doesn't
                  match the length of vector pi.vec"))
   }
   num.strata <- ncol(I.S)
-  n  <- baseline$G
-  A  <- cbind(rep(0,n))  # treatment Assignment
-  l.seq<-num.strata/2
+  n <- baseline$G
+  A <- cbind(rep(0, n)) # treatment Assignment
+  l.seq <- num.strata / 2
 
   pi.matr <- matrix(1, ncol = num.strata, nrow = n.treat)
-  #pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)
+  # pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)
   pi.matr.w <- pi.matr * pi.vec
 
   for (k in 1:num.strata)
   {
-    index   <- which(I.S[,k]==1)
-    ns      <- length(index)
+    index <- which(I.S[, k] == 1)
+    ns <- length(index)
 
     # pick a random permutation of elements in \mathbb{A} and 0
-    A[index]<- gen.treat.creg(pi.matr.w, ns, k)
+    A[index] <- gen.treat.creg(pi.matr.w, ns, k)
   }
   strata.set <- data.frame(I.S)
   strata.set$S <- max.col(strata.set)
   cluster.indicator <- baseline$cl.id
   G.seq <- seq(c(1:baseline$G))
-  data.short <- data.frame('cl.id'=G.seq, A, S = strata.set$S, Ng = baseline$Ng,
-                           baseline$X)
-  data.long <- data.frame('cl.id'= cluster.indicator)
+  data.short <- data.frame(
+    "cl.id" = G.seq, A, S = strata.set$S, Ng = baseline$Ng,
+    baseline$X
+  )
+  data.long <- data.frame("cl.id" = cluster.indicator)
   merged.data <- merge(data.long, data.short, by = "cl.id")
   length(merged.data$A)
   A <- merged.data$A
   S <- merged.data$S
   X <- merged.data[5:ncol(merged.data)]
   Ng <- merged.data$Ng
-  #now we need to generate observed outcomes via Rubin model
+  # now we need to generate observed outcomes via Rubin model
   for (a in 0:n.treat)
   {
     assign(paste("Y.", a, sep = ""), baseline[[paste("Yig.", a, sep = "")]])
@@ -806,24 +819,26 @@ dgp.obs.creg <- function(baseline, I.S, pi.vec, n.treat)
   formula <- gen.rubin.formula.creg(n.treat)
   Y.obs <- eval(parse(text = formula))
 
-  ret.list <- list('Y' = Y.obs,
-                   'D' = A,
-                   'S' = S,
-                   'Z.2' = baseline$Z.g.2,
-                   'X' = X,
-                   'Ng' = Ng,
-                   'G.id' = cluster.indicator,
-                   'cl.lvl.data' = data.short)
+  ret.list <- list(
+    "Y" = Y.obs,
+    "D" = A,
+    "S" = S,
+    "Z.2" = baseline$Z.g.2,
+    "X" = X,
+    "Ng" = Ng,
+    "G.id" = cluster.indicator,
+    "cl.lvl.data" = data.short
+  )
   return(ret.list)
 }
 
 #---------------------------------------------------------------------
-#%# (6) Function taken from Ivan's website
-#%# to generate the strata from the observed covariates
-#%# NB! Works only if we form strata from one W.
+# %# (6) Function taken from Ivan's website
+# %# to generate the strata from the observed covariates
+# %# NB! Works only if we form strata from one W.
 #---------------------------------------------------------------------
-form.strata.creg <- function(baseline,num.strata)
-  #---------------------------------------------------------------------
+form.strata.creg <- function(baseline, num.strata)
+#---------------------------------------------------------------------
 {
   #-------------------------------------------------------------------
   # X-plain: Generates strata indicators from covariates (W).
@@ -832,12 +847,12 @@ form.strata.creg <- function(baseline,num.strata)
   #         - model: model in baseline.
   #-------------------------------------------------------------------
   n <- baseline$G
-  W<-baseline$Z.g.2;
-  bounds<-seq(min(W),max(W),length.out = num.strata+1); # careful with bounds
-  I.S   <- matrix(0,n,num.strata);
+  W <- baseline$Z.g.2
+  bounds <- seq(min(W), max(W), length.out = num.strata + 1) # careful with bounds
+  I.S <- matrix(0, n, num.strata)
   for (s in 1:num.strata)
   {
-    I.S[,s]<- (W>bounds[s])*(W<=bounds[s+1]);
+    I.S[, s] <- (W > bounds[s]) * (W <= bounds[s + 1])
   }
 
   return(I.S)
