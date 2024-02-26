@@ -32,4 +32,4 @@ G.id <- data$G.id
 
 # Estimate the ATE, s.e., etc.
 test <- sreg(Y, S, D, G.id, Ng, X=NULL, Ng.cov = T)
-test <- sreg(Y, S, D, G.id, Ng, X=X, Ng.cov = T)
+test <- sreg(Y, S, D, G.id, Ng, X=X, Ng.cov = T, HC1 = F)
