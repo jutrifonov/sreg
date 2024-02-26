@@ -62,7 +62,7 @@ sreg <- function(Y,S,D,G.id = NULL, Ng = NULL, X=NULL, Ng.cov = FALSE, HC1 = FAL
     result <- res.sreg(Y,S,D,X,HC1)
     summary.sreg(result)
   }else{
-    result <- res.creg(Y,S,D,G.id,Ng,X,Ng.cov)
+    result <- res.creg(Y,S,D,G.id,Ng,X,Ng.cov,HC1)
     summary.creg(result)
   }
   return(result)
