@@ -313,7 +313,7 @@ tau.hat.creg <- function(Y,S,D,G.id,Ng,X=NULL,model=NULL, Ng.cov = FALSE)
 #-------------------------------------------------------------------
 # Variance Estimator
 #-------------------------------------------------------------------
-as.var.creg <- function(model=NULL, fit)
+as.var.creg <- function(model=NULL, fit, HC1)
 {
   var.vec <- rep(NA, length(fit$tau.hat))
   n.vec <- rep(NA, length(fit$tau.hat))
@@ -380,8 +380,13 @@ as.var.creg <- function(model=NULL, fit)
 
          sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
          #sigma.hat.sq <- mean(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + (Xi.hat.2)^2) / (mean(Ng.d))^2
-         #sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2 + Xi.hat.2^2) / length(fit$Y.bar.full$Y)) /  (sum(Ng.d) / length(fit$Y.bar.full$Y))^2
+         if (HC1 == TRUE)
+         {
+          var.vec[d] <-  ((sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y)) * 
+          (length(Y) / (length(Y) - (max(S) + max(D) * max(S)))) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
+         }else{
          var.vec[d] <- sigma.hat.sq
+         }
          #n.vec[d] <- n.d
          n.vec[d]   <- length(fit$Y.bar.full$Y)
        }
@@ -433,8 +438,13 @@ as.var.creg <- function(model=NULL, fit)
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
       sigma.hat.sq <-  (sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
-
-      var.vec[d] <- sigma.hat.sq
+      if (HC1 == TRUE)
+      {
+        var.vec[d] <-  ((sum(data.bin$A * (Xi.hat.1)^2 + (1 - data.bin$A) * (Xi.hat.0)^2) / length(fit$Y.bar.full$Y)) * 
+          (length(Y) / (length(Y) - (max(S) + max(D) * max(S)))) + mean(Xi.hat.2^2)) / (mean(Ng.d))^2
+      } else{
+        var.vec[d] <- sigma.hat.sq
+      }
       n.vec[d]   <- length(fit$Y.bar.full$Y)
     }
   }
@@ -446,7 +456,7 @@ as.var.creg <- function(model=NULL, fit)
 #%# (10) The core function. It provides estimates of ATE, their s.e.,
 #%#     calculates t-stats and corresponding p-values
 #-------------------------------------------------------------------
-res.creg <- function(Y,S,D,G.id,Ng,X, Ng.cov = FALSE)
+res.creg <- function(Y,S,D,G.id,Ng,X, Ng.cov = FALSE, HC1)
 #-------------------------------------------------------------------
 {
   n <- length(Y)
@@ -455,7 +465,7 @@ res.creg <- function(Y,S,D,G.id,Ng,X, Ng.cov = FALSE)
     model <- lm.iter.creg(Y,S,D,G.id,Ng,X)
     fit <- tau.hat.creg(Y,S,D,G.id,Ng,X,model)
     tau.est <- fit$tau.hat
-    se.rob <- as.var.creg(model,fit)
+    se.rob <- as.var.creg(model,fit,HC1)
     t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
@@ -475,7 +485,7 @@ res.creg <- function(Y,S,D,G.id,Ng,X, Ng.cov = FALSE)
       model <- lm.iter.creg(Y,S,D,G.id,Ng,X=NULL, Ng.cov = T)
       fit <-  tau.hat.creg(Y,S,D,G.id,Ng,X=NULL,model, Ng.cov = T)
       tau.est <- fit$tau.hat
-      se.rob <- as.var.creg(model,fit)
+      se.rob <- as.var.creg(model,fit,HC1)
       t.stat <- tau.est / se.rob
       p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
       CI.left <- tau.est - qnorm(0.975) * se.rob
@@ -492,7 +502,7 @@ res.creg <- function(Y,S,D,G.id,Ng,X, Ng.cov = FALSE)
     }else{
     fit <- tau.hat.creg(Y,S,D,G.id,Ng,X=NULL,model=NULL)
     tau.est <- fit$tau.hat
-    se.rob <- as.var.creg(model=NULL,fit)
+    se.rob <- as.var.creg(model=NULL,fit, HC1)
     t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
