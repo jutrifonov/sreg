@@ -72,11 +72,11 @@ sim.func <- function(sim.id) {
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
-  data <- sreg.rgen(n = n, tau.vec = tau.vec, n.strata = n.strata, cluster = F, is.cov = FALSE)
+  data <- sreg.rgen(n = n, tau.vec = tau.vec, n.strata = n.strata, cluster = F, is.cov = TRUE)
   Y <- data$Y
   S <- data$S
   D <- data$D
-  # X <- data.frame("x_1"= data$x_1, "x_2" = data$x_2)
+  X <- data.frame("x_1"= data$x_1, "x_2" = data$x_2)
 
   # Estimate the ATE, s.e., etc.
   # test <- sreg(Y,S,D,G.id = NULL, Ng = NULL, X = NULL)
@@ -86,7 +86,7 @@ sim.func <- function(sim.id) {
   # fit <- tau.hat(Y,D,S,G.id,Ng,X,model, exp.option = T)
   result <- tryCatch(
     {
-      sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL)
+      sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X)
     },
     error = function(e) { # tryCatch to avoid errors that stop the execution
       # Print the error message if an error occurs
