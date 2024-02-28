@@ -37,7 +37,5 @@ X <- data.frame(data.clean$x_1, data.clean$x_2)
 table(D = data.clean$D, S = data.clean$S)
 # %#%#%#%#%#%#%#%#%#%
 result <- sreg::sreg(Y, S, D, HC1 = T)
-tau_new <- result$tau.hat
-result$
 # %#%#%#%#%#%#%#%#%#%
 result <- sreg::sreg(Y = Y, S = S, D = D, X = X, HC1 = T)

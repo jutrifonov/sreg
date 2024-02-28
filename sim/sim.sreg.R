@@ -10,7 +10,7 @@
 ####    @Max Tabord-Meehan, UChicago    ####
 # %##%##%##%###%##%##%##%###%##%##%##%###%##%
 # %##%##%##%##
-# %# v.1.1.0 #%#
+# %# v.1.2.0 #%#
 # %##%##%##%##
 #-------------------------------------------------------------------
 # install.packages(c(
@@ -68,7 +68,7 @@ clusterEvalQ(cl, {
 sim.func <- function(sim.id) {
   seed <- 1000 + sim.id
   set.seed(seed)
-  n <- 1000
+  n <- 250
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
@@ -138,7 +138,7 @@ sim.func <- function(sim.id) {
 # Parallelize the simulations and store the results
 simres <- parLapply(cl, 1:5000, sim.func)
 # mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
-save(simres, file = "/Users/trifonovjuri/Desktop/1000.RData")
+save(simres, file = "/Users/trifonovjuri/Desktop/v.1.2.0/sreg.cov/250.RData")
 ###################
 # Close the cluster
 stopCluster(cl)

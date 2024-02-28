@@ -11,7 +11,7 @@ packageDescription("sreg") # package description
 set.seed(123) # fix the random seed
 
 # Generate a pseudo-random sample without clusters and with only one treatment = 0
-data <- sreg.rgen(n = 250, tau.vec = c(0.2), n.strata = 4, cluster = F)
+data <- sreg.rgen(n = 250, tau.vec = c(0), n.strata = 4, cluster = F)
 Y <- data$Y
 S <- data$S
 D <- data$D
@@ -33,5 +33,5 @@ Ng <- data$Ng
 G.id <- data$G.id
 
 # Estimate the ATE, s.e., etc.
-test <- sreg(Y, S, D, G.id, Ng, X = NULL, Ng.cov = T)
+test <- sreg(Y, S, D, G.id, Ng, X = NULL, Ng.cov = T, HC1 = T)
 test <- sreg(Y, S, D, G.id, Ng, X = X, Ng.cov = T, HC1 = F)
