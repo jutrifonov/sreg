@@ -11,7 +11,7 @@ packageDescription("sreg") # package description
 set.seed(123) # fix the random seed
 
 # Generate a pseudo-random sample without clusters and with only one treatment = 0
-data <- sreg.rgen(n = 250, tau.vec = c(0), n.strata = 4, cluster = F)
+data <- sreg.rgen(n = 10000, tau.vec = c(0, 0.2, 0.8), n.strata = 10, cluster = F)
 Y <- data$Y
 S <- data$S
 D <- data$D
