@@ -34,6 +34,7 @@ library(parallel)
 library(progress)
 library(purrr)
 library(SimDesign)
+library(microbenchmark)
 # %##%##%##%###%##%##%##%###%##%##%##%###%##%#%##%##%##%###%##%##%##%##
 # %##%##%##%###%##%##%##%###%##%##%##%###%##%#%##%##%##%###%##%##%##%##
 #         Please, provide the path to the corresponding source
@@ -68,15 +69,15 @@ clusterEvalQ(cl, {
 sim.func <- function(sim.id) {
   seed <- 1000 + sim.id
   set.seed(seed)
-  n <- 250
+  n <- 100
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
-  data <- sreg.rgen(n = n, tau.vec = tau.vec, n.strata = n.strata, cluster = F, is.cov = TRUE)
+  data <- sreg.rgen(n = n, tau.vec = tau.vec, n.strata = n.strata, cluster = F, is.cov = FALSE)
   Y <- data$Y
   S <- data$S
   D <- data$D
-  X <- data.frame("x_1"= data$x_1, "x_2" = data$x_2)
+  #X <- data.frame("x_1"= data$x_1, "x_2" = data$x_2)
 
   # Estimate the ATE, s.e., etc.
   # test <- sreg(Y,S,D,G.id = NULL, Ng = NULL, X = NULL)
@@ -86,7 +87,7 @@ sim.func <- function(sim.id) {
   # fit <- tau.hat(Y,D,S,G.id,Ng,X,model, exp.option = T)
   result <- tryCatch(
     {
-      sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X)
+      sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL)
     },
     error = function(e) { # tryCatch to avoid errors that stop the execution
       # Print the error message if an error occurs
@@ -136,8 +137,8 @@ sim.func <- function(sim.id) {
 }
 
 # Parallelize the simulations and store the results
-simres <- parLapply(cl, 1:5000, sim.func)
-# mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
+#simres <- parLapply(cl, 1:5000, sim.func)
+mb <- microbenchmark(parLapply(cl, 1:5000, sim.func), times = 1)
 save(simres, file = "/Users/trifonovjuri/Desktop/v.1.2.0/sreg.cov/250.RData")
 ###################
 # Close the cluster

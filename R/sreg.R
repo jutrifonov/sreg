@@ -123,7 +123,7 @@ lin.adj.sreg <- function(a, S, X, model)
 
 
 #-------------------------------------------------------------------
-pi.hat.sreg <- function(S, D, inverse = FALSE)
+pi.hat.sreg.new <- function(S, D, inverse = FALSE)
 #-------------------------------------------------------------------
 {
   n <- length(D)
@@ -143,6 +143,28 @@ pi.hat.sreg <- function(S, D, inverse = FALSE)
     }
   }
   return(pi.hat.mtrx)
+}
+#-------------------------------------------------------------------
+pi.hat.sreg<- function(S, D, inverse = FALSE)
+#-------------------------------------------------------------------
+{
+  n <- length(D)
+  data <- data.frame(S, D)
+  counts <- data %>% group_by(S,D) %>% summarise(n = n())
+  scount <- data %>% group_by(S) %>% summarise(ns = n())
+
+  j <- left_join(counts, scount, by = join_by(S == S))
+  j$pi_hat <- j$n/j$ns
+  pi_hat_all <- j %>% select(c(S,D,pi_hat)) %>% spread(key = D, value = pi_hat)
+  if(inverse){
+    n_repeat <- max(counts$D)
+    ret_df <- matrix(replicate(n_repeat,pi_hat_all$"0"),nrow=nrow(pi_hat_all))
+  }
+  else{
+    pi.hat.df <- select(data.frame(pi_hat_all),-c(1,2))
+    ret_df <- as.matrix(pi.hat.df)
+  }
+  return(ret_df[S,])
 }
 
 #-------------------------------------------------------------------
@@ -215,18 +237,40 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 
       data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data$Y - tau[d] * data$A * data$I)
 
-      Xi.1.mean <- rep(NA, n)
-      Xi.0.mean <- rep(NA, n)
-      Y.tau.D.1.mean <- rep(NA, n)
-      Y.tau.D.0.mean <- rep(NA, n)
+      count.Xi.1 <- data %>% group_by(S,A) %>% summarise(Xi.mean.1 = mean(Xi.tilde.1)) %>%
+          filter(A != -999999)
+      count.Xi.0 <- data %>% group_by(S,A) %>% summarise(Xi.mean.0 = mean(Xi.tilde.0)) %>%
+          filter(A != -999999)
+      count.Y <- data %>% group_by(S,A) %>% summarise(Y.tau = mean(Y.tau.D)) %>%
+          filter(A != -999999)
 
-      for (i in 1:n)
-      {
-        Xi.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Xi.tilde.1)
-        Xi.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Xi.tilde.0)
-        Y.tau.D.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Y.tau.D)
-        Y.tau.D.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Y.tau.D)
-      }
+      j <- left_join(count.Xi.1, count.Xi.0, by = join_by(S == S, A == A)) %>% left_join(count.Y, by = join_by(S == S, A == A))
+
+      Xi.tilde.1.all <- j %>% select(c(S,A,Xi.mean.1)) %>% spread(key = A, value = Xi.mean.1)
+      Xi.tilde.0.all <- j %>% select(c(S,A,Xi.mean.0)) %>% spread(key = A, value = Xi.mean.0)
+      Y.tau.D.all <- j %>% select(c(S,A,Y.tau)) %>% spread(key = A, value = Y.tau)
+
+      Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all),-1))
+      Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all),-1))
+      Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all),-1))
+
+      Xi.1.mean <- Xi.tilde.1.mean[S,2]
+      Xi.0.mean <- Xi.tilde.0.mean[S,1]
+      Y.tau.D.1.mean <- Y.tau.D.mean[S,2]
+      Y.tau.D.0.mean <- Y.tau.D.mean[S,1]
+      
+      #Xi.1.mean <- rep(NA, n)
+      #Xi.0.mean <- rep(NA, n)
+      #Y.tau.D.1.mean <- rep(NA, n)
+      #Y.tau.D.0.mean <- rep(NA, n)
+
+      #for (i in 1:n)
+      #{
+      #  Xi.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Xi.tilde.1)
+      #  Xi.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Xi.tilde.0)
+      #  Y.tau.D.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Y.tau.D)
+      #  Y.tau.D.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Y.tau.D)
+      #}
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
@@ -262,18 +306,39 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 
       data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data$Y - tau[d] * data$A * data$I)
 
-      Xi.1.mean <- rep(NA, n)
-      Xi.0.mean <- rep(NA, n)
-      Y.tau.D.1.mean <- rep(NA, n)
-      Y.tau.D.0.mean <- rep(NA, n)
+      #Xi.1.mean <- rep(NA, n)
+      #Xi.0.mean <- rep(NA, n)
+      #Y.tau.D.1.mean <- rep(NA, n)
+      #Y.tau.D.0.mean <- rep(NA, n)
 
-      for (i in 1:n)
-      {
-        Xi.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Xi.tilde.1)
-        Xi.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Xi.tilde.0)
-        Y.tau.D.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Y.tau.D)
-        Y.tau.D.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Y.tau.D)
-      }
+      #for (i in 1:n)
+      #{
+      #  Xi.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Xi.tilde.1)
+      #  Xi.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Xi.tilde.0)
+      #  Y.tau.D.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Y.tau.D)
+      #  Y.tau.D.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Y.tau.D)
+      #}
+      count.Xi.1 <- data %>% group_by(S,A) %>% summarise(Xi.mean.1 = mean(Xi.tilde.1)) %>%
+          filter(A != -999999)
+      count.Xi.0 <- data %>% group_by(S,A) %>% summarise(Xi.mean.0 = mean(Xi.tilde.0)) %>%
+          filter(A != -999999)
+      count.Y <- data %>% group_by(S,A) %>% summarise(Y.tau = mean(Y.tau.D)) %>%
+          filter(A != -999999)
+
+      j <- left_join(count.Xi.1, count.Xi.0, by = join_by(S == S, A == A)) %>% left_join(count.Y, by = join_by(S == S, A == A))
+
+      Xi.tilde.1.all <- j %>% select(c(S,A,Xi.mean.1)) %>% spread(key = A, value = Xi.mean.1)
+      Xi.tilde.0.all <- j %>% select(c(S,A,Xi.mean.0)) %>% spread(key = A, value = Xi.mean.0)
+      Y.tau.D.all <- j %>% select(c(S,A,Y.tau)) %>% spread(key = A, value = Y.tau)
+
+      Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all),-1))
+      Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all),-1))
+      Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all),-1))
+
+      Xi.1.mean <- Xi.tilde.1.mean[S,2]
+      Xi.0.mean <- Xi.tilde.0.mean[S,1]
+      Y.tau.D.1.mean <- Y.tau.D.mean[S,2]
+      Y.tau.D.0.mean <- Y.tau.D.mean[S,1]
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean

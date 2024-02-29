@@ -1,4 +1,6 @@
 #' Estimates the ATE
+#' @import tidyr
+#' @import dplyr
 #' @import extraDistr
 #'
 #' @param Y a numeric vector of the observed outcomes

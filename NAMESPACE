@@ -2,4 +2,6 @@
 
 export(sreg)
 export(sreg.rgen)
+import(dplyr)
 import(extraDistr)
+import(tidyr)
