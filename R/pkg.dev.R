@@ -1,8 +1,8 @@
 #' Estimates the ATE
+#'
+#' @import extraDistr
 #' @import tidyr
 #' @import dplyr
-#' @import extraDistr
-#' 
 #'
 #' @param Y a numeric vector of the observed outcomes
 #' @param S a numeric vector of strata indicators
@@ -24,12 +24,17 @@
 #' library("haven")
 #' ### Example 1. Simulated Data.
 #' data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = FALSE)
+#' Y <- data$Y
+#' S <- data$S
+#' D <- data$D
+#' X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 #' result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
 #' ### Example 2. Data taken from Chong et al. (2016).
 #' ## Data description
 #' ?AEJapp
 #' ## Upload the data from the package
 #' data("AEJapp")
+#' data <- AEJapp
 #' head(data)
 #' ## Replicate the empirical illustration from (Bugni et al, 2019)
 #' # Prepare the data
@@ -83,7 +88,7 @@ sreg <- function(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE, HC1 
 #' @export
 #'
 #' @examples
-#' data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = T)
+#' data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
 sreg.rgen <- function(n, Nmax = 50, n.strata,
                       tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
                       cluster = TRUE, is.cov = TRUE) {

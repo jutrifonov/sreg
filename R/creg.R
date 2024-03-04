@@ -11,7 +11,7 @@
 ####    @Max Tabord-Meehan, UChicago    ####
 # %##%##%##%###%##%##%##%###%##%##%##%###%##
 # %##%##%##%##
-# %# v.1.2.0
+# %# v.1.2.5
 # %##%##%##%##
 #-------------------------------------------------------------------
 # %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##
@@ -454,7 +454,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, Ng.cov = FALSE, HC1)
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
-    
+
     res.list <- list(
       "tau.hat" = tau.est,
       "se.rob" = se.rob,

@@ -36,12 +36,17 @@ library("dplyr")
 library("haven")
 ### Example 1. Simulated Data.
 data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = FALSE)
+Y <- data$Y
+S <- data$S
+D <- data$D
+X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
 ### Example 2. Data taken from Chong et al. (2016).
 ## Data description
 ?AEJapp
 ## Upload the data from the package
 data("AEJapp")
+data <- AEJapp
 head(data)
 ## Replicate the empirical illustration from (Bugni et al, 2019)
 # Prepare the data

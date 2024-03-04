@@ -10,11 +10,14 @@ Description: The 'sreg' package offers a robust toolkit for estimating average t
   package not only provides ATE estimators but also includes sophisticated features for calculating adjusted 
   variance estimators developed in papers (Bugni, Canay, Shaikh; 2017),
   (Bugni, Canay, Shaikh, Tabord-Meehan; 2023) and (Jiang, Linton, Tang, Zhang, 2023).
-License: GPL-2|GPL-3
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
 Imports: 
-    extraDistr
+    dplyr,
+    extraDistr,
+    haven,
+    tidyr
 Depends: 
     R (>= 2.10)

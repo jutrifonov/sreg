@@ -36,5 +36,5 @@ a data frame containing the results
 Generates a pseudo-random sample for estimating ATE
 }
 \examples{
-data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = T)
+data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
 }

@@ -6,7 +6,6 @@ install_github("yurytrifonov/sreg") # install sreg
 
 library(devtools) # load devtools
 library(sreg) # load sreg
-library(haven) # load haven (to read dta files)
 library(dplyr) # load dplyr (to transform data)
 packageDescription("sreg") # package description
 ?sreg # R documentation for sreg()
@@ -17,7 +16,6 @@ packageDescription("sreg") # package description
 data("AEJapp") # upload the Chong et al. (2016) data from the package
 data <- AEJapp # rename for convenience
 head(data)
-View(data)
 # %#%#%#%#%#%#%#%#%#%
 # Replicate the empirical illustration
 # from (Bugni et al, 2019)

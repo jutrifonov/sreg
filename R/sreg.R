@@ -3,14 +3,8 @@
 ### of functions to estimate the ATE    ####
 ### under CAR with multiple treatments  ####
 # %##%##%##%###%##%##%##%###%##%##%##%###%##
-####      The code is developed by      ####
-####      @Juri Trifonov, UChicago      ####
-####            Supervisors:            ####
-####      @Azeem Shaikh, UChicago       ####
-####    @Max Tabord-Meehan, UChicago    ####
-# %##%##%##%###%##%##%##%###%##%##%##%###%##
 # %##%##%##%##
-# %# v.1.2.0
+# %# v.1.2.5
 # %##%##%##%##
 #-------------------------------------------------------------------
 # %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##
@@ -25,7 +19,7 @@ indicator.sreg <- function(variable, type)
 #-------------------------------------------------------------------
 {
   if (min(variable) == 0) {
-    strg <- matrix(NA, nrow = length(variable), ncol = max(variable)) # matrix for storing I{D=d} or I{S=s}
+    strg <- matrix(NA, nrow = length(variable), ncol = max(variable))
 
     for (j in (min(variable) + 1):max(variable))
     {
@@ -62,7 +56,6 @@ indicator.sreg <- function(variable, type)
 # %#     for the subsequent iterative OLS estimation. Takes into account
 # %#     the number of observations and creates indicators.
 # %source function for theta.est.str()
-# NB CHANGE FOR MULTIVARIATE!
 #-------------------------------------------------------------------
 filter.ols.sreg <- function(Y, S, D, X, s, d)
 #-------------------------------------------------------------------
@@ -236,19 +229,6 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
       Y.tau.D.1.mean <- Y.tau.D.mean[S,2]
       Y.tau.D.0.mean <- Y.tau.D.mean[S,1]
       
-      #Xi.1.mean <- rep(NA, n)
-      #Xi.0.mean <- rep(NA, n)
-      #Y.tau.D.1.mean <- rep(NA, n)
-      #Y.tau.D.0.mean <- rep(NA, n)
-
-      #for (i in 1:n)
-      #{
-      #  Xi.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Xi.tilde.1)
-      #  Xi.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Xi.tilde.0)
-      #  Y.tau.D.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Y.tau.D)
-      #  Y.tau.D.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Y.tau.D)
-      #}
-
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
@@ -283,18 +263,6 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 
       data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data$Y - tau[d] * data$A * data$I)
 
-      #Xi.1.mean <- rep(NA, n)
-      #Xi.0.mean <- rep(NA, n)
-      #Y.tau.D.1.mean <- rep(NA, n)
-      #Y.tau.D.0.mean <- rep(NA, n)
-
-      #for (i in 1:n)
-      #{
-      #  Xi.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Xi.tilde.1)
-      #  Xi.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Xi.tilde.0)
-      #  Y.tau.D.1.mean[i] <- mean(data[data$A %in% 1 & data$S %in% data$S[i], ]$Y.tau.D)
-      #  Y.tau.D.0.mean[i] <- mean(data[data$A %in% 0 & data$S %in% data$S[i], ]$Y.tau.D)
-      #}
       count.Xi.1 <- data %>% group_by(S,A) %>% summarise(Xi.mean.1 = mean(Xi.tilde.1)) %>%
           filter(A != -999999)
       count.Xi.0 <- data %>% group_by(S,A) %>% summarise(Xi.mean.0 = mean(Xi.tilde.0)) %>%
