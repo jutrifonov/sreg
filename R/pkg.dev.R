@@ -2,6 +2,7 @@
 #' @import tidyr
 #' @import dplyr
 #' @import extraDistr
+#' 
 #'
 #' @param Y a numeric vector of the observed outcomes
 #' @param S a numeric vector of strata indicators

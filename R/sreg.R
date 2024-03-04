@@ -121,29 +121,6 @@ lin.adj.sreg <- function(a, S, X, model)
   return(mu.hat)
 }
 
-
-#-------------------------------------------------------------------
-pi.hat.sreg.new <- function(S, D, inverse = FALSE)
-#-------------------------------------------------------------------
-{
-  n <- length(D)
-  data <- data.frame(S, D)
-  pi.hat.mtrx <- matrix(NA, nrow = n, ncol = max(D))
-  for (d in 1:max(D))
-  {
-    for (i in 1:n)
-    {
-      n.1.s <- length(data[data$D %in% d & data$S %in% data$S[i], 2])
-      n.0.s <- length(data[data$D %in% 0 & data$S %in% data$S[i], 2])
-      n.s <- length(data[data$S %in% data$S[i], 2])
-      pi.hat.mtrx[i, d] <- n.1.s / n.s
-      if (inverse == TRUE) {
-        pi.hat.mtrx[i, d] <- n.0.s / n.s
-      }
-    }
-  }
-  return(pi.hat.mtrx)
-}
 #-------------------------------------------------------------------
 pi.hat.sreg<- function(S, D, inverse = FALSE)
 #-------------------------------------------------------------------
@@ -164,7 +141,7 @@ pi.hat.sreg<- function(S, D, inverse = FALSE)
     pi.hat.df <- select(data.frame(pi_hat_all),-c(1,2))
     ret_df <- as.matrix(pi.hat.df)
   }
-  return(ret_df[S,])
+  return(as.matrix(ret_df[S,]))
 }
 
 #-------------------------------------------------------------------
@@ -371,7 +348,6 @@ res.sreg <- function(Y, S, D, X=NULL, HC1)
     model <- lm.iter.sreg(Y, S, D, X)
     tau.est <- tau.hat.sreg(Y, S, D, X, model)
     se.rob <- as.var.sreg(Y, S, D, X, model, tau.est, HC1)
-
     t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
