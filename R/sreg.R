@@ -12,50 +12,10 @@
 # %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##
 #-------------------------------------------------------------------
 #-------------------------------------------------------------------
-### (1) Function for automatically creating indicators for S or D
-# %source function for full.satur()
-#-------------------------------------------------------------------
-indicator.sreg <- function(variable, type)
-#-------------------------------------------------------------------
-{
-  if (min(variable) == 0) {
-    strg <- matrix(NA, nrow = length(variable), ncol = max(variable))
-
-    for (j in (min(variable) + 1):max(variable))
-    {
-      strg[, j] <- as.numeric(variable == j)
-    }
-    ind.data <- as.data.frame(strg)
-    if (type == "s") {
-      col.names <- paste0("s_", min(variable):max(variable))
-    }
-    if (type == "d") {
-      col.names <- paste0("d_", (min(variable) + 1):max(variable))
-    }
-  } else {
-    strg <- matrix(NA, nrow = length(variable), ncol = max(variable))
-    for (j in min(variable):max(variable))
-    {
-      strg[, j] <- as.numeric(variable == j)
-    }
-    ind.data <- as.data.frame(strg)
-    if (type == "s") {
-      col.names <- paste0("s_", min(variable):max(variable))
-    }
-    if (type == "d") {
-      col.names <- paste0("d_", min(variable):max(variable))
-    }
-  }
-  colnames(ind.data) <- col.names
-  return(ind.data)
-}
-
-
-#-------------------------------------------------------------------
-# %# (4) Auxiliary function providing the appropriate data.frame
+# %# (1) Auxiliary function providing the appropriate data.frame
 # %#     for the subsequent iterative OLS estimation. Takes into account
 # %#     the number of observations and creates indicators.
-# %source function for theta.est.str()
+# %source function for lm.iter.sreg()
 #-------------------------------------------------------------------
 filter.ols.sreg <- function(Y, S, D, X, s, d)
 #-------------------------------------------------------------------
@@ -65,22 +25,15 @@ filter.ols.sreg <- function(Y, S, D, X, s, d)
   keep.s <- s
   keep.d <- d
   filtered.data <- data[data$D %in% keep.d & data$S %in% keep.s, ]
-
   data.ols <- filtered.data
   return(data.ols)
 }
 
-filter.fnc <- function(data, s) {
-  filtered.data <- data[data$S %in% s, ]
-  return(filtered.data)
-}
-
-
 #-------------------------------------------------------------------
-# %# (4) Function that implements the OLS estimation of the
-# %#     fully-saturated regression via lm() with the generated
-# %#     appropriate formula via full.satur()
-# %source function for theta.est.str()
+# %# (2) Function that implements the OLS estimation of the
+# %#     fully-saturated regression via lm() on the corresponding
+# %#     subsamples generated via filter.ols.sreg()
+# %source function for tau.est.sreg()
 #-------------------------------------------------------------------
 lm.iter.sreg <- function(Y, S, D, X)
 #-------------------------------------------------------------------
@@ -102,7 +55,9 @@ lm.iter.sreg <- function(Y, S, D, X)
   return(list.rtrn)
 }
 
-
+#-------------------------------------------------------------------
+# %# (3) Function that implements the calculation of \hat{\mu} --
+# %#     i.e., calculates conditional means
 #-------------------------------------------------------------------
 lin.adj.sreg <- function(a, S, X, model)
 #-------------------------------------------------------------------
@@ -115,28 +70,39 @@ lin.adj.sreg <- function(a, S, X, model)
 }
 
 #-------------------------------------------------------------------
-pi.hat.sreg<- function(S, D, inverse = FALSE)
+# %# (4) Function that implements the calculation of \hat{\pi} --
+# %#     i.e., calculates the proportions assigned to treatments
+#-------------------------------------------------------------------
+pi.hat.sreg <- function(S, D, inverse = FALSE)
 #-------------------------------------------------------------------
 {
   n <- length(D)
   data <- data.frame(S, D)
-  counts <- data %>% group_by(S,D) %>% summarise(n = n())
-  scount <- data %>% group_by(S) %>% summarise(ns = n())
+  counts <- data %>%
+    group_by(S, D) %>%
+    summarise(n = n())
+  scount <- data %>%
+    group_by(S) %>%
+    summarise(ns = n())
 
   j <- left_join(counts, scount, by = join_by(S == S))
-  j$pi_hat <- j$n/j$ns
-  pi_hat_all <- j %>% select(c(S,D,pi_hat)) %>% spread(key = D, value = pi_hat)
-  if(inverse){
+  j$pi_hat <- j$n / j$ns
+  pi_hat_all <- j %>%
+    select(c(S, D, pi_hat)) %>%
+    spread(key = D, value = pi_hat)
+  if (inverse) {
     n_repeat <- max(counts$D)
-    ret_df <- matrix(replicate(n_repeat,pi_hat_all$"0"),nrow=nrow(pi_hat_all))
-  }
-  else{
-    pi.hat.df <- select(data.frame(pi_hat_all),-c(1,2))
+    ret_df <- matrix(replicate(n_repeat, pi_hat_all$"0"), nrow = nrow(pi_hat_all))
+  } else {
+    pi.hat.df <- select(data.frame(pi_hat_all), -c(1, 2))
     ret_df <- as.matrix(pi.hat.df)
   }
-  return(as.matrix(ret_df[S,]))
+  return(as.matrix(ret_df[S, ]))
 }
 
+#-------------------------------------------------------------------
+# %# (5) Function that implements \hat{\tau} --
+# %#     i.e. the ATE estimator
 #-------------------------------------------------------------------
 tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
 #-------------------------------------------------------------------
@@ -178,9 +144,9 @@ tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
   return(tau.hat)
 }
 
-
 #-------------------------------------------------------------------
-# Variance Estimator
+# %# (5) Function that implements \hat{\sigma^2} --
+# %#     i.e. the variance estimator
 #-------------------------------------------------------------------
 as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
   var.vec <- rep(NA, max(D))
@@ -207,28 +173,40 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 
       data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data$Y - tau[d] * data$A * data$I)
 
-      count.Xi.1 <- data %>% group_by(S,A) %>% summarise(Xi.mean.1 = mean(Xi.tilde.1)) %>%
-          filter(A != -999999)
-      count.Xi.0 <- data %>% group_by(S,A) %>% summarise(Xi.mean.0 = mean(Xi.tilde.0)) %>%
-          filter(A != -999999)
-      count.Y <- data %>% group_by(S,A) %>% summarise(Y.tau = mean(Y.tau.D)) %>%
-          filter(A != -999999)
+      count.Xi.1 <- data %>%
+        group_by(S, A) %>%
+        summarise(Xi.mean.1 = mean(Xi.tilde.1)) %>%
+        filter(A != -999999)
+      count.Xi.0 <- data %>%
+        group_by(S, A) %>%
+        summarise(Xi.mean.0 = mean(Xi.tilde.0)) %>%
+        filter(A != -999999)
+      count.Y <- data %>%
+        group_by(S, A) %>%
+        summarise(Y.tau = mean(Y.tau.D)) %>%
+        filter(A != -999999)
 
       j <- left_join(count.Xi.1, count.Xi.0, by = join_by(S == S, A == A)) %>% left_join(count.Y, by = join_by(S == S, A == A))
 
-      Xi.tilde.1.all <- j %>% select(c(S,A,Xi.mean.1)) %>% spread(key = A, value = Xi.mean.1)
-      Xi.tilde.0.all <- j %>% select(c(S,A,Xi.mean.0)) %>% spread(key = A, value = Xi.mean.0)
-      Y.tau.D.all <- j %>% select(c(S,A,Y.tau)) %>% spread(key = A, value = Y.tau)
+      Xi.tilde.1.all <- j %>%
+        select(c(S, A, Xi.mean.1)) %>%
+        spread(key = A, value = Xi.mean.1)
+      Xi.tilde.0.all <- j %>%
+        select(c(S, A, Xi.mean.0)) %>%
+        spread(key = A, value = Xi.mean.0)
+      Y.tau.D.all <- j %>%
+        select(c(S, A, Y.tau)) %>%
+        spread(key = A, value = Y.tau)
 
-      Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all),-1))
-      Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all),-1))
-      Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all),-1))
+      Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
+      Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
+      Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all), -1))
 
-      Xi.1.mean <- Xi.tilde.1.mean[S,2]
-      Xi.0.mean <- Xi.tilde.0.mean[S,1]
-      Y.tau.D.1.mean <- Y.tau.D.mean[S,2]
-      Y.tau.D.0.mean <- Y.tau.D.mean[S,1]
-      
+      Xi.1.mean <- Xi.tilde.1.mean[S, 2]
+      Xi.0.mean <- Xi.tilde.0.mean[S, 1]
+      Y.tau.D.1.mean <- Y.tau.D.mean[S, 2]
+      Y.tau.D.0.mean <- Y.tau.D.mean[S, 1]
+
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
@@ -263,27 +241,39 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 
       data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data$Y - tau[d] * data$A * data$I)
 
-      count.Xi.1 <- data %>% group_by(S,A) %>% summarise(Xi.mean.1 = mean(Xi.tilde.1)) %>%
-          filter(A != -999999)
-      count.Xi.0 <- data %>% group_by(S,A) %>% summarise(Xi.mean.0 = mean(Xi.tilde.0)) %>%
-          filter(A != -999999)
-      count.Y <- data %>% group_by(S,A) %>% summarise(Y.tau = mean(Y.tau.D)) %>%
-          filter(A != -999999)
+      count.Xi.1 <- data %>%
+        group_by(S, A) %>%
+        summarise(Xi.mean.1 = mean(Xi.tilde.1)) %>%
+        filter(A != -999999)
+      count.Xi.0 <- data %>%
+        group_by(S, A) %>%
+        summarise(Xi.mean.0 = mean(Xi.tilde.0)) %>%
+        filter(A != -999999)
+      count.Y <- data %>%
+        group_by(S, A) %>%
+        summarise(Y.tau = mean(Y.tau.D)) %>%
+        filter(A != -999999)
 
       j <- left_join(count.Xi.1, count.Xi.0, by = join_by(S == S, A == A)) %>% left_join(count.Y, by = join_by(S == S, A == A))
 
-      Xi.tilde.1.all <- j %>% select(c(S,A,Xi.mean.1)) %>% spread(key = A, value = Xi.mean.1)
-      Xi.tilde.0.all <- j %>% select(c(S,A,Xi.mean.0)) %>% spread(key = A, value = Xi.mean.0)
-      Y.tau.D.all <- j %>% select(c(S,A,Y.tau)) %>% spread(key = A, value = Y.tau)
+      Xi.tilde.1.all <- j %>%
+        select(c(S, A, Xi.mean.1)) %>%
+        spread(key = A, value = Xi.mean.1)
+      Xi.tilde.0.all <- j %>%
+        select(c(S, A, Xi.mean.0)) %>%
+        spread(key = A, value = Xi.mean.0)
+      Y.tau.D.all <- j %>%
+        select(c(S, A, Y.tau)) %>%
+        spread(key = A, value = Y.tau)
 
-      Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all),-1))
-      Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all),-1))
-      Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all),-1))
+      Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
+      Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
+      Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all), -1))
 
-      Xi.1.mean <- Xi.tilde.1.mean[S,2]
-      Xi.0.mean <- Xi.tilde.0.mean[S,1]
-      Y.tau.D.1.mean <- Y.tau.D.mean[S,2]
-      Y.tau.D.0.mean <- Y.tau.D.mean[S,1]
+      Xi.1.mean <- Xi.tilde.1.mean[S, 2]
+      Xi.0.mean <- Xi.tilde.0.mean[S, 1]
+      Y.tau.D.1.mean <- Y.tau.D.mean[S, 2]
+      Y.tau.D.0.mean <- Y.tau.D.mean[S, 1]
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
@@ -305,7 +295,7 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 }
 
 #-------------------------------------------------------------------
-# %# (10) The core function. It provides estimates of ATE, their s.e.,
+# %# (6) The core function. It provides estimates of ATE, their s.e.,
 # %#     calculates t-stats and corresponding p-values
 #-------------------------------------------------------------------
 res.sreg <- function(Y, S, D, X=NULL, HC1)
@@ -321,40 +311,38 @@ res.sreg <- function(Y, S, D, X=NULL, HC1)
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
     res.list <- list(
-      "tau.hat" = tau.est,
-      "se.rob" = se.rob,
-      "t.stat" = t.stat,
-      "p.value" = p.value,
-      "as.CI" = c(CI.left, CI.right),
-      "CI.left" = CI.left,
+      "tau.hat"  = tau.est,
+      "se.rob"   = se.rob,
+      "t.stat"   = t.stat,
+      "p.value"  = p.value,
+      "as.CI"    = c(CI.left, CI.right),
+      "CI.left"  = CI.left,
       "CI.right" = CI.right,
-      "data" = data.frame(Y, S, D, X)
+      "data"     = data.frame(Y, S, D, X)
     )
   } else {
     tau.est <- tau.hat.sreg(Y, S, D, X = NULL, model = NULL)
     se.rob <- as.var.sreg(Y, S, D, X = NULL, model = NULL, tau.est, HC1)
-
     t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
     res.list <- list(
-      "tau.hat" = tau.est,
-      "se.rob" = se.rob,
-      "t.stat" = t.stat,
-      "p.value" = p.value,
-      "as.CI" = c(CI.left, CI.right),
-      "CI.left" = CI.left,
+      "tau.hat"  = tau.est,
+      "se.rob"   = se.rob,
+      "t.stat"   = t.stat,
+      "p.value"  = p.value,
+      "as.CI"    = c(CI.left, CI.right),
+      "CI.left"  = CI.left,
       "CI.right" = CI.right,
-      "data" = data.frame(Y, S, D)
+      "data"     = data.frame(Y, S, D)
     )
   }
-
   return(res.list)
 }
 
 #-------------------------------------------------------------------
-# %# (11) Summary method for sreg(). Provide the output table.
+# %# (7) Summary method for sreg(). Provides the output table.
 #-------------------------------------------------------------------
 summary.sreg <- function(model)
 #-------------------------------------------------------------------
@@ -396,12 +384,12 @@ summary.sreg <- function(model)
   stars[(p.value > 0.05) & (p.value <= 0.1)] <- "."
 
   df <- data.frame(
-    "Tau" = tau.hat,
-    "As.se" = se.rob,
-    "T-stat" = t.stat,
-    "P-value" = p.value,
-    "CI.left" = CI.left,
-    "CI.right" = CI.right,
+    "Tau"          = tau.hat,
+    "As.se"        = se.rob,
+    "T-stat"       = t.stat,
+    "P-value"      = p.value,
+    "CI.left"      = CI.left,
+    "CI.right"     = CI.right,
     "Significance" = stars
   )
   is.df.num.col <- sapply(df, is.numeric)
@@ -417,7 +405,7 @@ summary.sreg <- function(model)
 
 #-------------------------------------------------------------------------------
 # %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%#%##%##%##%#
-# %##%##%##%##%##%## III. DGP functions for simulations #%##%##%##%##%##%##%##%#%
+# %##%##%##%##%##%##%##%# DGP functions for simulations #%##%##%##%##%##%##%##%#%
 # %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%#%##%##%##%#
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------
