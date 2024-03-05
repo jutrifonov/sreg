@@ -64,7 +64,7 @@ sim.func <- function(sim.id) {
   seed <- 1000 + sim.id
   set.seed(seed)
 
-  n <- 250
+  n <- 2000
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
@@ -128,9 +128,9 @@ sim.func <- function(sim.id) {
 }
 
 # Parallelize the simulations and store the results
-simres <- parLapply(cl, 1:5000, sim.func)
+simres <- parLapply(cl, 1:100000, sim.func)
 # mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
-save(simres, file = "/Users/trifonovjuri/Desktop/v.1.2.0/creg.cov/250.RData")
+save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/2000.RData")
 ###################
 # Close the cluster
 stopCluster(cl)
@@ -144,7 +144,7 @@ ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
 rowMeans(tau)
 apply(tau, 1, sd)
 rowMeans(se)
-rowMeans(ci.hit[, 1:5000])
+rowMeans(ci.hit)
 
 mean(tau)
 sd(tau)
