@@ -2,7 +2,7 @@ library(ggplot2)
 # %##%##%##%##
 # %# v.1.2.0
 # %##%##%##%##
-load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/100.RData')
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/100.RData')
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
@@ -12,7 +12,7 @@ se.analyt.100 <- rowMeans(se)
 ci.hit.100 <- rowMeans(ci.hit)
 
 
-load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/250.RData')
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/250.RData')
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
@@ -21,7 +21,7 @@ se.num.250 <- apply(tau, 1, sd)
 se.analyt.250 <- rowMeans(se)
 ci.hit.250 <- rowMeans(ci.hit)
 
-load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/500.RData')
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/500.RData')
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
@@ -30,7 +30,7 @@ se.num.500 <- apply(tau, 1, sd)
 se.analyt.500 <- rowMeans(se)
 ci.hit.500 <- rowMeans(ci.hit)
 
-load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/750.RData')
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/750.RData')
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
@@ -40,7 +40,7 @@ se.analyt.750 <- rowMeans(se)
 ci.hit.750 <- rowMeans(ci.hit)
 
 
-load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/1000.RData')
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/1000.RData')
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
@@ -49,16 +49,16 @@ se.num.1000 <- apply(tau, 1, sd)
 se.analyt.1000 <- rowMeans(se)
 ci.hit.1000 <- rowMeans(ci.hit)
 
-load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/1500.RData')
-tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
-se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
-ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
-tau.1500 <- rowMeans(tau)
-se.num.1500 <- apply(tau, 1, sd)
-se.analyt.1500 <- rowMeans(se)
-ci.hit.1500 <- rowMeans(ci.hit)
+#load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/1500.RData')
+#tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
+#se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
+#ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
+#tau.1500 <- rowMeans(tau)
+#se.num.1500 <- apply(tau, 1, sd)
+#se.analyt.1500 <- rowMeans(se)
+#ci.hit.1500 <- rowMeans(ci.hit)
 
-load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/2000.RData')
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/2000.RData')
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
@@ -67,7 +67,7 @@ se.num.2000 <- apply(tau, 1, sd)
 se.analyt.2000 <- rowMeans(se)
 ci.hit.2000 <- rowMeans(ci.hit)
 
-load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/3000.RData')
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/3000.RData')
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
@@ -76,7 +76,7 @@ se.num.3000 <- apply(tau, 1, sd)
 se.analyt.3000 <- rowMeans(se)
 ci.hit.3000 <- rowMeans(ci.hit)
 
-load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.0/creg.cov/4000.RData')
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/4000.RData')
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
 ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
@@ -85,19 +85,46 @@ se.num.4000 <- apply(tau, 1, sd)
 se.analyt.4000 <- rowMeans(se)
 ci.hit.4000 <- rowMeans(ci.hit)
 
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/5000.RData')
+tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
+se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
+ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
+tau.5000 <- rowMeans(tau)
+se.num.5000 <- apply(tau, 1, sd)
+se.analyt.5000 <- rowMeans(se)
+ci.hit.5000 <- rowMeans(ci.hit)
+
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/7500.RData')
+tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
+se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
+ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
+tau.7500 <- rowMeans(tau)
+se.num.7500 <- apply(tau, 1, sd)
+se.analyt.7500 <- rowMeans(se)
+ci.hit.7500 <- rowMeans(ci.hit)
+
+load('/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/10000.RData')
+tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
+se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
+ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
+tau.10000 <- rowMeans(tau)
+se.num.10000 <- apply(tau, 1, sd)
+se.analyt.10000 <- rowMeans(se)
+ci.hit.10000 <- rowMeans(ci.hit)
+
 tau_1.vec <- c(tau.100[1], tau.250[1], tau.500[1], tau.750[1],
-               tau.1000[1], tau.1500[1], tau.2000[1], tau.3000[1], tau.4000[1])
+               tau.1000[1], tau.2000[1], tau.3000[1], tau.4000[1], tau.5000[1], tau.7500[1], tau.10000[1])
 tau_2.vec <- c(tau.100[2], tau.250[2], tau.500[2], tau.750[2],
-               tau.1000[2], tau.1500[2], tau.2000[2], tau.3000[2], tau.4000[2])
+               tau.1000[2], tau.2000[2], tau.3000[2], tau.4000[2], tau.5000[2], tau.7500[2], tau.10000[2])
 se.num_1.vec <- c(se.num.100[1], se.num.250[1], se.num.500[1], se.num.750[1],
-                  se.num.1000[1], se.num.1500[1], se.num.2000[1], se.num.3000[1], se.num.4000[1])
+                  se.num.1000[1], se.num.2000[1], se.num.3000[1], se.num.4000[1], se.num.5000[1], se.num.7500[1], se.num.10000[1])
 se.num_2.vec <- c(se.num.100[2], se.num.250[2], se.num.500[2], se.num.750[2],
-                  se.num.1000[2], se.num.1500[2], se.num.2000[2], se.num.3000[2], se.num.4000[2])
-se.analyt_1.vec <- c(se.analyt.100[1], se.analyt.250[1], se.analyt.500[1], se.analyt.750[1], se.analyt.1000[1], se.analyt.1500[1], se.analyt.2000[1], se.analyt.3000[1], se.analyt.4000[1])
-se.analyt_2.vec <- c(se.analyt.100[2], se.analyt.250[2], se.analyt.500[2], se.analyt.750[2], se.analyt.1000[2], se.analyt.1500[2], se.analyt.2000[2], se.analyt.3000[2], se.analyt.4000[2])
-ci.hit_1.vec <- c(ci.hit.100[1], ci.hit.250[1], ci.hit.500[1], ci.hit.750[1], ci.hit.1000[1], ci.hit.1500[1], ci.hit.2000[1], ci.hit.3000[1], ci.hit.4000[1])
-ci.hit_2.vec <- c(ci.hit.100[2], ci.hit.250[2], ci.hit.500[2], ci.hit.750[2], ci.hit.1000[2], ci.hit.1500[2], ci.hit.2000[2], ci.hit.3000[2], ci.hit.4000[2])
-sample.set <- c(100, 250, 500, 750, 1000, 1500, 2000, 3000, 4000)
+                  se.num.1000[2], se.num.2000[2], se.num.3000[2], se.num.4000[2], se.num.5000[1], se.num.7500[1], se.num.10000[1])
+se.analyt_1.vec <- c(se.analyt.100[1], se.analyt.250[1], se.analyt.500[1], se.analyt.750[1], se.analyt.1000[1], se.analyt.2000[1], se.analyt.3000[1], se.analyt.4000[1], se.analyt.5000[1], se.analyt.7500[1], se.analyt.10000[1])
+se.analyt_2.vec <- c(se.analyt.100[2], se.analyt.250[2], se.analyt.500[2], se.analyt.750[2], se.analyt.1000[2], se.analyt.2000[2], se.analyt.3000[2], se.analyt.4000[2], se.analyt.5000[2], se.analyt.7500[2], se.analyt.10000[2])
+ci.hit_1.vec <- c(ci.hit.100[1], ci.hit.250[1], ci.hit.500[1], ci.hit.750[1], ci.hit.1000[1], ci.hit.2000[1], ci.hit.3000[1], ci.hit.4000[1], ci.hit.5000[1], ci.hit.7500[1], ci.hit.10000[1])
+ci.hit_2.vec <- c(ci.hit.100[2], ci.hit.250[2], ci.hit.500[2], ci.hit.750[2], ci.hit.1000[2], ci.hit.2000[2], ci.hit.3000[2], ci.hit.4000[2], ci.hit.5000[2], ci.hit.7500[2], ci.hit.10000[2])
+sample.set <- c(100, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 7500, 10000)
 
 graph.data <- data.frame('s.size' = sample.set,
                          'tau_1' = tau_1.vec, 'tau_2' = tau_2.vec,
@@ -144,7 +171,7 @@ ggplot(graph.data) +
   geom_point(aes(x = s.size, y = ci.hit_1, color = "hit_1"), size = 3) +
   geom_line(aes(x = s.size, y = ci.hit_2, color = "hit_2"), size = 1) +
   geom_point(aes(x = s.size, y = ci.hit_2, color = "hit_2"), size = 3) +
-  labs(x = "Sample Size", y = "Coverage %") + scale_y_continuous(limits = c(0.6, 1))
+  labs(x = "Sample Size", y = "Coverage %") + scale_y_continuous(limits = c(0.7, 1))
 
 
 

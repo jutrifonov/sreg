@@ -34,6 +34,7 @@ library(parallel)
 library(progress)
 library(purrr)
 library(SimDesign)
+library(pbapply)
 
 ###############
 rm(list = ls())
@@ -55,16 +56,18 @@ clusterEvalQ(cl, {
   library(progress)
   library(parallel)
   library(sreg)
+  library(pbapply)
 })
 
 # The main function for the Lapply loop
 # Function that performs simulations and takes as input
 # Only the number of simulation, sim.id
 sim.func <- function(sim.id) {
+  output <- capture.output({
   seed <- 1000 + sim.id
   set.seed(seed)
 
-  n <- 2000
+  n <- 4000
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
@@ -122,15 +125,18 @@ sim.func <- function(sim.id) {
       ci.hit = ci.hit
     )
   }
-  message(paste("Simulation", sim.id, "is completed succesfully"))
-
+  #message(paste("Simulation", sim.id, "is completed succesfully"))
+  
   return(results)
+  })
+  return(output)
 }
 
 # Parallelize the simulations and store the results
 simres <- parLapply(cl, 1:100000, sim.func)
+simres <- pblapply(1:1000, sim.func, cl=cl)
 # mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
-save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/2000.RData")
+save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/1000.RData")
 ###################
 # Close the cluster
 stopCluster(cl)
@@ -144,7 +150,7 @@ ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
 rowMeans(tau)
 apply(tau, 1, sd)
 rowMeans(se)
-rowMeans(ci.hit)
+rowMeans(ci.hit[, 1:5000])
 
 mean(tau)
 sd(tau)

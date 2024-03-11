@@ -20,9 +20,14 @@
 #  "Matrix",
 #  "parallel",
 #  "progress"), dependencies = TRUE)
-install.packages(devtools) # install devtools
+rm(list = ls())
+#sink("output_filename.txt") 
+#sink(stdout(), type = "message")
+#sink(zz, type = c("output", "message"))
+
+#install.packages(devtools) # install devtools
 library(devtools) # install devtools
-install_github("yurytrifonov/sreg") # install sreg
+#install_github("yurytrifonov/sreg") # install sreg
 library(sreg)
 library(sandwich)
 library(lubridate)
@@ -35,13 +40,13 @@ library(progress)
 library(purrr)
 library(SimDesign)
 library(microbenchmark)
+library(pbapply)
 # %##%##%##%###%##%##%##%###%##%##%##%###%##%#%##%##%##%###%##%##%##%##
 # %##%##%##%###%##%##%##%###%##%##%##%###%##%#%##%##%##%###%##%##%##%##
 #         Please, provide the path to the corresponding source
 #                  file with functions on your PC
 #                    ↓↓↓↓↓↓↓↓↓↓↓HERE↓↓↓↓↓↓↓↓↓↓↓
-rm(list = ls())
-
+#rm(list = ls())
 # %##%##%##%###%##%##%##%###%##%##%##%###%##%#%##%##%##%###%##%##%##%##
 # %##%##%##%###%##%##%##%###%##%##%##%###%##%#%##%##%##%###%##%##%##%##
 
@@ -61,15 +66,17 @@ clusterEvalQ(cl, {
   library(progress)
   library(parallel)
   library(sreg)
+  library(pbapply)
 })
 
 # The main function for the Lapply loop
 # Function that performs simulations and takes as input
 # Only the number of simulation, sim.id
 sim.func <- function(sim.id) {
+  output <- capture.output({
   seed <- 1000 + sim.id
   set.seed(seed)
-  n <- 1000
+  n <- 50
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
@@ -87,7 +94,7 @@ sim.func <- function(sim.id) {
   # fit <- tau.hat(Y,D,S,G.id,Ng,X,model, exp.option = T)
   result <- tryCatch(
     {
-      sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X)
+      sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X, HC1 = TRUE)
     },
     error = function(e) { # tryCatch to avoid errors that stop the execution
       # Print the error message if an error occurs
@@ -131,21 +138,24 @@ sim.func <- function(sim.id) {
       ci.hit = ci.hit
     )
   }
-  message(paste("Simulation", sim.id, "is completed successfully"))
-
+  #message(paste("Simulation", sim.id, "is completed successfully"))
   return(results)
+  })
+  return(output)
 }
 
 # Parallelize the simulations and store the results
-simres <- parLapply(cl, 1:100000, sim.func)
+#simres <- parLapply(cl, 1:100000, sim.func)
+simres <- pblapply(1:10000, sim.func, cl=cl)
 #mb <- microbenchmark(parLapply(cl, 1:5000, sim.func), times = 1)
-save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/sreg.cov/1000.RData")
+sink()
+save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/hctests/50_hc.RData")
+save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/sreg.cov (all 100k iter)/250.RData")
 ###################
 # Close the cluster
 stopCluster(cl)
 # Close the cluster
 ###################
-
 # Extract parameters of interest from the results
 tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
 se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))

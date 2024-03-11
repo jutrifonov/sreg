@@ -215,6 +215,7 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
       if (HC1 == TRUE) {
         var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S) + max(D) * max(S)))) +
           mean(Xi.hat.2^2)
+        #var.vec[d] <- sigma.hat.sq * (n / (n - (max(S) + max(D) * max(S))))
       } else {
         var.vec[d] <- sigma.hat.sq
       }

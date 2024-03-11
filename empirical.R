@@ -7,6 +7,7 @@ install_github("yurytrifonov/sreg") # install sreg
 library(devtools) # load devtools
 library(sreg) # load sreg
 library(dplyr) # load dplyr (to transform data)
+library(haven)
 packageDescription("sreg") # package description
 ?sreg # R documentation for sreg()
 ?sreg.rgen # R documentation for sreg.rgen()
