@@ -438,6 +438,11 @@ res.creg <- function(Y, S, D, G.id, Ng, X, Ng.cov = FALSE, HC1)
 #-------------------------------------------------------------------
 {
   n <- length(Y)
+  
+  if(is.null(S)){
+    S <- rep(1, n)
+  }
+
   if (!is.null(X)) {
     model <- lm.iter.creg(Y, S, D, G.id, Ng, X)
     fit <- tau.hat.creg(Y, S, D, G.id, Ng, X, model)
