@@ -39,7 +39,7 @@ lm.iter.sreg <- function(Y, S, D, X)
 #-------------------------------------------------------------------
 {
   theta.list <- rep(list(matrix(NA, ncol = ncol(X), nrow = max(S))), (max(D) + 1))
-
+  
   for (d in 0:max(D))
   {
     for (s in 1:max(S))
@@ -299,10 +299,13 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
 # %# (6) The core function. It provides estimates of ATE, their s.e.,
 # %#     calculates t-stats and corresponding p-values
 #-------------------------------------------------------------------
-res.sreg <- function(Y, S, D, X=NULL, HC1)
+res.sreg <- function(Y, S=NULL, D, X=NULL, HC1)
 #-------------------------------------------------------------------
 {
   n <- length(Y)
+  if(is.null(S)){
+    S <- rep(1, n)
+  }
   if (!is.null(X)) {
     model <- lm.iter.sreg(Y, S, D, X)
     tau.est <- tau.hat.sreg(Y, S, D, X, model)
@@ -339,7 +342,6 @@ res.sreg <- function(Y, S, D, X=NULL, HC1)
       "data"     = data.frame(Y, S, D)
     )
   }
-  return(res.list)
 }
 
 #-------------------------------------------------------------------

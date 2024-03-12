@@ -63,7 +63,7 @@
 #' S <- data.clean$S
 #' X <- data.frame(data.clean$x_1, data.clean$x_2)
 #' result <- sreg::sreg(Y, S, D, X = X, HC1 = TRUE)
-sreg <- function(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE, HC1 = FALSE) {
+sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE, HC1 = FALSE) {
   if (is.null(G.id) | is.null(Ng)) {
     result <- res.sreg(Y, S, D, X, HC1)
     summary.sreg(result)

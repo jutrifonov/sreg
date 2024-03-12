@@ -76,10 +76,10 @@ sim.func <- function(sim.id) {
   output <- capture.output({
   seed <- 1000 + sim.id
   set.seed(seed)
-  n <- 50
+  n <- 1000
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
-  n.strata <- 2
+  n.strata <- 1
   data <- sreg.rgen(n = n, tau.vec = tau.vec, n.strata = n.strata, cluster = F, is.cov = TRUE)
   Y <- data$Y
   S <- data$S
@@ -94,7 +94,7 @@ sim.func <- function(sim.id) {
   # fit <- tau.hat(Y,D,S,G.id,Ng,X,model, exp.option = T)
   result <- tryCatch(
     {
-      sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X, HC1 = TRUE)
+      sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = X, HC1 = FALSE)
     },
     error = function(e) { # tryCatch to avoid errors that stop the execution
       # Print the error message if an error occurs
@@ -146,9 +146,7 @@ sim.func <- function(sim.id) {
 
 # Parallelize the simulations and store the results
 #simres <- parLapply(cl, 1:100000, sim.func)
-simres <- pblapply(1:10000, sim.func, cl=cl)
-#mb <- microbenchmark(parLapply(cl, 1:5000, sim.func), times = 1)
-sink()
+simres <- pblapply(1:10000, sim.func, cl=cl)#mb <- microbenchmark(parLapply(cl, 1:5000, sim.func), times = 1)
 save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/hctests/50_hc.RData")
 save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/sreg.cov (all 100k iter)/250.RData")
 ###################

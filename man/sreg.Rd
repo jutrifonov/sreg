@@ -4,7 +4,16 @@
 \alias{sreg}
 \title{Estimates the ATE}
 \usage{
-sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE, HC1 = FALSE)
+sreg(
+  Y,
+  S = NULL,
+  D,
+  G.id = NULL,
+  Ng = NULL,
+  X = NULL,
+  Ng.cov = FALSE,
+  HC1 = FALSE
+)
 }
 \arguments{
 \item{Y}{a numeric vector of the observed outcomes}
