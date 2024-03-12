@@ -438,7 +438,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, Ng.cov = FALSE, HC1)
 #-------------------------------------------------------------------
 {
   n <- length(Y)
-  
+
   if(is.null(S)){
     S <- rep(1, n)
   }
@@ -485,6 +485,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, Ng.cov = FALSE, HC1)
         "data"     = data.frame(Y, S, D, G.id, Ng),
         "lin.adj"  = data.frame(Ng)
       )
+      
     } else {
       fit <- tau.hat.creg(Y, S, D, G.id, Ng, X = NULL, model = NULL)
       tau.est <- fit$tau.hat
@@ -557,13 +558,14 @@ summary.creg <- function(model)
   stars[(p.value > 0.05) & (p.value <= 0.1)] <- "."
 
   df <- data.frame(
-    "Tau"          = tau.hat,
-    "As.se"        = se.rob,
-    "T-stat"       = t.stat,
-    "P-value"      = p.value,
-    "CI.left"      = CI.left,
-    "CI.right"     = CI.right,
-    "Significance" = stars
+    "Tau"           = tau.hat,
+    "As.se"         = se.rob,
+    "T-stat"        = t.stat,
+    "P-value"       = p.value,
+    "CI.left(95%)"  = CI.left,
+    "CI.right(95%)" = CI.right,
+    "Significance"  = stars, 
+    check.names     = FALSE
   )
   is.df.num.col <- sapply(df, is.numeric)
   df[, is.df.num.col] <- round(df[, is.df.num.col], 5)
