@@ -8,13 +8,13 @@
 \usepackage{xcolor}
 \usepackage{array}
 \usepackage{hyperref}
+\usepackage{natbib}
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
     filecolor=blue,
     urlcolor=blue,
 }
-
 % Define colors for the lines
 \definecolor{linecolor}{rgb}{0,0,0}
 
@@ -56,7 +56,7 @@
 %\href{https://github.com/yurytrifonov/sreg}{https://github.com/yurytrifonov/sreg} 
 %\end{center}
 \subsection*{General Description}
-The 'sreg' package for R offers a robust toolkit for estimating average treatment effects (ATEs) within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR). Designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, the 'sreg' package not only provides ATE estimators but also includes sophisticated features for calculating adjusted variance estimators developed in papers (Bugni, Canay, Shaikh; 2017), (Bugni, Canay, Shaikh, Meehan; 2023) and (Jiang, Linton, Tang, Zhang; 2023).
+The 'sreg' package for R offers a robust toolkit for estimating average treatment effects (ATEs) within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR). Designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, the 'sreg' package not only provides ATE estimators but also includes features for calculating adjusted variance estimators developed in papers (Bugni, Canay, Shaikh; 2017), (Bugni, Canay, Shaikh, Meehan; 2023) and (Jiang, Linton, Tang, Zhang; 2023).
 
 \subsection*{The function sreg()}
 
@@ -82,7 +82,7 @@ This function estimates the ATE(s) and the corresponding standard error(s) given
 \subsubsection*{Value}
 \noindent \textit{\textbf{Printed output}}
 
-The function prints a "Stata-style" table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95\%$ asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below:
+The function prints a "Stata-style" table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95\%$ asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below.
 
 
 \begin{flushleft}
@@ -124,8 +124,7 @@ The function returns an object of class \texttt{sreg} that is a list containing 
 \end{itemize}
 
 \subsubsection*{Example}
-Here we provide the empirical application example using the data from (Chong et al, 2016), who studied the effect of iron deficiency anemia on school-age children's educational attainment and cognitive ability in Peru. The example replicates the empirical illustration from (Bugni et al, 2019). For the replication purposes the data is included in the package and can be accessed by running \texttt{data("AEJapp")}.
-
+Here, we provide the empirical application example using the data from (Chong et al., 2016), who studied the effect of iron deficiency anemia on school-age children's educational attainment and cognitive ability in Peru. The example replicates the empirical illustration from (Bugni et al., 2019). For replication purposes, the data is included in the package and can be accessed by running \texttt{data("AEJapp")}.
 \begin{rcode}
 library(devtools)
 install_github("yurytrifonov/sreg")
@@ -183,8 +182,7 @@ X <- data.frame(data.clean$x_1, data.clean$x_2)
 result <- sreg::sreg(Y, S, D, X, HC1 = TRUE)
 
 Saturated Model Estimation Results under CARObservations: 215 Number of treatments: 2 Number of strata: 5 ---Coefficients:       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance1 -0.02862 0.17964 -0.15929 0.87344     -0.38071       0.32348             2  0.34609 0.18362  1.88477 0.05946     -0.01381       0.70598            .---Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
 \end{rcode}
-
-
 \end{document}
 
