@@ -1,7 +1,7 @@
 Package: sreg
 Type: Package
 Title: ATE Estimation under CAR and Cluster-Level Treatment Assignment
-Version: 1.2.5
+Version: 1.3.1
 Author: Juri Trifonov <jutrifonov@uchicago.edu>
 Maintainer: Juri Trifonov <jutrifonov@uchicago.edu>
 Description: The 'sreg' package offers a robust toolkit for estimating average treatment effects (ATEs) 
