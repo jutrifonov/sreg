@@ -81,7 +81,7 @@ sim.func <- function(sim.id) {
 
   result <- tryCatch(
     {
-      sreg(Y, S, D, G.id, Ng, X = X, Ng.cov = T, HC1 = FALSE)
+      res <- sreg(Y, S, D, G.id, Ng, X = X, Ng.cov = T, HC1 = FALSE)
     },
     error = function(e) { # tryCatch to avoid errors that stop the execution
       # Print the error message if an error occurs
