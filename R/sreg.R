@@ -342,6 +342,8 @@ res.sreg <- function(Y, S=NULL, D, X=NULL, HC1)
       "data"     = data.frame(Y, S, D)
     )
   }
+  class(res.list) <- "sreg"
+  return(res.list)
 }
 
 #-------------------------------------------------------------------

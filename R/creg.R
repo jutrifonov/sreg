@@ -507,6 +507,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, Ng.cov = FALSE, HC1)
       )
     }
   }
+  class(res.list) <- "sreg"
   return(res.list)
 }
 
