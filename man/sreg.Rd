@@ -4,16 +4,7 @@
 \alias{sreg}
 \title{Estimates the ATE}
 \usage{
-sreg(
-  Y,
-  S = NULL,
-  D,
-  G.id = NULL,
-  Ng = NULL,
-  X = NULL,
-  Ng.cov = FALSE,
-  HC1 = FALSE
-)
+sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = FALSE)
 }
 \arguments{
 \item{Y}{a numeric vector of the observed outcomes}
@@ -27,9 +18,6 @@ sreg(
 \item{Ng}{a numeric vector of cluster sizes}
 
 \item{X}{a data frame of covariates}
-
-\item{Ng.cov}{a TRUE/FALSE argument indicating whether the Ng should be included as the only covariate in linear adjustments
-when X = NULL}
 
 \item{HC1}{a TRUE/FALSE argument indicating whether the small sample correction should be applied to the variance estimator.}
 }

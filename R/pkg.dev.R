@@ -10,8 +10,6 @@
 #' @param G.id a numeric vector of cluster indicators
 #' @param Ng a numeric vector of cluster sizes
 #' @param X a data frame of covariates
-#' @param Ng.cov a TRUE/FALSE argument indicating whether the Ng should be included as the only covariate in linear adjustments
-#'  when X = NULL
 #' @param HC1 a TRUE/FALSE argument indicating whether the small sample correction should be applied to the variance estimator.
 #'
 #'
@@ -63,12 +61,12 @@
 #' S <- data.clean$S
 #' X <- data.frame(data.clean$x_1, data.clean$x_2)
 #' result <- sreg::sreg(Y, S, D, X = X, HC1 = TRUE)
-sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE, HC1 = FALSE) {
+sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   if (is.null(G.id) | is.null(Ng)) {
     result <- res.sreg(Y, S, D, X, HC1)
     summary.sreg(result)
   } else {
-    result <- res.creg(Y, S, D, G.id, Ng, X, Ng.cov, HC1)
+    result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
     summary.creg(result)
   }
   return(result)
@@ -125,7 +123,6 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
     strata_set <- data.frame(strata) # generate strata
     strata_set$S <- max.col(strata_set) # generate strata
     pi.vec <- rep(c(1 / (n.treat + 1)), n.treat) # vector of target proportions (equal allocation)
-    # pi.vec <- c(0.1, 0.35, 0.2)
     data.test <- dgp.obs.sreg(pot.outcomes,
       I.S = strata, # simulate observed outcomes
       pi.vec = pi.vec, n.treat = n.treat, is.cov = is.cov

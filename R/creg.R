@@ -11,7 +11,7 @@
 ####    @Max Tabord-Meehan, UChicago    ####
 # %##%##%##%###%##%##%##%###%##%##%##%###%##
 # %##%##%##%##
-# %# v.1.2.5
+# %# v.2.0.0
 # %##%##%##%##
 #-------------------------------------------------------------------
 # %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##
@@ -34,46 +34,26 @@ filter.ols.creg <- function(data, s, d)
   return(data.ols)
 }
 #-------------------------------------------------------------------
-lm.iter.creg <- function(Y, S, D, G.id, Ng, X=NULL, Ng.cov = FALSE)
+lm.iter.creg <- function(Y, S, D, G.id, Ng, X)
 #-------------------------------------------------------------------
 {
-  if (Ng.cov == TRUE) {
-    working.df <- data.frame(Y, S, D, G.id, Ng)
-    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")])
-    cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
-    data <- cl.lvl.data
-    data$X <- NULL
-    theta.list <- rep(list(matrix(NA, ncol = 1, nrow = max(S))), (max(D) + 1))
-    for (d in 0:max(D))
-    {
-      for (s in 1:max(S))
-      {
-        data.filtered <- filter.ols.creg(data, s, d)
-        data.filtered.adj <- data.frame(Y.bar.Ng = data.filtered$Y.bar * data.filtered$Ng, Ng = data.filtered$Ng)
-        result <- lm(Y.bar.Ng ~ ., data = data.filtered.adj)
-        theta.list[[d + 1]][s, ] <- coef(result)[2]
-      }
-    }
-  } else {
     working.df <- data.frame(Y, S, D, G.id, Ng, X)
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
     cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", names(working.df)[6:ncol(working.df)])])
     cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
     data <- cl.lvl.data
-    theta.list <- rep(list(matrix(NA, ncol = ncol(X) + 1, nrow = max(S))), (max(D) + 1))
+    theta.list <- rep(list(matrix(NA, ncol = ncol(X), nrow = max(S))), (max(D) + 1))
     for (d in 0:max(D))
     {
       for (s in 1:max(S))
       {
         data.filtered <- filter.ols.creg(data, s, d)
         data.X <- data.filtered[, 6:(6 + ncol(X) - 1)]
-        data.filtered.adj <- data.frame(Y.bar.Ng = data.filtered$Y.bar * data.filtered$Ng, Ng = data.filtered$Ng, data.X)
+        data.filtered.adj <- data.frame(Y.bar.Ng = data.filtered$Y.bar * data.filtered$Ng, data.X)
         result <- lm(Y.bar.Ng ~ ., data = data.filtered.adj)
-        theta.list[[d + 1]][s, ] <- coef(result)[2:(2 + ncol(X))]
+        theta.list[[d + 1]][s, ] <- coef(result)[2:(1 + ncol(X))]
       }
     }
-  }
   list.rtrn <- list(
     "theta.list"  = theta.list,
     "cl.lvl.data" = data
@@ -81,22 +61,13 @@ lm.iter.creg <- function(Y, S, D, G.id, Ng, X=NULL, Ng.cov = FALSE)
   return(list.rtrn)
 }
 #-------------------------------------------------------------------
-lin.adj.creg <- function(a, data, model, Ng.cov = FALSE)
+lin.adj.creg <- function(a, data, model)
 #-------------------------------------------------------------------
 {
-  if (Ng.cov == TRUE) {
-    theta.mtrx <- model$theta.list[[a + 1]]
-    theta.vec.matched <- theta.mtrx[data$S, ]
-    Ng.hat <- theta.vec.matched * data$Ng
-    mu.hat <- Ng.hat
-  } else {
     X.data <- data[, 6:ncol(data)]
     theta.mtrx <- model$theta.list[[a + 1]]
     theta.vec.matched <- theta.mtrx[data$S, ]
-    Ng.hat <- theta.vec.matched[, 1] * data$Ng
-    X.hat <- diag(as.matrix(X.data) %*% t(theta.vec.matched[, -1]))
-    mu.hat <- Ng.hat + X.hat
-  }
+    mu.hat <- diag(as.matrix(X.data) %*% t(theta.vec.matched))
 
   return(mu.hat)
 }
@@ -128,7 +99,7 @@ pi.hat.creg <- function(S, D, inverse = FALSE)
   return(as.matrix(ret_df[S, ]))
 }
 #-------------------------------------------------------------------
-tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL, Ng.cov = FALSE)
+tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL)
 #-------------------------------------------------------------------
 {
   tau.hat.vec <- rep(NA, max(D))
@@ -161,7 +132,6 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL, Ng.cov = FALSE)
       mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0, mu.hat.d), ncol = 2)
 
       tau.hat <- mean(Xi.g) / mean(Ng.full)
-
       tau.hat.vec[d] <- tau.hat
     }
     rtrn.list <- list(
@@ -174,43 +144,6 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL, Ng.cov = FALSE)
       "Ng"        = Ng.full
     )
   } else {
-    if (Ng.cov == TRUE) {
-      cl.lvl.data <- model$cl.lvl.data
-      data <- cl.lvl.data
-      Ng.full <- data$Ng
-      Y.bar.full <- data$Y.bar
-      for (d in 1:max(D))
-      {
-        data$pi <- pi.hat.creg(data$S, data$D)[, d]
-        data$pi.0 <- pi.hat.creg(data$S, data$D, inverse = T)[, 1]
-        data$A <- ifelse(data$D == d, 1, ifelse(data$D == 0, 0, -999999))
-        data$I <- as.numeric(data$A != -999999)
-        data.list[[d]] <- data
-        pi.hat.list[[d]] <- data$pi
-
-        mu.hat.d <- lin.adj.creg(d, data = cl.lvl.data, model, Ng.cov = TRUE)
-        mu.hat.0 <- lin.adj.creg(0, data = cl.lvl.data, model, Ng.cov = TRUE)
-
-        Xi.g <- data$I * (((data$A * (Y.bar.full * data$Ng - mu.hat.d)) / data$pi) -
-          (((1 - data$A) * (Y.bar.full * data$Ng - mu.hat.0)) / data$pi.0)) +
-          (mu.hat.d - mu.hat.0)
-
-        mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0, mu.hat.d), ncol = 2)
-
-        tau.hat <- mean(Xi.g) / mean(Ng)
-
-        tau.hat.vec[d] <- tau.hat
-      }
-      rtrn.list <- list(
-        "tau.hat"   = tau.hat.vec,
-        "mu.hat"    = mu.hat.list,
-        "pi.hat"    = pi.hat.list,
-        "pi.hat.0"  = data$pi.0,
-        "data.list" = data.list,
-        "Y.bar.g"   = Y.bar.full,
-        "Ng"        = Ng.full
-      )
-    } else {
       working.df <- data.frame(Y, S, D, G.id, Ng)
       Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)$Y
       cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")]) # created data on a cluster level for estimating pi.hat(s)
@@ -235,8 +168,7 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL, Ng.cov = FALSE)
 
         mu.hat.list[[d]] <- as.matrix(cbind(mu.hat.0, mu.hat.d), ncol = 2)
 
-        tau.hat <- mean(Xi.g) / mean(Ng)
-
+        tau.hat <- mean(Xi.g) / mean(Ng.full)
         tau.hat.vec[d] <- tau.hat
       }
       rtrn.list <- list(
@@ -248,7 +180,6 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL, Ng.cov = FALSE)
         "Y.bar.g"   = Y.bar.full,
         "Ng"        = Ng.full
       )
-    }
   }
   return(rtrn.list)
 }
@@ -415,12 +346,11 @@ as.var.creg <- function(model = NULL, fit, HC1) {
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (Ng - N.g.bar.cl)
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
-      sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2) / (mean(Ng))^2
-
       if (HC1 == TRUE) {
         var.vec[d] <- ((mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S) + max(D) * max(S)))) +
           mean(Xi.hat.2^2)) / mean(Ng)^2
       } else {
+        sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2) / (mean(Ng))^2
         var.vec[d] <- sigma.hat.sq
       }
       n.vec[d] <- n
@@ -434,7 +364,7 @@ as.var.creg <- function(model = NULL, fit, HC1) {
 # %# (10) The core function. It provides estimates of ATE, their s.e.,
 # %#     calculates t-stats and corresponding p-values
 #-------------------------------------------------------------------
-res.creg <- function(Y, S, D, G.id, Ng, X, Ng.cov = FALSE, HC1)
+res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
 #-------------------------------------------------------------------
 {
   n <- length(Y)
@@ -462,31 +392,9 @@ res.creg <- function(Y, S, D, G.id, Ng, X, Ng.cov = FALSE, HC1)
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
       "data"     = data.frame(Y, S, D, G.id, Ng, X),
-      "lin.adj"  = data.frame(Ng, X)
+      "lin.adj"  = data.frame(X)
     )
   } else {
-    if (Ng.cov == T) {
-      model <- lm.iter.creg(Y, S, D, G.id, Ng, X = NULL, Ng.cov = T)
-      fit <- tau.hat.creg(Y, S, D, G.id, Ng, X = NULL, model, Ng.cov = T)
-      tau.est <- fit$tau.hat
-      se.rob <- as.var.creg(model, fit, HC1)
-      t.stat <- tau.est / se.rob
-      p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
-      CI.left <- tau.est - qnorm(0.975) * se.rob
-      CI.right <- tau.est + qnorm(0.975) * se.rob
-      res.list <- list(
-        "tau.hat"  = tau.est,
-        "se.rob"   = se.rob,
-        "t.stat"   = t.stat,
-        "p.value"  = p.value,
-        "as.CI"    = c(CI.left, CI.right),
-        "CI.left"  = CI.left,
-        "CI.right" = CI.right,
-        "data"     = data.frame(Y, S, D, G.id, Ng),
-        "lin.adj"  = data.frame(Ng)
-      )
-      
-    } else {
       fit <- tau.hat.creg(Y, S, D, G.id, Ng, X = NULL, model = NULL)
       tau.est <- fit$tau.hat
       se.rob <- as.var.creg(model = NULL, fit, HC1)
@@ -505,7 +413,6 @@ res.creg <- function(Y, S, D, G.id, Ng, X, Ng.cov = FALSE, HC1)
         "data"     = data.frame(Y, S, D, G.id, Ng),
         "lin.adj"  = NULL
       )
-    }
   }
   class(res.list) <- "sreg"
   return(res.list)

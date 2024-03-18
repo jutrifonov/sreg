@@ -19,6 +19,8 @@ X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 # Estimate the ATE, s.e., etc.
 test <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X=X)
 
+set.seed(123) # fix the random seed
+
 # Generate a pseudo-random sample with clusters and two treatments = c(0.2, 0.8)
 data <- sreg.rgen(
   n = 10000, tau.vec = c(0.2, 0.8),
@@ -27,11 +29,12 @@ data <- sreg.rgen(
 Y <- data$Y
 S <- data$S
 D <- data$D
-X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+#X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+X <- data.frame("Ng" = data$Ng, "x_1" = data$x_1, "x_2" = data$x_2)
+#X <- data.frame("Ng" = data$Ng)
 Ng <- data$Ng
 G.id <- data$G.id
 
 # Estimate the ATE, s.e., etc.
-test <- sreg(Y, S, D, G.id, Ng, X = NULL, Ng.cov = F, HC1 = T)
-test <- sreg(Y, S, D, G.id, Ng, X = X, Ng.cov = T, HC1 = T)
-
+test <- sreg(Y, S, D, G.id, Ng, X = X, HC1 = TRUE)
+test <- sreg(Y, S = NULL, D, G.id, Ng, X = NULL, HC1 = FALSE)
