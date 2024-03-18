@@ -39,7 +39,7 @@ lm.iter.sreg <- function(Y, S, D, X)
 #-------------------------------------------------------------------
 {
   theta.list <- rep(list(matrix(NA, ncol = ncol(X), nrow = max(S))), (max(D) + 1))
-  
+
   for (d in 0:max(D))
   {
     for (s in 1:max(S))
@@ -215,7 +215,7 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
       if (HC1 == TRUE) {
         var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S) + max(D) * max(S)))) +
           mean(Xi.hat.2^2)
-        #var.vec[d] <- sigma.hat.sq * (n / (n - (max(S) + max(D) * max(S))))
+        # var.vec[d] <- sigma.hat.sq * (n / (n - (max(S) + max(D) * max(S))))
       } else {
         var.vec[d] <- sigma.hat.sq
       }
@@ -303,7 +303,7 @@ res.sreg <- function(Y, S=NULL, D, X=NULL, HC1)
 #-------------------------------------------------------------------
 {
   n <- length(Y)
-  if(is.null(S)){
+  if (is.null(S)) {
     S <- rep(1, n)
   }
   if (!is.null(X)) {
@@ -395,7 +395,7 @@ summary.sreg <- function(model)
     "P-value"       = p.value,
     "CI.left(95%)"  = CI.left,
     "CI.right(95%)" = CI.right,
-    "Significance"  = stars, 
+    "Significance"  = stars,
     check.names     = FALSE
   )
   is.df.num.col <- sapply(df, is.numeric)

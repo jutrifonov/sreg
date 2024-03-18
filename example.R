@@ -3,8 +3,8 @@ install_github("yurytrifonov/sreg") # install sreg
 library(devtools) # install devtools
 library(sreg) # install sreg
 packageDescription("sreg") # package description
-#?sreg # R documentation for sreg()
-#?sreg.rgen # R documentation for sreg.rgen()
+# ?sreg # R documentation for sreg()
+# ?sreg.rgen # R documentation for sreg.rgen()
 # %#%#%#%#%#%#%#%#%#%
 # %#%#%#%#%#%#%#%#%#%
 
@@ -17,7 +17,7 @@ S <- data$S
 D <- data$D
 X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 # Estimate the ATE, s.e., etc.
-test <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X=X)
+test <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X)
 
 set.seed(123) # fix the random seed
 
@@ -29,9 +29,9 @@ data <- sreg.rgen(
 Y <- data$Y
 S <- data$S
 D <- data$D
-#X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+# X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 X <- data.frame("Ng" = data$Ng, "x_1" = data$x_1, "x_2" = data$x_2)
-#X <- data.frame("Ng" = data$Ng)
+# X <- data.frame("Ng" = data$Ng)
 Ng <- data$Ng
 G.id <- data$G.id
 
