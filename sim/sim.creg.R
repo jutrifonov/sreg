@@ -63,11 +63,11 @@ clusterEvalQ(cl, {
 # Function that performs simulations and takes as input
 # Only the number of simulation, sim.id
 sim.func <- function(sim.id) {
-  output <- capture.output({
+  #output <- capture.output({
   seed <- 1000 + sim.id
   set.seed(seed)
 
-  n <- 100
+  n <- 200
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
@@ -75,13 +75,14 @@ sim.func <- function(sim.id) {
   Y <- data$Y
   S <- data$S
   D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  #X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  X <- data.frame("Ng" = data$Ng, "x_1" = data$x_1, "x_2" = data$x_2)
   Ng <- data$Ng
   G.id <- data$G.id
-
   result <- tryCatch(
     {
-      res <- sreg(Y, S, D, G.id, Ng, X = X, Ng.cov = T, HC1 = FALSE)
+      #sreg(Y, S = S, D, G.id, Ng, X = X)
+      sreg(Y, S = NULL, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
     },
     error = function(e) { # tryCatch to avoid errors that stop the execution
       # Print the error message if an error occurs
@@ -125,16 +126,16 @@ sim.func <- function(sim.id) {
       ci.hit = ci.hit
     )
   }
-  #message(paste("Simulation", sim.id, "is completed succesfully"))
+  message(paste("Simulation", sim.id, "is completed succesfully"))
   
   return(results)
-  })
-  return(output)
+  #})
+  #return(output)
 }
 
 # Parallelize the simulations and store the results
-simres <- parLapply(cl, 1:100000, sim.func)
-simres <- pblapply(1:1000, sim.func, cl=cl)
+simres <- parLapply(cl, 1:1000, sim.func)
+simres <- pblapply(1:10000, sim.func, cl=cl)
 # mb <- microbenchmark(parLapply(cl, 1:100, sim.func), times = 1)
 save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/creg.cov (all 100k iter)/1000.RData")
 ###################

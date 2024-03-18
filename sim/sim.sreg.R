@@ -145,8 +145,8 @@ sim.func <- function(sim.id) {
 }
 
 # Parallelize the simulations and store the results
-#simres <- parLapply(cl, 1:100000, sim.func)
-simres <- pblapply(1:10000, sim.func, cl=cl)#mb <- microbenchmark(parLapply(cl, 1:5000, sim.func), times = 1)
+simres <- parLapply(cl, 1:100000, sim.func)
+simres <- pblapply(1:100, sim.func, cl=cl)#mb <- microbenchmark(parLapply(cl, 1:5000, sim.func), times = 1)
 save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/hctests/50_hc.RData")
 save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/sreg.cov (all 100k iter)/250.RData")
 ###################
