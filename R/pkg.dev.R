@@ -5,12 +5,12 @@
 #' @import dplyr
 #'
 #' @param Y a numeric vector of the observed outcomes
-#' @param S a numeric vector of strata indicators
+#' @param S a numeric vector of strata indicators; if NULL then the estimator without strata is applied
 #' @param D a numeric vector of treatments
-#' @param G.id a numeric vector of cluster indicators
-#' @param Ng a numeric vector of cluster sizes
-#' @param X a data frame of covariates
-#' @param HC1 a TRUE/FALSE argument indicating whether the small sample correction should be applied to the variance estimator.
+#' @param G.id a numeric vector of cluster indicators; if NULL then the estimator without clusters is applied
+#' @param Ng a numeric vector of cluster sizes; if NULL then the estimator without clusters is applied
+#' @param X a data frame with columns representing the covariate values for every observation; if NULL then the estimator without linear adjustments is applied
+#' @param HC1 a TRUE/FALSE argument indicating whether the small sample correction should be applied to the variance estimator
 #'
 #'
 #' @return a list containing the results
