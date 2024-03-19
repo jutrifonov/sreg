@@ -322,7 +322,8 @@ res.sreg <- function(Y, S=NULL, D, X=NULL, HC1)
       "as.CI"    = c(CI.left, CI.right),
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
-      "data"     = data.frame(Y, S, D, X)
+      "data"     = data.frame(Y, S, D, X),
+      "lin.adj"  = data.frame(X)
     )
   } else {
     tau.est <- tau.hat.sreg(Y, S, D, X = NULL, model = NULL)
@@ -339,7 +340,8 @@ res.sreg <- function(Y, S=NULL, D, X=NULL, HC1)
       "as.CI"    = c(CI.left, CI.right),
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
-      "data"     = data.frame(Y, S, D)
+      "data"     = data.frame(Y, S, D),
+      "lin.adj"  = NULL
     )
   }
   class(res.list) <- "sreg"
@@ -375,7 +377,10 @@ summary.sreg <- function(model)
     "Number of strata:",
     max(model$data$S), "\n"
   ))
-
+cat(paste0(
+    "Covariates used in linear adjustments: ",
+    paste(names(model$lin.adj), collapse = ", "), "\n"
+  ))
   cat("---\n")
 
   cat("Coefficients:\n")
