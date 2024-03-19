@@ -1,4 +1,4 @@
-# %##%##%##%###%##%##%##%###%##%##%##%###%##
+##%##%##%##%###%##%##%##%###%##%##%##%###%##
 ### This R file provides the collection ####
 ### of functions to estimate the ATE    ####
 ### under CAR with multiple treatments  ####
