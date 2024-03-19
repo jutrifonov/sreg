@@ -1,4 +1,4 @@
-#' Estimate Average Treatment Effects (ATEs) and corresponding Standard Errors
+#' Estimate Average Treatment Effects (ATEs) and Corresponding Standard Errors
 #'
 #' The function estimates the ATE(s) and the corresponding standard error(s) given the data provided. Multiple treatments, strata-based treatments, cluster-level treatments, and linear adjustments are supported. The function implements the appropriate estimator(s) given the data provided.
 #' @import extraDistr
