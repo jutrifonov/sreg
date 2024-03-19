@@ -38,4 +38,4 @@ table(D = data.clean$D, S = data.clean$S)
 # %#%#%#%#%#%#%#%#%#%
 result <- sreg::sreg(Y, S, D, HC1 = T)
 # %#%#%#%#%#%#%#%#%#%
-result <- sreg::sreg(Y = Y, S = S, D = D, X = X)
+result <- sreg::sreg(Y, S, D, X = X)
