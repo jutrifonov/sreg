@@ -2,7 +2,7 @@
 % Please edit documentation in R/pkg.dev.R
 \name{sreg}
 \alias{sreg}
-\title{Estimates the ATE}
+\title{Estimate Average Treatment Effects (ATEs) and corresponding Standard Errors}
 \usage{
 sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 }
@@ -35,7 +35,7 @@ An object of class \code{sreg} that is a list containing the following elements:
 }
 }
 \description{
-Estimates the ATE
+The function estimates the ATE(s) and the corresponding standard error(s) given the data provided. Multiple treatments, strata-based treatments, cluster-level treatments, and linear adjustments are supported. The function implements the appropriate estimator(s) given the data provided.
 }
 \examples{
 library("sreg")
@@ -69,17 +69,17 @@ S <- data.clean$S
 # Look at the frequency table
 table(D = data.clean$D, S = data.clean$S)
 # Replicate the results from (Bugni et al, 2019)
-result <- sreg::sreg(Y, S, D, HC1 = TRUE)
+result <- sreg::sreg(Y, S, D)
 
 ## Besides that, it is possible to add linear adjustments (covariates)
-x_1 <- data$pills_taken
-x_2 <- data$age_months
-data.clean <- data.frame(Y, D, S, x_1, x_2)
+pills <- data$pills_taken
+age <- data$age_months
+data.clean <- data.frame(Y, D, S, pills, age)
 data.clean <- data.clean \%>\%
   mutate(D = ifelse(D == 3, 0, D))
 Y <- data.clean$Y
 D <- data.clean$D
 S <- data.clean$S
-X <- data.frame(data.clean$x_1, data.clean$x_2)
-result <- sreg::sreg(Y, S, D, X = X, HC1 = TRUE)
+X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
+result <- sreg::sreg(Y, S, D, X)
 }
