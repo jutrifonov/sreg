@@ -13,7 +13,18 @@
 #' @param HC1 a \code{TRUE/FALSE} argument indicating whether the small sample correction should be applied to the variance estimator
 #'
 #'
-#' @return a list containing the results
+#' @return An object of class \code{sreg} that is a list containing the following elements:
+#' \itemize{
+#' \item \code{tau.hat}: a \eqn{1 \times |\mathcal A|} vector of ATE estimates, where \eqn{|\mathcal A|} represents the number of treatments
+#' \item \code{se.rob}: a \eqn{1 \times |\mathcal A|} vector of standard errors estimates, where \eqn{|\mathcal A|} represents the number of treatments
+#' \item \code{t.stat}: a \eqn{1 \times |\mathcal A|} vector of \eqn{t}-statistics, where \eqn{|\mathcal A|} represents the number of treatments
+#' \item \code{p.value}: a \eqn{1 \times |\mathcal A|} vector of corresponding \eqn{p}-values, where \eqn{|\mathcal A|} represents the number of treatments
+#' \item \code{CI.left}: a \eqn{1 \times |\mathcal A|} vector of the left bounds of the 95\% as. confidence interval
+#' \item \code{CI.right}: a \eqn{1 \times |\mathcal A|} vector of the right bounds of the 95\% as. confidence interval
+#' \item \code{data}: an original data of the form \code{data.frame(Y, S, D, G.id, Ng, X)}
+#' \item \code{lin.adj}: a data frame representing the covariates that were used in implementing linear adjustments
+#'}
+#' 
 #' @export
 #'
 #' @examples
