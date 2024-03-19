@@ -9,17 +9,17 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 \arguments{
 \item{Y}{a numeric vector of the observed outcomes}
 
-\item{S}{a numeric vector of strata indicators; if NULL then the estimator without strata is applied}
+\item{S}{a numeric vector of strata indicators; if \code{S = NULL} then the estimator without strata is applied}
 
 \item{D}{a numeric vector of treatments}
 
-\item{G.id}{a numeric vector of cluster indicators; if NULL then the estimator without clusters is applied}
+\item{G.id}{a numeric vector of cluster indicators; if \code{G.id = NULL} then the estimator without clusters is applied}
 
-\item{Ng}{a numeric vector of cluster sizes; if NULL then the estimator without clusters is applied}
+\item{Ng}{a numeric vector of cluster sizes; if \code{Ng = NULL} then the estimator without clusters is applied}
 
-\item{X}{a data frame with columns representing the covariate values for every observation; if NULL then the estimator without linear adjustments is applied}
+\item{X}{a data frame with columns representing the covariate values for every observation; if \code{X = NULL} then the estimator without linear adjustments is applied}
 
-\item{HC1}{a TRUE/FALSE argument indicating whether the small sample correction should be applied to the variance estimator}
+\item{HC1}{a \code{TRUE/FALSE} argument indicating whether the small sample correction should be applied to the variance estimator}
 }
 \value{
 a list containing the results
