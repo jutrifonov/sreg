@@ -76,10 +76,10 @@ sim.func <- function(sim.id) {
   output <- capture.output({
   seed <- 1000 + sim.id
   set.seed(seed)
-  n <- 1000
+  n <- 3000
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
-  n.strata <- 1
+  n.strata <- 2
   data <- sreg.rgen(n = n, tau.vec = tau.vec, n.strata = n.strata, cluster = F, is.cov = TRUE)
   Y <- data$Y
   S <- data$S
@@ -146,7 +146,7 @@ sim.func <- function(sim.id) {
 
 # Parallelize the simulations and store the results
 simres <- parLapply(cl, 1:100000, sim.func)
-simres <- pblapply(1:100, sim.func, cl=cl)#mb <- microbenchmark(parLapply(cl, 1:5000, sim.func), times = 1)
+simres <- pblapply(1:10000, sim.func, cl=cl)#mb <- microbenchmark(parLapply(cl, 1:5000, sim.func), times = 1)
 save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/hctests/50_hc.RData")
 save(simres, file = "/Users/trifonovjuri/Desktop/sreg.source/mc.files/res/v.1.2.5/sreg.cov (all 100k iter)/250.RData")
 ###################
