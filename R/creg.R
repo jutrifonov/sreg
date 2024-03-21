@@ -102,7 +102,8 @@ pi.hat.creg <- function(S, D, inverse = FALSE)
 tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL)
 #-------------------------------------------------------------------
 {
-  tau.hat.vec <- rep(NA, max(D))
+  #tau.hat.vec <- rep(NA, max(D))
+  tau.hat.vec <- numeric(max(D))
   Y.bar.g.list <- rep(list(NA), max(D))
   mu.hat.list <- rep(list(NA), max(D))
   pi.hat.list <- rep(list(NA), max(D))
@@ -194,8 +195,10 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL)
 # Variance Estimator
 #-------------------------------------------------------------------
 as.var.creg <- function(model = NULL, fit, HC1) {
-  var.vec <- rep(NA, length(fit$tau.hat))
-  n.vec <- rep(NA, length(fit$tau.hat))
+  var.vec <- numeric(length(fit$tau.hat))
+  n.vec <- numeric(length(fit$tau.hat))
+  #var.vec <- rep(NA, length(fit$tau.hat))
+  #n.vec <- rep(NA, length(fit$tau.hat))
 
   if (!is.null(model)) {
     for (d in 1:length(fit$tau.hat))

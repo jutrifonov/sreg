@@ -2,7 +2,7 @@
 % Please edit documentation in R/pkg.dev.R
 \name{sreg}
 \alias{sreg}
-\title{Estimate Average Treatment Effects (ATEs) and corresponding Standard Errors}
+\title{Estimate Average Treatment Effects (ATEs) and Corresponding Standard Errors}
 \usage{
 sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 }

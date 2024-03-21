@@ -12,7 +12,7 @@ packageDescription("sreg") # package description
 ?sreg # R documentation for sreg()
 ?sreg.rgen # R documentation for sreg.rgen()
 ?AEJapp # R documentation for AEJapp dataset
-# %#%#%#%#%#%#%#%#%#%
+# %#%#%#%#%#%#%#%#%#% 
 # %#%#%#%#%#%#%#%#%#%
 data("AEJapp") # upload the Chong et al. (2016) data from the package
 data <- AEJapp # rename for convenience

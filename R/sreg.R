@@ -107,7 +107,8 @@ pi.hat.sreg <- function(S, D, inverse = FALSE)
 tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
 #-------------------------------------------------------------------
 {
-  tau.hat <- rep(NA, max(D))
+  tau.hat <- numeric(max(D))
+  #tau.hat <- rep(NA, max(D))
   for (d in 1:max(D))
   {
     if (!is.null(X)) {
@@ -149,8 +150,10 @@ tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
 # %#     i.e. the variance estimator
 #-------------------------------------------------------------------
 as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
-  var.vec <- rep(NA, max(D))
-  n.vec <- rep(NA, max(D))
+  var.vec <- numeric(max(D))
+  n.vec <- numeric(max(D))
+  #var.vec <- rep(NA, max(D))
+  #n.vec <- rep(NA, max(D))
 
   if (!is.null(X)) {
     for (d in 1:max(D))

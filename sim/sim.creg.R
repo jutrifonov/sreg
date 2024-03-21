@@ -73,13 +73,13 @@ sim.func <- function(sim.id) {
   tau.vec <- c(0.8, 0.4)
   n.treat <- length(tau.vec)
   n.strata <- 2
-  data <- sreg.rgen(n = n, Nmax = 50, n.strata = n.strata, tau.vec = tau.vec, cluster = T, is.cov = TRUE)
+  data <- sreg.rgen(n = n, Nmax = 150, n.strata = n.strata, tau.vec = tau.vec, cluster = T, is.cov = TRUE)
   Y <- data$Y
   S <- data$S
   D <- data$D
   #X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  #X <- data.frame("Ng" = data$Ng, "x_1" = data$x_1, "x_2" = data$x_2)
-  X <- data.frame("Ng" = data$Ng)
+  X <- data.frame("Ng" = data$Ng, "x_1" = data$x_1, "x_2" = data$x_2)
+  #X <- data.frame("Ng" = data$Ng)
   #X <- NULL
   Ng <- data$Ng
   G.id <- data$G.id
