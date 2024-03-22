@@ -534,7 +534,7 @@ summary.creg <- function(model)
   ))
   if(is.null(model$data$Ng)){
     #print("HERE")
-    message("Ng is not provided (Ng = NULL)! Assuming Ng being equal to the number of observations for every G.id.")
+    warning("Ng is not provided (Ng = NULL)! Ng is assumed being equal to the number of available observations in every cluster g.")
   }
 }
 
