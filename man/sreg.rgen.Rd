@@ -2,8 +2,7 @@
 % Please edit documentation in R/pkg.dev.R
 \name{sreg.rgen}
 \alias{sreg.rgen}
-\title{Generates a Pseudo-Random Sample under the Stratified Block Randomization
-The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).}
+\title{Generates a Pseudo-Random Sample under the Stratified Block Randomization}
 \usage{
 sreg.rgen(
   n,
@@ -34,7 +33,6 @@ sreg.rgen(
 a data frame containing the generated values of \code{Y}, \code{S}, \code{D}, \code{G.id}, \code{Ng}, and \code{X}
 }
 \description{
-Generates a Pseudo-Random Sample under the Stratified Block Randomization
 The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).
 }
 \examples{

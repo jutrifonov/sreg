@@ -85,6 +85,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 }
 
 #' Generates a Pseudo-Random Sample under the Stratified Block Randomization
+#' 
 #' The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).
 #' @param n number of observations
 #' @param Nmax maximum size of clusters
