@@ -25,12 +25,12 @@ sreg.rgen(
 
 \item{gamma.vec}{a numeric vector of parameters}
 
-\item{cluster}{a TRUE/FALSE argument indicating whether the dgp should include clusters or not}
+\item{cluster}{a \code{TRUE/FALSE} argument indicating whether the dgp should include clusters or not}
 
-\item{is.cov}{a TRUE/FALSE argument indicating whether the dgp should include covariates or not}
+\item{is.cov}{a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not}
 }
 \value{
-a data frame containing the results
+a data frame containing the generated values of \code{Y}, \code{S}, \code{D}, \code{G.id}, \code{Ng}, \code{X}
 }
 \description{
 Generates a pseudo-random sample for estimating ATE

@@ -91,10 +91,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 #' @param n.strata number of strata
 #' @param tau.vec a numeric vector of treatment effects
 #' @param gamma.vec a numeric vector of parameters
-#' @param cluster a TRUE/FALSE argument indicating whether the dgp should include clusters or not
-#' @param is.cov a TRUE/FALSE argument indicating whether the dgp should include covariates or not
+#' @param cluster a \code{TRUE/FALSE} argument indicating whether the dgp should include clusters or not
+#' @param is.cov a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not
 #'
-#' @return a data frame containing the results
+#' @return a data frame containing the generated values of \code{Y}, \code{S}, \code{D}, \code{G.id}, \code{Ng}, \code{X}
+#' 
 #' @export
 #'
 #' @examples
