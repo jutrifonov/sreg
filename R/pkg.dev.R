@@ -84,8 +84,8 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   return(result)
 }
 
-#' Generates a pseudo-random sample for estimating ATE
-#'
+#' Generates a Pseudo-Random Sample under the Stratified Block Randomization
+#' The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).
 #' @param n number of observations
 #' @param Nmax maximum size of clusters
 #' @param n.strata number of strata
@@ -94,7 +94,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 #' @param cluster a \code{TRUE/FALSE} argument indicating whether the dgp should include clusters or not
 #' @param is.cov a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not
 #'
-#' @return a data frame containing the generated values of \code{Y}, \code{S}, \code{D}, \code{G.id}, \code{Ng}, \code{X}
+#' @return a data frame containing the generated values of \code{Y}, \code{S}, \code{D}, \code{G.id}, \code{Ng}, and \code{X}
 #' 
 #' @export
 #'
