@@ -15,7 +15,7 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 
 \item{G.id}{a numeric vector of cluster indicators; if \code{G.id = NULL} then the estimator without clusters is applied}
 
-\item{Ng}{a numeric vector of cluster sizes; if \code{Ng = NULL} then \code{Ng} is assumed to be equal to the number of available observations in every cluster \eqn{g \in \mathbb{G}} (i.e, \eqn{N_g = \sum_{i = 1}^{n} \mathbb{I}\{G_{i} = g\}})}
+\item{Ng}{a numeric vector of cluster sizes; if \code{Ng = NULL} then \code{Ng} is assumed to be equal to the number of available observations in every cluster \eqn{g \in \mathbb{G}} (i.e., \eqn{N_g = \sum_{i = 1}^{n} \mathbb{I}\{G_{i} = g\}})}
 
 \item{X}{a data frame with columns representing the covariate values for every observation; if \code{X = NULL} then the estimator without linear adjustments is applied}
 
