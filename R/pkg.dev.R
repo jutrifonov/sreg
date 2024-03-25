@@ -74,7 +74,7 @@
 #' X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 #' result <- sreg::sreg(Y, S, D, X)
 sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
-  if (is.null(G.id) | is.null(Ng)) {
+  if (is.null(G.id)) {
     result <- res.sreg(Y, S, D, X, HC1)
     summary.sreg(result)
   } else {
