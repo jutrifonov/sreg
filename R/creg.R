@@ -394,7 +394,6 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
   if (is.null(S)) {
     S <- rep(1, n)
   }
-
   if (!is.null(X)) {
     model <- lm.iter.creg(Y, S, D, G.id, Ng, X)
     fit <- tau.hat.creg(Y, S, D, G.id, Ng, X, model)
@@ -533,8 +532,7 @@ summary.creg <- function(model)
     "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"
   ))
   if(is.null(model$data$Ng)){
-    #print("HERE")
-    warning("Ng is not provided (Ng = NULL)! Ng is assumed being equal to the number of available observations in every cluster g.")
+    warning("Warning: cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
   }
 }
 
