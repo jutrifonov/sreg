@@ -399,6 +399,17 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
     S <- rep(1, n)
   }
   if (!is.null(X)) {
+    df <- data.frame(G.id, X)
+    if (!check.cluster(df)){
+      X.0 <- X
+      df.mod <- as.data.frame(df %>%
+       group_by(G.id) %>%
+       mutate(across(everything(), ~ if (is.numeric(.)) mean(.x, na.rm = TRUE) else .x)) %>%
+       ungroup())
+       X <- df.mod[, 2:ncol(df.mod)]
+    }else{
+      X.0 <- X
+    }
     model <- lm.iter.creg(Y, S, D, G.id, Ng, X)
     fit <- tau.hat.creg(Y, S, D, G.id, Ng, X, model)
     tau.est <- fit$tau.hat
@@ -417,8 +428,8 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
       "ols.iter" = model$theta.list,
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
-      "data"     = data.frame(Y, S, D, G.id, Ng, X),
-      "lin.adj"  = data.frame(X)
+      "data"     = data.frame(Y, S, D, G.id, Ng, X.0),
+      "lin.adj"  = data.frame(X.0)
     )
       }else{
        res.list <- list(
@@ -430,8 +441,8 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
       "ols.iter" = model$theta.list,
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
-      "data"     = data.frame(Y, S, D, G.id, X),
-      "lin.adj"  = data.frame(X)
+      "data"     = data.frame(Y, S, D, G.id, X.0),
+      "lin.adj"  = data.frame(X.0)
     ) 
       }
   } else{
@@ -539,13 +550,34 @@ summary.creg <- function(model)
     "Signif. codes:  0 ‘***’ 0.001 ‘**’",
     "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"
   ))
+  ### Warnings: ###
   if(is.null(model$data$Ng)){
     warning("Warning: cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
   }
   if(any(sapply(model$ols.iter, function(x) any(is.na(x))))){
     warning("Warning: There are not enough degrees of freedom to estimate the model. Please consider reducing the number of covariates (k = ncol(X)) or estimating the model without linear adjustments.")
+  }
+  if(!check.cluster(data.frame("G.id" = model$data$G.id, model$lin.adj))){
+    warning("Warning: X is nut cluster level.")
 
   }
+}
+#-------------------------------------------------------------------------
+# %# (12) Function to check if covariates are the same within each cluster
+#-------------------------------------------------------------------------
+check.cluster <- function(df)
+#-------------------------------------------------------------------------
+{
+  cov.names <- names(df)[-1]              # Get all column names except G.id
+  group.by.cov <- rlang::syms(c("G.id"))  # Dynamically create group_by covariates
+
+  cov.same <- df %>%
+    group_by(!!!group.by.cov) %>%
+    summarize(across(all_of(cov.names), ~ n_distinct(.) == 1)) %>%
+    ungroup() %>%
+    summarize(all.same = all(c_across(all_of(cov.names))))
+
+  return(cov.same$all.same)
 }
 
 #-------------------------------------------------------------------------------
