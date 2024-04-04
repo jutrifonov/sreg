@@ -60,8 +60,18 @@ lm.iter.creg <- function(Y, S, D, G.id, Ng, X)
         data.filtered <- filter.ols.creg(data, s, d)
         data.X <- data.filtered[, 6:(6 + ncol(X) - 1)]
         data.filtered.adj <- data.frame(Y.bar.Ng = data.filtered$Y.bar * data.filtered$Ng, data.X)
-        result <- lm(Y.bar.Ng ~ ., data = data.filtered.adj)
+        result <- tryCatch(
+          {
+            lm(Y.bar.Ng ~ ., data = data.filtered.adj)
+          }, error = function(e) {
+            NULL
+          }
+        )
+        if(is.null(result)){
+        theta.list[[d + 1]][s, ] <- rep(NA, ncol(X))
+      } else{
         theta.list[[d + 1]][s, ] <- coef(result)[2:(1 + ncol(X))]
+      }
       }
     }
     list.rtrn <- list(
@@ -410,6 +420,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
       "t.stat"   = t.stat,
       "p.value"  = p.value,
       "as.CI"    = c(CI.left, CI.right),
+      "ols.iter" = model$theta.list,
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
       "data"     = data.frame(Y, S, D, G.id, Ng, X),
@@ -422,6 +433,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
       "t.stat"   = t.stat,
       "p.value"  = p.value,
       "as.CI"    = c(CI.left, CI.right),
+      "ols.iter" = model$theta.list,
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
       "data"     = data.frame(Y, S, D, G.id, X),
@@ -443,6 +455,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
       "t.stat"   = t.stat,
       "p.value"  = p.value,
       "as.CI"    = c(CI.left, CI.right),
+      "ols.iter" = NULL,
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
       "data"     = data.frame(Y, S, D, G.id, Ng),
@@ -455,6 +468,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
       "t.stat"   = t.stat,
       "p.value"  = p.value,
       "as.CI"    = c(CI.left, CI.right),
+      "ols.iter" = NULL,
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
       "data"     = data.frame(Y, S, D, G.id),
@@ -533,6 +547,9 @@ summary.creg <- function(model)
   ))
   if(is.null(model$data$Ng)){
     warning("Warning: cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
+  }
+  if(any(sapply(model$ols.iter, function(x) any(is.na(x))))){
+    warning("Warning: not enough degrees of freedom.")
   }
 }
 

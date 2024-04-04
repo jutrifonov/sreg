@@ -47,8 +47,19 @@ lm.iter.sreg <- function(Y, S, D, X)
       data.filtered <- filter.ols.sreg(Y, S, D, X, s, d)
       data.X <- data.filtered[, 4:(4 + ncol(X) - 1)]
       data.filtered.adj <- data.frame(Y = data.filtered$Y, data.X)
-      result <- lm(Y ~ ., data = data.filtered.adj)
-      theta.list[[d + 1]][s, ] <- coef(result)[2:(2 + ncol(X) - 1)]
+      #result <- lm(Y ~ ., data = data.filtered.adj)
+      result <- tryCatch(
+        {
+          lm(Y ~ ., data = data.filtered.adj)
+        }, error = function(e) {
+          NULL
+        }
+      )
+      if(is.null(result)){
+        theta.list[[d + 1]][s, ] <- rep(NA, ncol(X))
+      } else{
+        theta.list[[d + 1]][s, ] <- coef(result)[2:(2 + ncol(X) - 1)]
+      }
     }
   }
   list.rtrn <- theta.list
@@ -108,7 +119,6 @@ tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
 #-------------------------------------------------------------------
 {
   tau.hat <- numeric(max(D))
-  #tau.hat <- rep(NA, max(D))
   for (d in 1:max(D))
   {
     if (!is.null(X)) {
@@ -323,6 +333,7 @@ res.sreg <- function(Y, S=NULL, D, X=NULL, HC1)
       "t.stat"   = t.stat,
       "p.value"  = p.value,
       "as.CI"    = c(CI.left, CI.right),
+      "ols.iter" = model,
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
       "data"     = data.frame(Y, S, D, X),
@@ -341,6 +352,7 @@ res.sreg <- function(Y, S=NULL, D, X=NULL, HC1)
       "t.stat"   = t.stat,
       "p.value"  = p.value,
       "as.CI"    = c(CI.left, CI.right),
+      "ols.iter" = NULL,
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
       "data"     = data.frame(Y, S, D),
@@ -414,6 +426,10 @@ cat(paste0(
     "Signif. codes:  0 ‘***’ 0.001 ‘**’",
     "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"
   ))
+    #if(any(is.na(model$ols.iter)))
+    if(any(sapply(model$ols.iter, function(x) any(is.na(x))))){
+    warning("Warning: not enough degrees of freedom.")
+  }
 }
 
 
