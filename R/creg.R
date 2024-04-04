@@ -558,8 +558,7 @@ summary.creg <- function(model)
     warning("Warning: There are not enough degrees of freedom to estimate the model. Please consider reducing the number of covariates (k = ncol(X)) or estimating the model without linear adjustments.")
   }
   if(!check.cluster(data.frame("G.id" = model$data$G.id, model$lin.adj))){
-    warning("Warning: X is nut cluster level.")
-
+    warning("Warning: The X matrix includes individual-level covariates with varying values within clusters. Utilizing cluster-level averaging in the estimation process.")
   }
 }
 #-------------------------------------------------------------------------
