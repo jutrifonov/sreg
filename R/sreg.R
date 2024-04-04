@@ -2,9 +2,9 @@
 ### This R file provides the collection ####
 ### of functions to estimate the ATE    ####
 ### under CAR with multiple treatments  ####
-# %##%##%##%###%##%##%##%###%##%##%##%###%##
+##%##%##%##%###%##%##%##%###%##%##%##%###%##
 # %##%##%##%##
-# %# v.2.1.0
+# %# v.2.2.3
 # %##%##%##%##
 #-------------------------------------------------------------------
 # %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##
@@ -228,7 +228,6 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) {
       if (HC1 == TRUE) {
         var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S) + max(D) * max(S)))) +
           mean(Xi.hat.2^2)
-        # var.vec[d] <- sigma.hat.sq * (n / (n - (max(S) + max(D) * max(S))))
       } else {
         var.vec[d] <- sigma.hat.sq
       }
@@ -426,7 +425,6 @@ cat(paste0(
     "Signif. codes:  0 ‘***’ 0.001 ‘**’",
     "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"
   ))
-    #if(any(is.na(model$ols.iter)))
     if(any(sapply(model$ols.iter, function(x) any(is.na(x))))){
     warning("Warning: There are not enough degrees of freedom to estimate the model. Please consider reducing the number of covariates (k = ncol(X)) or estimating the model without linear adjustments.")
   }

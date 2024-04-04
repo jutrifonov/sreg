@@ -1,17 +1,11 @@
-# %##%##%##%###%##%##%##%###%##%##%##%###%##
+##%##%##%##%###%##%##%##%###%##%##%##%###%##
 ### This R file provides the collection ####
 ### of functions to estimate the ATE    ####
 ### under CAR with multiple treatments  ####
 ###        & cluster-level treatment    ####
 # %##%##%##%###%##%##%##%###%##%##%##%###%##
-####      The code is developed by      ####
-####      @Juri Trifonov, UChicago      ####
-####            Supervisors:            ####
-####      @Azeem Shaikh, UChicago       ####
-####    @Max Tabord-Meehan, UChicago    ####
-# %##%##%##%###%##%##%##%###%##%##%##%###%##
 # %##%##%##%##
-# %# v.2.1.0
+# %# v.2.2.3
 # %##%##%##%##
 #-------------------------------------------------------------------
 # %##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##%##
