@@ -426,7 +426,7 @@ cat(paste0(
     "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"
   ))
     if(any(sapply(model$ols.iter, function(x) any(is.na(x))))){
-    warning("Warning: There are not enough degrees of freedom to estimate the model. Please consider reducing the number of covariates (k = ncol(X)) or estimating the model without linear adjustments.")
+    warning("Warning: there are not enough degrees of freedom to estimate the model. Please consider reducing the number of covariates (k = ncol(X)) or estimating the model without linear adjustments.")
   }
 }
 
