@@ -555,10 +555,10 @@ summary.creg <- function(model)
     warning("Warning: cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
   }
   if(any(sapply(model$ols.iter, function(x) any(is.na(x))))){
-    warning("Warning: There are not enough degrees of freedom to estimate the model. Please consider reducing the number of covariates (k = ncol(X)) or estimating the model without linear adjustments.")
+    warning("Warning: there are not enough degrees of freedom to estimate the model. Please consider reducing the number of covariates (k = ncol(X)) or estimating the model without linear adjustments.")
   }
   if(!check.cluster(data.frame("G.id" = model$data$G.id, model$lin.adj))){
-    warning("Warning: The X matrix includes individual-level covariates with varying values within clusters. Utilizing cluster-level averaging to estimate the model.")
+    warning("Warning: the X matrix includes individual-level covariates with varying values within clusters. Utilizing cluster-level averaging to estimate the model.")
   }
 }
 #-------------------------------------------------------------------------
