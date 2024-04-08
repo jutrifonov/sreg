@@ -5,13 +5,13 @@
 #' @import tidyr
 #' @import dplyr
 #'
-#' @param Y a numeric vector of the observed outcomes
-#' @param S a numeric vector of strata indicators; if \code{S = NULL} then the estimator without strata is applied
-#' @param D a numeric vector of treatments
-#' @param G.id a numeric vector of cluster indicators; if \code{G.id = NULL} then the estimator without clusters is applied
-#' @param Ng a numeric vector of cluster sizes; if \code{Ng = NULL} then \code{Ng} is assumed to be equal to the number of available observations in every cluster \eqn{g \in \mathbb{G}} (i.e., \eqn{N_g = \sum_{i = 1}^{n} \mathbb{I}\{G_{i} = g\}})
-#' @param X a data frame with columns representing the covariate values for every observation; if \code{X = NULL} then the estimator without linear adjustments is applied
-#' @param HC1 a \code{TRUE/FALSE} argument indicating whether the small sample correction should be applied to the variance estimator
+#' @param Y a numeric \eqn{n \times 1} vector of the observed outcomes
+#' @param S a numeric \eqn{n \times 1} vector of strata indicators;  if \code{NULL} then the estimation is performed assuming no stratification
+#' @param D a numeric \eqn{n \times 1} vector of treatments indexed by \eqn{\{0, 1, 2, \ldots\}$, where $\code{D} = 0} denotes the control
+#' @param G.id a numeric \eqn{n \times 1} vector of cluster indicators; if \code{NULL} then estimation is performed assuming treatment is assigned at the individual level
+#' @param Ng a numeric \eqn{n \times 1} vector of cluster sizes; if \code{NULL} then \code{Ng} is assumed to be equal to the number of available observations in every cluster
+#' @param X a data frame with columns representing the covariate values for every observation; if \code{NULL} then the estimator without linear adjustments is applied
+#' @param HC1 a \code{TRUE/FALSE} logical argument indicating whether the small sample correction should be applied to the variance estimator
 #'
 #'
 #' @return An object of class \code{sreg} that is a list containing the following elements:
