@@ -17,7 +17,7 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 
 \item{Ng}{a numeric \eqn{n \times 1} vector of cluster sizes; if \code{NULL} then \code{Ng} is assumed to be equal to the number of available observations in every cluster}
 
-\item{X}{a data frame with columns representing the covariate values for every observation; if \code{NULL} then the estimator without linear adjustments is applied}
+\item{X}{a data frame with columns representing the cluster-level covariate values for every observation; if \code{NULL} then the estimator without linear adjustments is applied. (Note: if individual-level covariates with varying values within clusters are provided, then the cluster-level averaging is implemented to estimate the model)}
 
 \item{HC1}{a \code{TRUE/FALSE} logical argument indicating whether the small sample correction should be applied to the variance estimator}
 }
