@@ -1,15 +1,13 @@
 Package: sreg
 Type: Package
-Title: ATE Estimation under CAR and Cluster-Level Treatment Assignment
+Title: ATE Estimation in Stratified Randomized Experiments
 Version: 2.2.3
 Author: Juri Trifonov <jutrifonov@uchicago.edu>
 Maintainer: Juri Trifonov <jutrifonov@uchicago.edu>
-Description: The 'sreg' package offers a robust toolkit for estimating average treatment effects (ATEs) 
-  within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR). 
-  Designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, the 'sreg' 
-  package not only provides ATE estimators but also includes sophisticated features for calculating adjusted 
-  variance estimators developed in papers (Bugni, Canay, Shaikh; 2017),
-  (Bugni, Canay, Shaikh, Tabord-Meehan; 2023) and (Jiang, Linton, Tang, Zhang, 2023).
+Description: The `sreg' package offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. 
+             The package is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accomodates 
+             optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors 
+             based on Bugni, Canay, Shaikh (2018), Bugni, Canay, Shaikh, Tabord-Meehan (2023), and Jiang, Linton, Tang, Zhang (2023).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
