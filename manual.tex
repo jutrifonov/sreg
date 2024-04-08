@@ -26,8 +26,8 @@
 }{%
 
 }
-\title{\textbf{Package 'sreg'}}
-\author{Juri Trifonov \\ \textit{Last version is available at} \href{https://github.com/yurytrifonov/sreg}{https://github.com/yurytrifonov/sreg}
+\title{\textbf{Package `sreg'}}
+\author{Juri Trifonov \\ \textit{Latest version is available at} \href{https://github.com/yurytrifonov/sreg}{https://github.com/yurytrifonov/sreg}
 }
 \date{\today}
 % Define a custom environment for function titles and descriptions
@@ -56,26 +56,25 @@
 %\href{https://github.com/yurytrifonov/sreg}{https://github.com/yurytrifonov/sreg} 
 %\end{center}
 \subsection*{General Description}
-The 'sreg' package for R offers a robust toolkit for estimating average treatment effects (ATEs) within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR). Designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, the 'sreg' package not only provides ATE estimators but also includes features for calculating adjusted variance estimators developed in papers (Bugni, Canay, Shaikh; 2017), (Bugni, Canay, Shaikh, Meehan; 2023) and (Jiang, Linton, Tang, Zhang; 2023).
+The `sreg' package offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. The package is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018), Bugni, Canay, Shaikh, Tabord-Meehan (2023), and Jiang, Linton, Tang, Zhang (2023).
 
 \subsection*{The function sreg()}
 
-\begin{cranfunction}{sreg}{\textit{Estimates the ATE, standard errors, calculates p--values \& confidence intervals.}}
+\begin{cranfunction}{sreg}{\textit{Estimates ATEs, standard errors, p--values \& confidence intervals for stratified experiments}}
 \end{cranfunction}
 \subsubsection*{Description}
-This function estimates the ATE(s) and the corresponding standard error(s) given the data provided. Multiple treatments, strata-based treatments, cluster-level treatments, and linear adjustments are supported. The function implements the appropriate estimator(s) given the data provided.
-\subsubsection*{Usage}
-\texttt{sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, Ng.cov = FALSE, HC1 = FALSE)}
+This function estimates the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
+\subsubsection*{Syntax}
+\texttt{sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = FALSE)}
 
 \subsubsection*{Arguments}
 \begin{argdesc}
     \texttt{Y} & a numeric $n \times 1$ vector of the \textit{observed outcomes}. \\
-    \texttt{S} & a numeric $n \times 1$ vector of \textit{strata indicators}; if \texttt{NULL} then the estimator without strata is applied. \\
-    \texttt{D} & a numeric $n \times 1$ vector of \textit{treatments}. \\
-    \texttt{G.id} & a numeric $n \times 1$ vector of \textit{cluster indicators}; if \texttt{NULL} then the estimator without clusters is applied. \\
-    \texttt{Ng} & a numeric $n \times 1$ vector of \textit{cluster sizes}; if \texttt{NULL} then \texttt{Ng} is assumed to be equal to the number of available observations in every cluster $g \in \mathbb{G}$ (i.e, $N_g = \sum_{i = 1}^{n} \mathbb{I}\{G_{i} = g\}$). \\
-    \texttt{X} & a data frame with columns representing the \textit{covariate values} for every observation; if \texttt{NULL} then the estimator without linear adjustments is applied. \\
-    \texttt{Ng.cov} & a \texttt{TRUE/FALSE} logical argument indicating whether the \texttt{Ng} should be included as the only covariate in linear adjustments when \texttt{X = NULL}. \\
+    \texttt{S} & a numeric $n \times 1$ vector of \textit{strata indicators}; if \texttt{NULL} then the estimation is performed assuming no stratification. \\
+    \texttt{D} & a numeric $n \times 1$ vector of \textit{treatments} indexed by $\{0, 1, 2, \ldots\}$, where $\texttt{D} = 0$ denotes the control. \\
+    \texttt{G.id} & a numeric $n \times 1$ vector of \textit{cluster indicators}; if \texttt{NULL} then estimation is performed assuming treatment is assigned at the individual level. \\
+    \texttt{Ng} & a numeric $n \times 1$ vector of \textit{cluster sizes}; if \texttt{NULL} then \texttt{Ng} is assumed to be equal to the number of available observations in every cluster.\\ %$g \in \mathbb{G}$ (i.e, $N_g = \sum_{i = 1}^{n} \mathbb{I}\{G_{i} = g\}$). \\
+    \texttt{X} & a data frame with columns representing the cluster-level \textit{covariate values} for every observation; if \texttt{NULL} then the estimator without linear adjustments is applied. \textit{(Note: if individual-level covariates with varying values within clusters are provided, then the cluster-level averaging is implemented to estimate the model)}. \\
     \texttt{HC1} & a \texttt{TRUE/FALSE} logical argument indicating whether the small sample correction should be applied to the variance estimator. \\
 \end{argdesc}
 
@@ -176,11 +175,21 @@ data.clean <- data.clean %>%
   mutate(D = ifelse(D == 3, 0, D))
 # Look at the input data
 head(data.clean)
-     Y D S1 11.2 1 12 12.4 0 33 11.9 0 54 13.1 0 15 13.4 2 26 10.7 0 1
+     Y D S
+1 11.2 1 1
+2 12.4 0 3
+3 11.9 0 5
+4 13.1 0 1
+5 13.4 2 2
+6 10.7 0 1
 
 # Look at the frequency table
 table(D = data.clean$D, S = data.clean$S)
-   SD    1  2  3  4  5  0 15 19 16 12 10  1 16 19 15 10 10  2 17 20 15 11 10
+   S
+D    1  2  3  4  5
+  0 15 19 16 12 10
+  1 16 19 15 10 10
+  2 17 20 15 11 10
   
 Y <- data.clean$Y
 D <- data.clean$D
@@ -189,7 +198,17 @@ S <- data.clean$S
 # Replicate the results from (Bugni et al, 2019)
 result <- sreg::sreg(Y, S, D, HC1 = TRUE)
 
-Saturated Model Estimation Results under CARObservations: 215 Number of treatments: 2 Number of strata: 5 ---Coefficients:       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance1 -0.05113 0.20645 -0.24766 0.80440     -0.45577       0.35351             2  0.40903 0.20651  1.98065 0.04763      0.00427       0.81379            *---Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Saturated Model Estimation Results under CAR
+Observations: 215 
+Number of treatments: 2 
+Number of strata: 5 
+---
+Coefficients:
+       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
+1 -0.05113 0.20645 -0.24766 0.80440     -0.45577       0.35351             
+2  0.40903 0.20651  1.98065 0.04763      0.00427       0.81379            *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 ## Besides that, it is possible to add linear adjustments (covariates)
 x_1 <- data$pills_taken
@@ -199,7 +218,13 @@ data.clean <- data.clean %>%
   mutate(D = ifelse(D == 3, 0, D))
 # Look at the input data
 head(data.clean)
-     Y D S x_1      x_21 11.2 1 1   0 156.84602 12.4 0 3  16 186.41483 11.9 0 5   5 209.05134 13.1 0 1  21 146.20125 13.4 2 2   9 168.77216 10.7 0 1   5 146.0370
+     Y D S x_1      x_2
+1 11.2 1 1   0 156.8460
+2 12.4 0 3  16 186.4148
+3 11.9 0 5   5 209.0513
+4 13.1 0 1  21 146.2012
+5 13.4 2 2   9 168.7721
+6 10.7 0 1   5 146.0370
 Y <- data.clean$Y
 D <- data.clean$D
 S <- data.clean$S
@@ -208,7 +233,17 @@ X <- data.frame(data.clean$x_1, data.clean$x_2)
 # Results with linear adjustments
 result <- sreg::sreg(Y, S, D, X, HC1 = TRUE)
 
-Saturated Model Estimation Results under CARObservations: 215 Number of treatments: 2 Number of strata: 5 ---Coefficients:       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance1 -0.02862 0.17964 -0.15929 0.87344     -0.38071       0.32348             2  0.34609 0.18362  1.88477 0.05946     -0.01381       0.70598            .---Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Saturated Model Estimation Results under CAR
+Observations: 215 
+Number of treatments: 2 
+Number of strata: 5 
+---
+Coefficients:
+       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
+1 -0.02862 0.17964 -0.15929 0.87344     -0.38071       0.32348             
+2  0.34609 0.18362  1.88477 0.05946     -0.01381       0.70598            .
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 \end{rcode}
 \end{document}
