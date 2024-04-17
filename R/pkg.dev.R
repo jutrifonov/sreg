@@ -32,7 +32,6 @@
 #' @examples
 #' library("sreg")
 #' library("dplyr")
-#' library("haven")
 #' ### Example 1. Simulated Data.
 #' data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = FALSE)
 #' Y <- data$Y
