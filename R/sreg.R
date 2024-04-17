@@ -47,7 +47,6 @@ lm.iter.sreg <- function(Y, S, D, X)
       data.filtered <- filter.ols.sreg(Y, S, D, X, s, d)
       data.X <- data.filtered[, 4:(4 + ncol(X) - 1)]
       data.filtered.adj <- data.frame(Y = data.filtered$Y, data.X)
-      #result <- lm(Y ~ ., data = data.filtered.adj)
       result <- tryCatch(
         {
           lm(Y ~ ., data = data.filtered.adj)
@@ -422,8 +421,8 @@ cat(paste0(
   print(df)
   cat("---\n")
   cat(paste(
-    "Signif. codes:  0 ‘***’ 0.001 ‘**’",
-    "0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n"
+    "Signif. codes:  0 `***` 0.001 `**`",
+    "0.01 `*` 0.05 `.` 0.1 ` ` 1\n"
   ))
     if(any(sapply(model$ols.iter, function(x) any(is.na(x))))){
     warning("Warning: there are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
@@ -630,6 +629,5 @@ form.strata.sreg <- function(baseline, num.strata)
   {
     I.S[, s] <- (W > bounds[s]) * (W <= bounds[s + 1])
   }
-
   return(I.S)
 }
