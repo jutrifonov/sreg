@@ -4,6 +4,7 @@
 #' @import extraDistr
 #' @import tidyr
 #' @import dplyr
+#' @import rlang
 #'
 #' @param Y a numeric \eqn{n \times 1} vector of the observed outcomes
 #' @param S a numeric \eqn{n \times 1} vector of strata indicators;  if \code{NULL} then the estimation is performed assuming no stratification
