@@ -17,5 +17,7 @@ Imports:
     extraDistr,
     rlang,
     tidyr
+Suggests:
+    haven
 Depends: 
     R (>= 2.10)
