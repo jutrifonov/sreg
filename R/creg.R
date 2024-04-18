@@ -245,37 +245,37 @@ as.var.creg <- function(model = NULL, fit, HC1) {
       data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.Ng = Y.bar.g * Ng)
 
       count.Xi.1 <- data %>%
-        group_by(S, A) %>%
-        summarise(Xi.mean.1 = mean(Xi.tilde.1)) %>%
-        filter(A != -999999)
+        group_by(.data$S, .data$A) %>%
+        summarise(Xi.mean.1 = mean(.data$Xi.tilde.1)) %>%
+        filter(.data$A != -999999)
       count.Xi.0 <- data %>%
-        group_by(S, A) %>%
-        summarise(Xi.mean.0 = mean(Xi.tilde.0)) %>%
-        filter(A != -999999)
+        group_by(.data$S, .data$A) %>%
+        summarise(Xi.mean.0 = mean(.data$Xi.tilde.0)) %>%
+        filter(.data$A != -999999)
       count.Y <- data %>%
-        group_by(S, A) %>%
-        summarise(Y.bar = mean(Y.Ng)) %>%
-        filter(A != -999999)
+        group_by(.data$S, .data$A) %>%
+        summarise(Y.bar = mean(.data$Y.Ng)) %>%
+        filter(.data$A != -999999)
       count.Ng <- data %>%
-        group_by(S) %>%
-        summarise(Ng.bar = mean(Ng))
+        group_by(.data$S) %>%
+        summarise(Ng.bar = mean(.data$Ng))
 
-      j <- left_join(count.Xi.1, count.Xi.0, by = join_by(S == S, A == A)) %>%
-        left_join(count.Y, by = join_by(S == S, A == A)) %>%
-        left_join(count.Ng, by = join_by(S == S))
+      j <- left_join(count.Xi.1, count.Xi.0, by = join_by("S" == "S", "A" == "A")) %>%
+        left_join(count.Y, by = join_by("S" == "S", "A" == "A")) %>%
+        left_join(count.Ng, by = join_by("S" == "S"))
 
       Xi.tilde.1.all <- j %>%
-        select(c(S, A, Xi.mean.1)) %>%
-        spread(key = A, value = Xi.mean.1)
+        select(c(.data$S, .data$A, .data$Xi.mean.1)) %>%
+        spread(key = .data$A, value = .data$Xi.mean.1)
       Xi.tilde.0.all <- j %>%
-        select(c(S, A, Xi.mean.0)) %>%
-        spread(key = A, value = Xi.mean.0)
+        select(c(.data$S, .data$A, .data$Xi.mean.0)) %>%
+        spread(key = .data$A, value = .data$Xi.mean.0)
       Y.Ng.all <- j %>%
-        select(c(S, A, Y.bar)) %>%
-        spread(key = A, value = Y.bar)
+        select(c(.data$S, .data$A, .data$Y.bar)) %>%
+        spread(key = .data$A, value = .data$Y.bar)
       Ng.bar.all <- j %>%
-        select(c(S, A, Ng.bar)) %>%
-        spread(key = A, value = Ng.bar)
+        select(c(.data$S, .data$A, .data$Ng.bar)) %>%
+        spread(key = .data$A, value = .data$Ng.bar)
 
       Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
@@ -295,7 +295,7 @@ as.var.creg <- function(model = NULL, fit, HC1) {
       sigma.hat.sq <- mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2) + Xi.hat.2^2) / (mean(Ng))^2
 
       if (HC1 == TRUE) {
-        var.vec[d] <- ((mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S) + max(D) * max(S)))) +
+        var.vec[d] <- ((mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(data$S) + max(data$D) * max(data$S)))) +
           mean(Xi.hat.2^2)) / (mean(Ng))^2
       } else {
         var.vec[d] <- sigma.hat.sq
@@ -325,37 +325,37 @@ as.var.creg <- function(model = NULL, fit, HC1) {
       data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.Ng = Y.bar.g * Ng)
 
       count.Xi.1 <- data %>%
-        group_by(S, A) %>%
-        summarise(Xi.mean.1 = mean(Xi.tilde.1)) %>%
-        filter(A != -999999)
+        group_by(.data$S, .data$A) %>%
+        summarise(Xi.mean.1 = mean(.data$Xi.tilde.1)) %>%
+        filter(.data$A != -999999)
       count.Xi.0 <- data %>%
-        group_by(S, A) %>%
-        summarise(Xi.mean.0 = mean(Xi.tilde.0)) %>%
-        filter(A != -999999)
+        group_by(.data$S, .data$A) %>%
+        summarise(Xi.mean.0 = mean(.data$Xi.tilde.0)) %>%
+        filter(.data$A != -999999)
       count.Y <- data %>%
-        group_by(S, A) %>%
-        summarise(Y.bar = mean(Y.Ng)) %>%
-        filter(A != -999999)
+        group_by(.data$S, .data$A) %>%
+        summarise(Y.bar = mean(.data$Y.Ng)) %>%
+        filter(.data$A != -999999)
       count.Ng <- data %>%
-        group_by(S) %>%
-        summarise(Ng.bar = mean(Ng))
+        group_by(.data$S) %>%
+        summarise(Ng.bar = mean(.data$Ng))
 
-      j <- left_join(count.Xi.1, count.Xi.0, by = join_by(S == S, A == A)) %>%
-        left_join(count.Y, by = join_by(S == S, A == A)) %>%
-        left_join(count.Ng, by = join_by(S == S))
+      j <- left_join(count.Xi.1, count.Xi.0, by = join_by("S" == "S", "A" == "A")) %>%
+        left_join(count.Y, by = join_by("S" == "S", "A" == "A")) %>%
+        left_join(count.Ng, by = join_by("S" == "S"))
 
       Xi.tilde.1.all <- j %>%
-        select(c(S, A, Xi.mean.1)) %>%
-        spread(key = A, value = Xi.mean.1)
+        select(c(.data$S, .data$A, .data$Xi.mean.1)) %>%
+        spread(key = .data$A, value = .data$Xi.mean.1)
       Xi.tilde.0.all <- j %>%
-        select(c(S, A, Xi.mean.0)) %>%
-        spread(key = A, value = Xi.mean.0)
+        select(c(.data$S, .data$A, .data$Xi.mean.0)) %>%
+        spread(key = .data$A, value = .data$Xi.mean.0)
       Y.Ng.all <- j %>%
-        select(c(S, A, Y.bar)) %>%
-        spread(key = A, value = Y.bar)
+        select(c(.data$S, .data$A, .data$Y.bar)) %>%
+        spread(key = .data$A, value = .data$Y.bar)
       Ng.bar.all <- j %>%
-        select(c(S, A, Ng.bar)) %>%
-        spread(key = A, value = Ng.bar)
+        select(c(.data$S, .data$A, .data$Ng.bar)) %>%
+        spread(key = .data$A, value = .data$Ng.bar)
 
       Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
@@ -373,7 +373,7 @@ as.var.creg <- function(model = NULL, fit, HC1) {
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
       if (HC1 == TRUE) {
-        var.vec[d] <- ((mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S) + max(D) * max(S)))) +
+        var.vec[d] <- ((mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(data$S) + max(data$D) * max(data$S)))) +
           mean(Xi.hat.2^2)) / mean(Ng)^2
       } else {
         sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2) / (mean(Ng))^2
