@@ -5,7 +5,7 @@
 #' @import tidyr
 #' @import dplyr
 #' @import rlang
-#'
+#' 
 #' @param Y a numeric \eqn{n \times 1} vector of the observed outcomes
 #' @param S a numeric \eqn{n \times 1} vector of strata indicators;  if \code{NULL} then the estimation is performed assuming no stratification
 #' @param D a numeric \eqn{n \times 1} vector of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
@@ -131,7 +131,7 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
   } else {
     n.treat <- length(tau.vec) # number of treatments
     pot.outcomes <- dgp.po.sreg(
-      n = n, tau.vec, gamma = gamma.vec,
+      n = n, tau.vec, gamma.vec = gamma.vec,
       n.treat = n.treat, is.cov = is.cov
     ) # generate pot. outcomes and W
     strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata) # generate strata
