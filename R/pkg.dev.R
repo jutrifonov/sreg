@@ -5,6 +5,7 @@
 #' @import tidyr
 #' @import dplyr
 #' @import rlang
+#' @importFrom stats aggregate coef lm pnorm qnorm rbeta rnorm
 #' 
 #' @param Y a numeric \eqn{n \times 1} vector of the observed outcomes
 #' @param S a numeric \eqn{n \times 1} vector of strata indicators;  if \code{NULL} then the estimation is performed assuming no stratification
