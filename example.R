@@ -11,7 +11,7 @@ packageDescription("sreg") # package description
 set.seed(123) # fix the random seed
 
 # Generate a pseudo-random sample without clusters and with only one treatment = 0
-data <- sreg.rgen(n = 20, tau.vec = c(0.8), n.strata = 5, cluster = F, is.cov = TRUE)
+data <- sreg.rgen(n = 1000, tau.vec = c(0.8), n.strata = 5, cluster = F, is.cov = TRUE)
 Y <- data$Y
 S <- data$S
 D <- data$D
@@ -29,21 +29,18 @@ Y <- data$Y
 S <- data$S
 D <- data$D
 X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-head(X)
-Ng <- data$Ng
-#Ng[1:30] <- 40
-X[1, 1] <- 2.3894
-X[1, 2] <- 5.2090398
-X[2, 1] <- 4.2049587
-X[2, 2] <- 9.01023948
 G.id <- data$G.id
-save <- res.creg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+Ng <- data$Ng
+#Ng[1:40] <- 50
+#X[1, 1] <- 2.3894
+#X[1, 2] <- 5.2090398
+#X[2, 1] <- 4.2049587
+#X[2, 2] <- 9.01023948
+head(X)
+save <- sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
 save$tau.hat
 save$se.rob
 summary.creg(save)
-
-#X <- data.frame("Ng" = data$Ng, "x_1" = data$x_1, "x_2" = data$x_2)
-# X <- data.frame("Ng" = data$Ng)
 
 data <- data.frame(G.id, X)
 head(data)
