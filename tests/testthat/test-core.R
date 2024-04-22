@@ -64,6 +64,14 @@ test_that("simulations with clusters work", {
 
   expect_equal(round(result$tau.hat, 7), c(0.1548014, 0.6955543))
   expect_equal(round(result$se.rob, 8), c(0.06201006, 0.05871032))
+
+  invisible(capture.output({result <- sreg::sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X)}))
+
+  expect_error(invisible(capture.output({result <- sreg::sreg(Y = NULL, S = S, D, G.id = G.id, Ng = NULL, X = X)})), 
+                  "Observed outcomes have not been provided")
+  expect_error(invisible(capture.output({result <- sreg::sreg(Y, S = S, D = NULL, G.id = NULL, Ng = Ng, X = X)})), 
+                  "Treatments have not been provided")
+
 })
 
 test_that("degrees of freedom warning works", {
