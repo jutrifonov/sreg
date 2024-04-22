@@ -6,7 +6,7 @@
 #' @import dplyr
 #' @import rlang
 #' @importFrom stats aggregate coef lm pnorm qnorm rbeta rnorm
-#' 
+#'
 #' @param Y a numeric \eqn{n \times 1} vector of the observed outcomes
 #' @param S a numeric \eqn{n \times 1} vector of strata indicators;  if \code{NULL} then the estimation is performed assuming no stratification
 #' @param D a numeric \eqn{n \times 1} vector of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
@@ -26,8 +26,8 @@
 #' \item \code{CI.right}: a \eqn{1 \times |\mathcal A|} vector of the right bounds of the 95\% as. confidence interval
 #' \item \code{data}: an original data of the form \code{data.frame(Y, S, D, G.id, Ng, X)}
 #' \item \code{lin.adj}: a data frame representing the covariates that were used in implementing linear adjustments
-#'}
-#' 
+#' }
+#'
 #' @export
 #'
 #' @examples
@@ -87,7 +87,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 }
 
 #' Generates a Pseudo-Random Sample under the Stratified Block Randomization
-#' 
+#'
 #' The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).
 #' @param n number of observations
 #' @param Nmax maximum size of clusters
@@ -98,7 +98,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 #' @param is.cov a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not
 #'
 #' @return a data frame containing the generated values of \code{Y}, \code{S}, \code{D}, \code{G.id}, \code{Ng}, and \code{X}
-#' 
+#'
 #' @export
 #'
 #' @examples

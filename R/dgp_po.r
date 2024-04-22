@@ -68,7 +68,7 @@ dgp.po.creg <- function(Ng, G, tau.vec, sigma1 = sqrt(2),
   {
     assign(paste("mu.", a, sep = ""), tau.vec[a])
   }
-  
+
   beta.rv <- rbeta(G, 2, 2)
   Z.g.2 <- (beta.rv - 0.5) * sqrt(20)
   x_1 <- (rnorm(G, mean = 5, sd = 2) - 5) / 2

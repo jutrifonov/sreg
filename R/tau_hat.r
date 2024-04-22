@@ -86,15 +86,15 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL)
       "Ng"        = Ng.full
     )
   } else {
-    if(!is.null(Ng)){
+    if (!is.null(Ng)) {
       working.df <- data.frame(Y, S, D, G.id, Ng)
-    }else{
+    } else {
       working.df <- data.frame(Y, S, D, G.id)
       working.df <- working.df %>%
-      group_by(G.id) %>%
-      mutate(Ng = n()) %>%
-      ungroup() %>%
-      select(Y, S, D, G.id, Ng)
+        group_by(G.id) %>%
+        mutate(Ng = n()) %>%
+        ungroup() %>%
+        select(Y, S, D, G.id, Ng)
       working.df <- as.data.frame(working.df)
     }
     Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)$Y

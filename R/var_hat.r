@@ -2,9 +2,9 @@
 # %#     Function that implements \hat{\sigma^2} --
 # %#     i.e. the variance estimator
 #-------------------------------------------------------------------
-as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1) 
+as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
 #-------------------------------------------------------------------
-{ 
+{
   var.vec <- numeric(max(D))
   n.vec <- numeric(max(D))
 
@@ -150,12 +150,12 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
   return(se.vec)
 }
 #-------------------------------------------------------------------
-as.var.creg <- function(model = NULL, fit, HC1) 
+as.var.creg <- function(model = NULL, fit, HC1)
 #-------------------------------------------------------------------
 {
   var.vec <- numeric(length(fit$tau.hat))
   n.vec <- numeric(length(fit$tau.hat))
-  
+
   if (!is.null(model)) {
     for (d in 1:length(fit$tau.hat))
     {

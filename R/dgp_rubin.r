@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------
 # %#   Generate the formula for Y.obs (Rubin model)
 #-------------------------------------------------------------------
-gen.rubin.formula.sreg <- function(n.treat) 
+gen.rubin.formula.sreg <- function(n.treat)
 #-------------------------------------------------------------------
 {
   A.values <- 0:n.treat

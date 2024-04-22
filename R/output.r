@@ -27,7 +27,7 @@ summary.sreg <- function(model)
     "Number of strata:",
     max(model$data$S), "\n"
   ))
-cat(paste0(
+  cat(paste0(
     "Covariates used in linear adjustments: ",
     paste(names(model$lin.adj), collapse = ", "), "\n"
   ))
@@ -61,7 +61,7 @@ cat(paste0(
     "Signif. codes:  0 `***` 0.001 `**`",
     "0.01 `*` 0.05 `.` 0.1 ` ` 1\n"
   ))
-    if(any(sapply(model$ols.iter, function(x) any(is.na(x))))){
+  if (any(sapply(model$ols.iter, function(x) any(is.na(x))))) {
     warning("Warning: there are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
   }
 }
@@ -129,13 +129,13 @@ summary.creg <- function(model)
     "0.01 `*` 0.05 `.` 0.1 ` ` 1\n"
   ))
   ### Warnings: ###
-  if(is.null(model$data$Ng)){
+  if (is.null(model$data$Ng)) {
     warning("Warning: cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
   }
-  if(any(sapply(model$ols.iter, function(x) any(is.na(x))))){
+  if (any(sapply(model$ols.iter, function(x) any(is.na(x))))) {
     warning("Warning: there are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
   }
-  if(!check.cluster(data.frame("G.id" = model$data$G.id, model$lin.adj))){
+  if (!check.cluster(data.frame("G.id" = model$data$G.id, model$lin.adj))) {
     warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
   }
 }

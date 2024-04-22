@@ -4,9 +4,9 @@
 check.cluster <- function(df)
 #-------------------------------------------------------------------------
 {
-  cov.names <- names(df)[-1]      
+  cov.names <- names(df)[-1]
   group.by.cov <- rlang::syms(c("G.id"))
-  
+
   cov.same <- df %>%
     group_by(!!!group.by.cov) %>%
     summarize(across(all_of(cov.names), ~ n_distinct(.) == 1)) %>%

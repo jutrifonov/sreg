@@ -57,20 +57,20 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
 #-------------------------------------------------------------------
 {
   n <- length(Y)
-  
+
   if (is.null(S)) {
     S <- rep(1, n)
   }
   if (!is.null(X)) {
     df <- data.frame(G.id, X)
-    if (!check.cluster(df)){
+    if (!check.cluster(df)) {
       X.0 <- X
       df.mod <- as.data.frame(df %>%
-                                group_by(G.id) %>%
-                                mutate(across(everything(), ~ if (is.numeric(.)) mean(.x, na.rm = TRUE) else .x)) %>%
-                                ungroup())
+        group_by(G.id) %>%
+        mutate(across(everything(), ~ if (is.numeric(.)) mean(.x, na.rm = TRUE) else .x)) %>%
+        ungroup())
       X <- df.mod[, 2:ncol(df.mod)]
-    }else{
+    } else {
       X.0 <- X
     }
     model <- lm.iter.creg(Y, S, D, G.id, Ng, X)
@@ -81,7 +81,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
-    if(!is.null(Ng)){
+    if (!is.null(Ng)) {
       res.list <- list(
         "tau.hat"  = tau.est,
         "se.rob"   = se.rob,
@@ -94,7 +94,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
         "data"     = data.frame(Y, S, D, G.id, Ng, X.0),
         "lin.adj"  = data.frame(X.0)
       )
-    }else{
+    } else {
       res.list <- list(
         "tau.hat"  = tau.est,
         "se.rob"   = se.rob,
@@ -106,9 +106,9 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
         "CI.right" = CI.right,
         "data"     = data.frame(Y, S, D, G.id, X.0),
         "lin.adj"  = data.frame(X.0)
-      ) 
+      )
     }
-  } else{
+  } else {
     fit <- tau.hat.creg(Y, S, D, G.id, Ng, X = NULL, model = NULL)
     tau.est <- fit$tau.hat
     se.rob <- as.var.creg(model = NULL, fit, HC1)
@@ -116,7 +116,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
-    if(!is.null(Ng)){
+    if (!is.null(Ng)) {
       res.list <- list(
         "tau.hat"  = tau.est,
         "se.rob"   = se.rob,
@@ -129,7 +129,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
         "data"     = data.frame(Y, S, D, G.id, Ng),
         "lin.adj"  = NULL
       )
-    }else{
+    } else {
       res.list <- list(
         "tau.hat"  = tau.est,
         "se.rob"   = se.rob,

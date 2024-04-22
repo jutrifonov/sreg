@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------
 # %#     Auxiliary function providing the appropriate data.frame
-# %#     for the subsequent iterative OLS estimation. Takes into 
+# %#     for the subsequent iterative OLS estimation. Takes into
 # %#     account the number of observations and creates indicators.
 #-------------------------------------------------------------------
 filter.ols.sreg <- function(Y, S, D, X, s, d)
