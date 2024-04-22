@@ -135,7 +135,9 @@ summary.creg <- function(model)
   if (any(sapply(model$ols.iter, function(x) any(is.na(x))))) {
     warning("Warning: there are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
   }
-  if (!check.cluster(data.frame("G.id" = model$data$G.id, model$lin.adj))) {
-    warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
-  }
+   if (!is.null(model$lin.adj)) {
+      if (!check.cluster(data.frame("G.id" = model$data$G.id, model$lin.adj))) {
+      warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
+      }
+   }
 }
