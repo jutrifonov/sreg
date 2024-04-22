@@ -152,4 +152,9 @@ test_that("empirical example works", {
 
   expect_equal(round(result$tau, 8), c(-0.02861589, 0.34608688))
   expect_equal(round(result$se, 7), c(0.1796427, 0.1836229))
+
+  expect_error(invisible(capture.output({result <- sreg::sreg(Y = NULL, S, D)})), 
+                  "Observed outcomes have not been provided")
+  expect_error(invisible(capture.output({result <- sreg::sreg(Y, S, D = NULL)})), 
+                  "Treatments have not been provided")
 })
