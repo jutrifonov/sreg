@@ -1,5 +1,5 @@
 test_that("empirical example works", {
-
+  library(haven)
   data("AEJapp")
   data <- AEJapp
   Y <- data$gradesq34
