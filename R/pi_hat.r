@@ -17,8 +17,8 @@ pi.hat.sreg <- function(S, D, inverse = FALSE)
   j <- left_join(counts, scount, by = join_by(S == S))
   j$pi_hat <- j$n / j$ns
   pi_hat_all <- j %>%
-    select(c(.data$S, .data$D, .data$pi_hat)) %>%
-    spread(key = .data$D, value = .data$pi_hat)
+    select(c("S", "D", "pi_hat")) %>%
+    spread(key = "D", value = "pi_hat")
   if (inverse) {
     n_repeat <- max(counts$D)
     ret_df <- matrix(replicate(n_repeat, pi_hat_all$"0"), nrow = nrow(pi_hat_all))
@@ -44,8 +44,8 @@ pi.hat.creg <- function(S, D, inverse = FALSE)
   j <- left_join(counts, scount, by = join_by(S == S))
   j$pi_hat <- j$n / j$ns
   pi_hat_all <- j %>%
-    select(c(.data$S, .data$D, .data$pi_hat)) %>%
-    spread(key = .data$D, value = .data$pi_hat)
+    select(c("S", "D", "pi_hat")) %>%
+    spread(key = "D", value = "pi_hat")
   if (inverse) {
     n_repeat <- max(counts$D)
     ret_df <- matrix(replicate(n_repeat, pi_hat_all$"0"), nrow = nrow(pi_hat_all))

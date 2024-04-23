@@ -45,14 +45,14 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       j <- left_join(count.Xi.1, count.Xi.0, by = join_by("S" == "S", "A" == "A")) %>% left_join(count.Y, by = join_by("S" == "S", "A" == "A"))
 
       Xi.tilde.1.all <- j %>%
-        select(c(.data$S, .data$A, .data$Xi.mean.1)) %>%
-        spread(key = .data$A, value = .data$Xi.mean.1)
+        select(c("S", "A", "Xi.mean.1")) %>%
+        spread(key = "A", value = "Xi.mean.1")
       Xi.tilde.0.all <- j %>%
-        select(c(.data$S, .data$A, .data$Xi.mean.0)) %>%
-        spread(key = .data$A, value = .data$Xi.mean.0)
+        select(c("S", "A", "Xi.mean.0")) %>%
+        spread(key = "A", value = "Xi.mean.0")
       Y.tau.D.all <- j %>%
-        select(c(.data$S, .data$A, .data$Y.tau)) %>%
-        spread(key = .data$A, value = .data$Y.tau)
+        select(c("S", "A", "Y.tau")) %>%
+        spread(key = "A", value = "Y.tau")
 
       Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
@@ -113,14 +113,14 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       j <- left_join(count.Xi.1, count.Xi.0, by = join_by("S" == "S", "A" == "A")) %>% left_join(count.Y, by = join_by("S" == "S", "A" == "A"))
 
       Xi.tilde.1.all <- j %>%
-        select(c(.data$S, .data$A, .data$Xi.mean.1)) %>%
-        spread(key = .data$A, value = .data$Xi.mean.1)
+        select(c("S", "A", "Xi.mean.1")) %>%
+        spread(key = "A", value = "Xi.mean.1")
       Xi.tilde.0.all <- j %>%
-        select(c(.data$S, .data$A, .data$Xi.mean.0)) %>%
-        spread(key = .data$A, value = .data$Xi.mean.0)
+        select(c("S", "A", "Xi.mean.0")) %>%
+        spread(key = "A", value = "Xi.mean.0")
       Y.tau.D.all <- j %>%
-        select(c(.data$S, .data$A, .data$Y.tau)) %>%
-        spread(key = .data$A, value = .data$Y.tau)
+        select(c("S", "A", "Y.tau")) %>%
+        spread(key = "A", value = "Y.tau")
 
       Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
@@ -198,17 +198,17 @@ as.var.creg <- function(model = NULL, fit, HC1)
         left_join(count.Ng, by = join_by("S" == "S"))
 
       Xi.tilde.1.all <- j %>%
-        select(c(.data$S, .data$A, .data$Xi.mean.1)) %>%
-        spread(key = .data$A, value = .data$Xi.mean.1)
+        select(c("S", "A", "Xi.mean.1")) %>%
+        spread(key = "A", value = "Xi.mean.1")
       Xi.tilde.0.all <- j %>%
-        select(c(.data$S, .data$A, .data$Xi.mean.0)) %>%
-        spread(key = .data$A, value = .data$Xi.mean.0)
+        select(c("S", "A", "Xi.mean.0")) %>%
+        spread(key = "A", value = "Xi.mean.0")
       Y.Ng.all <- j %>%
-        select(c(.data$S, .data$A, .data$Y.bar)) %>%
-        spread(key = .data$A, value = .data$Y.bar)
+        select(c("S", "A", "Y.bar")) %>%
+        spread(key = "A", value = "Y.bar")
       Ng.bar.all <- j %>%
-        select(c(.data$S, .data$A, .data$Ng.bar)) %>%
-        spread(key = .data$A, value = .data$Ng.bar)
+        select(c("S", "A", "Ng.bar")) %>%
+        spread(key = "A", value = "Ng.bar")
 
       Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
@@ -278,17 +278,17 @@ as.var.creg <- function(model = NULL, fit, HC1)
         left_join(count.Ng, by = join_by("S" == "S"))
 
       Xi.tilde.1.all <- j %>%
-        select(c(.data$S, .data$A, .data$Xi.mean.1)) %>%
-        spread(key = .data$A, value = .data$Xi.mean.1)
+        select(c("S", "A", "Xi.mean.1")) %>%
+        spread(key = "A", value = "Xi.mean.1")
       Xi.tilde.0.all <- j %>%
-        select(c(.data$S, .data$A, .data$Xi.mean.0)) %>%
-        spread(key = .data$A, value = .data$Xi.mean.0)
+        select(c("S", "A", "Xi.mean.0")) %>%
+        spread(key = "A", value = "Xi.mean.0")
       Y.Ng.all <- j %>%
-        select(c(.data$S, .data$A, .data$Y.bar)) %>%
-        spread(key = .data$A, value = .data$Y.bar)
+        select(c("S", "A", "Y.bar")) %>%
+        spread(key = "A", value = "Y.bar")
       Ng.bar.all <- j %>%
-        select(c(.data$S, .data$A, .data$Ng.bar)) %>%
-        spread(key = .data$A, value = .data$Ng.bar)
+        select(c("S", "A", "Ng.bar")) %>%
+        spread(key = "A", value = "Ng.bar")
 
       Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
