@@ -10,29 +10,29 @@ test_that("simulations without clusters work", {
     result <- sreg::sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X)
   }))
 
-  expect_equal(round(result$tau, 7), c(0.1580814, 0.4846882))
-  expect_equal(round(result$se, 8), c(0.07524021, 0.07616346))
+  expect_equal(round(result$tau.hat, 7), c(0.1580814, 0.4846882))
+  expect_equal(round(result$se.rob, 8), c(0.07524021, 0.07616346))
 
   invisible(capture.output({
     result <- sreg::sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL)
   }))
 
-  expect_equal(round(result$tau, 7), c(0.1627114, 0.4948722))
-  expect_equal(round(result$se, 7), c(0.1105611, 0.1124072))
+  expect_equal(round(result$tau.hat, 7), c(0.1627114, 0.4948722))
+  expect_equal(round(result$se.rob, 7), c(0.1105611, 0.1124072))
 
   invisible(capture.output({
     result <- sreg::sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = X)
   }))
 
-  expect_equal(round(result$tau, 7), c(0.1578917, 0.4963735))
-  expect_equal(round(result$se, 8), c(0.08255663, 0.08320655))
+  expect_equal(round(result$tau.hat, 7), c(0.1578917, 0.4963735))
+  expect_equal(round(result$se.rob, 8), c(0.08255663, 0.08320655))
 
   invisible(capture.output({
     result <- sreg::sreg(Y, S = NULL, D = D, G.id = NULL, Ng = NULL, X = NULL)
   }))
 
-  expect_equal(round(result$tau, 7), c(0.1685108, 0.5022035))
-  expect_equal(round(result$se, 7), c(0.1145915, 0.1161482))
+  expect_equal(round(result$tau.hat, 7), c(0.1685108, 0.5022035))
+  expect_equal(round(result$se.rob, 7), c(0.1145915, 0.1161482))
 })
 
 test_that("simulations with clusters work", {
@@ -200,15 +200,15 @@ test_that("empirical example works", {
     result <- sreg::sreg(Y, S, D)
   }))
 
-  expect_equal(round(result$tau, 8), c(-0.05112971, 0.40903373))
-  expect_equal(round(result$se, 7), c(0.2064541, 0.2065146))
+  expect_equal(round(result$tau.hat, 8), c(-0.05112971, 0.40903373))
+  expect_equal(round(result$se.rob, 7), c(0.2064541, 0.2065146))
 
   invisible(capture.output({
     result <- sreg::sreg(Y, S, D, X = X)
   }))
 
-  expect_equal(round(result$tau, 8), c(-0.02861589, 0.34608688))
-  expect_equal(round(result$se, 7), c(0.1796427, 0.1836229))
+  expect_equal(round(result$tau.hat, 8), c(-0.02861589, 0.34608688))
+  expect_equal(round(result$se.rob, 7), c(0.1796427, 0.1836229))
 
   expect_error(
     invisible(capture.output({
