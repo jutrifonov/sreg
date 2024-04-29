@@ -99,6 +99,37 @@ test_that("simulations with clusters work", {
     })),
     "Treatments have not been provided"
   )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = as.list(X))
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = as.character(S), D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = as.character(S), D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+    S[2] <- 2.5
+    expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "must contain only integer values."
+  )
+    expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = NULL, X = X)
+    })),
+    "must contain only integer values."
+  )
 })
 
 test_that("degrees of freedom warning works", {
@@ -219,6 +250,8 @@ test_that("data contains one or more NA (or NaN) values warning works", {
       msg
     )
 })
+
+
 
 test_that("empirical example works", {
   library(haven)
