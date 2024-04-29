@@ -179,6 +179,47 @@ test_that("no cluster sizes warning works", {
   )
 })
 
+test_that("data contains one or more NA (or NaN) values warning works", {
+  set.seed(123) # fix the random seed
+# Generate a pseudo-random sample with clusters and two treatments = c(0.2, 0.8)
+  
+  data <- sreg.rgen(
+  n = 100, tau.vec = c(0.2, 0.8),
+  n.strata = 4, cluster = T, Nmax = 50
+  )
+  Y <- data$Y
+  S <- data$S
+  D <- data$D
+  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  Y[1:10] <- NA
+  G.id <- data$G.id
+  Ng <- data$Ng
+
+  msg <- "ignoring these values"
+  expect_warning(
+      invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+    })),
+      msg
+    )
+  Y <- data$Y
+  X[1, 1] <- NA
+  expect_warning(
+      invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+    })),
+      msg
+    )
+  X[1:5, ] <- NA
+  Y[1:10] <- NaN
+  expect_warning(
+      invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+    })),
+      msg
+    )
+})
+
 test_that("empirical example works", {
   library(haven)
   data("AEJapp")

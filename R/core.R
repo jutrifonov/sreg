@@ -5,7 +5,7 @@
 #' @import tidyr
 #' @import dplyr
 #' @import rlang
-#' @importFrom stats aggregate coef lm pnorm qnorm rbeta rnorm
+#' @importFrom stats aggregate coef lm pnorm qnorm rbeta rnorm na.omit
 #' @importFrom utils packageVersion
 #'
 #' @param Y a numeric \eqn{n \times 1} vector of the observed outcomes
@@ -77,16 +77,40 @@
 #' X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 #' result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
 sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
+
   if (is.null(Y)) {
     stop("Observed outcomes have not been provided (Y = NULL). Please provide the vector of observed outcomes.")
   }
   if (is.null(D)) {
     stop("Treatments have not been provided (D = NULL). Please provide the vector of treatments.")
   }
+  check.df <- tibble(Y, S, D, G.id, Ng, X) 
+  if (any(is.na(check.df))) 
+  {
+    warning("The data contains one or more NA (or NaN) values. Proceeding while ignoring these values.")
+  }
+  clean.df <- na.omit(check.df)
+  x.ind <- max(which(colnames(clean.df) %in% c("D", "G.id", "Ng")))
+  
+  suppressWarnings({
+  Y <- clean.df$Y
+  S <- clean.df$S
+  D <- clean.df$D 
+  G.id <- clean.df$G.id
+  Ng <- clean.df$Ng
+  if ((x.ind + 1) >= ncol(clean.df))
+  {
+  X <- NULL
+  }else{
+  X <- clean.df[, (x.ind + 1):ncol(clean.df)]
+  }
+  })
+
   if (is.null(G.id)) {
     result <- res.sreg(Y, S, D, X, HC1)
     summary.sreg(result)
   } else {
+
     result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
     summary.creg(result)
   }
