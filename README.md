@@ -57,10 +57,11 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 - **`D` -** a numeric  vector/matrix/data frame of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
 - **`G.id` -** a numeric vector/matrix/data frame of cluster indicators; if `NULL` then estimation is performed assuming treatment is assigned at the individual level;
 - **`Ng` -** a numeric vector/matrix/data frame of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
-- **`X` -** a data frame with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied. [^*]
+- **`X` -** a data frame with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
+- **`HC1` -** a `TRUE/FALSE` logical argument indicating whether the small sample correction should be applied to the variance estimator.
 [^*]: *Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages.*
 
-### Data Example
+### Data Structure
 Here we provide an example of a data frame that can be used with `sreg`.
 ````{r}
 |       Y      | S | D | G.id | Ng |     x_1    |      x_2      |
@@ -75,6 +76,26 @@ Here we provide an example of a data frame that can be used with `sreg`.
 | -2.25064316  | 4 | 2 |  2   | 30 |  0.8747419 | -0.77090031   |
 |  0.37962312  | 4 | 2 |  2   | 30 |  0.8747419 | -0.77090031   |
 ````
+### Value
+#### Summary
+`sreg` prints a *"Stata-style"* table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95\\%$ asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below.
+```{r}
+Saturated Model Estimation Results under CAR with clusters and linear adjustments
+Observations: 30000 
+Clusters: 1000 
+Number of treatments: 2 
+Number of strata: 4 
+Covariates used in linear adjustments: x_1, x_2
+---
+Coefficients:
+      Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
+1 0.01614 0.04513  0.35753 0.72069     -0.07232        0.1046             
+2 0.78642 0.04642 16.94263 0.00000      0.69545        0.8774          ***
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+```
+
+
 
 
 
