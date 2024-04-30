@@ -94,7 +94,16 @@ Coefficients:
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
-
+#### Return Value
+The function returns an object of class `sreg` that is a list containing the following elements:
+- **`tau.hat` -**  a $1 \times |\mathcal A|$ vector of ATE estimates, where $|\mathcal A|$ represents the number of treatments;
+- **`se.rob` -** a $1 \times |\mathcal A|$ vector of standard errors estimates, where $|\mathcal A|$ represents the number of treatments;
+- **`t.stat` -** a $1 \times |\mathcal A|$ vector of $t$-statistics, where $|\mathcal A|$ represents the number of treatments;
+- **`p.value` -** a $1 \times |\mathcal A|$ vector of corresponding $p$-values, where $|\mathcal A|$ represents the number of treatments;
+- **`CI.left` -** a $1 \times |\mathcal A|$ vector of the left bounds of the $95\\%$ as. confidence interval;
+- **`CI.right` -** a $1 \times |\mathcal A|$ vector of the right bounds of the $95\\%$ as. confidence interval;
+- **`data` -** an original data of the form `data.frame(Y, S, D, G.id, Ng, X)`;
+- **`lin.adj` -** a data frame representing the covariates that were used in implementing linear adjustments.
 
 
 
