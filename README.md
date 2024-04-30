@@ -32,5 +32,16 @@ Downloading GitHub repo yurytrifonov/sreg@HEAD
 ** testing if installed package keeps a record of temporary installation path
 * DONE (sreg)
 ```
+````{r}
+library(sreg)
+````
+```{r}
+  ____  ____  _____ ____      Stratified Randomized
+ / ___||  _ \| ____/ ___|     Experiments
+ \___ \| |_) |  _|| |  _  
+  ___) |  _ <| |__| |_| |  
+ |____/|_| \_\_____\____| version 0.5.8
+                           
+```
 
 
