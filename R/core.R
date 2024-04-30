@@ -189,3 +189,5 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
   }
   return(data.sim)
 }
+
+#' @export startupMessage
