@@ -1,7 +1,7 @@
 ![Static Badge](https://img.shields.io/badge/sreg-0.5.8(dev)-green?logo=GitHub) ![Static Badge](https://img.shields.io/badge/CRAN-Coming%20Soon!-orange?logo=R)
 
 # Stratified Randomized Experiments
-This repository houses the 'sreg' package for R, offering a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. The package is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018), Bugni, Canay, Shaikh, Tabord-Meehan (2023), and Jiang, Linton, Tang, Zhang (2023).
+This repository houses the `sreg` package for `R`, offering a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. The package is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018), Bugni, Canay, Shaikh, Tabord-Meehan (2023), and Jiang, Linton, Tang, Zhang (2023).
 
 ## Installation
 The latest version can be installed using `devtools`. The official `CRAN` release will be available soon.
@@ -105,6 +105,89 @@ The function returns an object of class `sreg` that is a list containing the fol
 - **`data` -** an original data of the form `data.frame(Y, S, D, G.id, Ng, X)`;
 - **`lin.adj` -** a data frame representing the covariates that were used in implementing linear adjustments.
 
-
-
+#### Empirical Example
+Here, we provide the empirical application example using the data from (Chong et al., 2016), who studied the effect of iron deficiency anemia on school-age children's educational attainment and cognitive ability in Peru. The example replicates the empirical illustration from (Bugni et al., 2019). For replication purposes, the data is included in the package and can be accessed by running `data("AEJapp")`. This example can be accessed directly in `R` via `help(sreg)`.
+````{r}
+library(sreg, dplyr, haven)
+````
+The description of the dataset can be accessed using `help()`:
+````{r}
+help(AEJapp)
+````
+We can upload the `AEJapp` dataset to the `R` session via `data()`:
+````{r}
+data("AEJapp")
+data <- AEJapp
+````
+It is pretty straightforward to prepare the data to fit the package syntax using `dplyr`:
+````{r}
+Y <- data$gradesq34
+D <- data$treatment
+S <- data$class_level
+data.clean <- data.frame(Y, D, S)
+data.clean <- data.clean %>%
+  mutate(D = ifelse(D == 3, 0, D))
+Y <- data.clean$Y
+D <- data.clean$D
+S <- data.clean$S
+head(data.clean)
+     Y D S
+1 11.2 1 1
+2 12.4 0 3
+3 11.9 0 5
+4 13.1 0 1
+5 13.4 2 2
+6 10.7 0 1
+````
+We can take a look at the frequency table of `D` and `S`:
+````{r}
+table(D = data.clean$D, S = data.clean$S)
+   S
+D    1  2  3  4  5
+  0 15 19 16 12 10
+  1 16 19 15 10 10
+  2 17 20 15 11 10
+````
+Now, it is straightforward to replicate the results from (Bugni et al, 2019) using `sreg`:
+````{r}
+result <- sreg::sreg(Y = Y, S = S, D = D)
+````
+```{r}
+Saturated Model Estimation Results under CAR
+Observations: 215 
+Number of treatments: 2 
+Number of strata: 5 
+---
+Coefficients:
+       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
+1 -0.05113 0.20645 -0.24766 0.80440     -0.45577       0.35351             
+2  0.40903 0.20651  1.98065 0.04763      0.00427       0.81379            *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+```
+Besides that, `sreg` allows us to add linear adjustments (covariates): 
+````{r}
+pills <- data$pills_taken
+age <- data$age_months
+data.clean <- data.frame(Y, D, S, pills, age)
+data.clean <- data.clean %>%
+  mutate(D = ifelse(D == 3, 0, D))
+Y <- data.clean$Y
+D <- data.clean$D
+S <- data.clean$S
+X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
+result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
+Saturated Model Estimation Results under CAR
+Observations: 215 
+Number of treatments: 2 
+Number of strata: 5 
+Covariates used in linear adjustments: pills, age
+---
+Coefficients:
+       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
+1 -0.02862 0.17964 -0.15929 0.87344     -0.38071       0.32348             
+2  0.34609 0.18362  1.88477 0.05946     -0.01381       0.70598            .
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+````
 
