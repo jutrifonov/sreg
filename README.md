@@ -5,11 +5,11 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 ## Installation
 The latest version can be installed using `devtools`. The official `CRAN` release will be available soon.
-````{r}
+``` r
 library(devtools)
 install_github("yurytrifonov/sreg")
-````
-```{r}
+```
+``` r
 Downloading GitHub repo yurytrifonov/sreg@HEAD
 ── R CMD build ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ✔  checking for file ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq/T/RtmpZh7j1Y/remotesfbf765906644/yurytrifonov-sreg-91d11dc/DESCRIPTION’ ...
@@ -33,24 +33,21 @@ Downloading GitHub repo yurytrifonov/sreg@HEAD
 ** testing if installed package keeps a record of temporary installation path
 * DONE (sreg)
 ```
-````{r}
+``` r
 library(sreg)
-````
-```{r}
-  ____  ____  _____ ____      Stratified Randomized
- / ___||  _ \| ____/ ___|     Experiments
- \___ \| |_) |  _|| |  _  
-  ___) |  _ <| |__| |_| |  
- |____/|_| \_\_____\____| version 0.5.8
-                           
+#>  ____  ____  _____ ____      Stratified Randomized
+#> / ___||  _ \| ____/ ___|     Experiments
+#> \___ \| |_) |  _|| |  _  
+#>  ___) |  _ <| |__| |_| |  
+#> |____/|_| \_\_____\____| version 0.5.8                           
 ```
 
 ## The function `sreg()`
 Estimates the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
 ### Syntax
-````{r}
+``` r
 sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
-````
+```
 ### Arguments
 - **`Y` -** a numeric vector/matrix/data frame of the observed outcomes;
 - **`S` -** a numeric vector/matrix/data frame of strata indicators; if `NULL` then the estimation is performed assuming no stratification;
@@ -63,7 +60,7 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 
 ### Data Structure
 Here we provide an example of a data frame that can be used with `sreg`.
-````{r}
+``` r
 |       Y      | S | D | G.id | Ng |     x_1    |      x_2      |
 |--------------|---|---|------|----|------------|---------------|
 | -0.57773576  | 2 | 0 |  1   | 10 |  1.5597899 |  0.03023334   |
@@ -75,11 +72,11 @@ Here we provide an example of a data frame that can be used with `sreg`.
 |  2.21008191  | 4 | 2 |  2   | 30 |  0.8747419 | -0.77090031   |
 | -2.25064316  | 4 | 2 |  2   | 30 |  0.8747419 | -0.77090031   |
 |  0.37962312  | 4 | 2 |  2   | 30 |  0.8747419 | -0.77090031   |
-````
+```
 ### Value
 #### Summary
 `sreg` prints a *"Stata-style"* table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95\\%$ asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below.
-```{r}
+``` r
 Saturated Model Estimation Results under CAR with clusters and linear adjustments
 Observations: 30000 
 Clusters: 1000 
@@ -107,20 +104,20 @@ The function returns an object of class `sreg` that is a list containing the fol
 
 #### Empirical Example
 Here, we provide the empirical application example using the data from (Chong et al., 2016), who studied the effect of iron deficiency anemia on school-age children's educational attainment and cognitive ability in Peru. The example replicates the empirical illustration from (Bugni et al., 2019). For replication purposes, the data is included in the package and can be accessed by running `data("AEJapp")`. This example can be accessed directly in `R` via `help(sreg)`.
-````{r}
+``` r
 library(sreg, dplyr, haven)
-````
+```
 The description of the dataset can be accessed using `help()`:
-````{r}
+``` r
 help(AEJapp)
-````
+```
 We can upload the `AEJapp` dataset to the `R` session via `data()`:
-````{r}
+``` r
 data("AEJapp")
 data <- AEJapp
-````
+```
 It is pretty straightforward to prepare the data to fit the package syntax using `dplyr`:
-````{r}
+``` r
 Y <- data$gradesq34
 D <- data$treatment
 S <- data$class_level
@@ -138,21 +135,21 @@ head(data.clean)
 4 13.1 0 1
 5 13.4 2 2
 6 10.7 0 1
-````
+```
 We can take a look at the frequency table of `D` and `S`:
-````{r}
+``` r
 table(D = data.clean$D, S = data.clean$S)
    S
 D    1  2  3  4  5
   0 15 19 16 12 10
   1 16 19 15 10 10
   2 17 20 15 11 10
-````
+```
 Now, it is straightforward to replicate the results from (Bugni et al, 2019) using `sreg`:
-````{r}
+``` r
 result <- sreg::sreg(Y = Y, S = S, D = D)
-````
-```{r}
+```
+``` r
 Saturated Model Estimation Results under CAR
 Observations: 215 
 Number of treatments: 2 
@@ -166,7 +163,7 @@ Coefficients:
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 Besides that, `sreg` allows adding linear adjustments (covariates) to the estimation procedure: 
-````{r}
+``` r
 pills <- data$pills_taken
 age <- data$age_months
 data.clean <- data.frame(Y, D, S, pills, age)
@@ -189,7 +186,7 @@ Coefficients:
 2  0.34609 0.18362  1.88477 0.05946     -0.01381       0.70598            .
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
-````
+```
 ## References
 Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. *Journal of the American Statistical Association*, 113(524), 1784–1796.
 
