@@ -165,7 +165,7 @@ Coefficients:
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
-Besides that, `sreg` allows us to add linear adjustments (covariates): 
+Besides that, `sreg` allows adding linear adjustments (covariates) to the estimation procedure: 
 ````{r}
 pills <- data$pills_taken
 age <- data$age_months
