@@ -197,6 +197,25 @@ Coefficients:
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
+## The function `sreg.rgen()`
+Generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect following the stratified block randomization design under covariate-adaptive randomization (CAR).
+### Syntax
+``` r
+sreg.rgen(n, Nmax = 50, n.strata, tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1), cluster = TRUE, is.cov = TRUE)
+```
+### Arguments
+- **`n` -** a total number of observations in a sample;
+- **`Nmax` -** a maximum size of generated clusters (maximum number of observations in a cluster)
+- **`n.strata` -** an integer specifying the number of strata;
+- **`tau.vec` -** a numeric $1 \times |\mathcal A|$ vector of treatment effects, where $|\mathcal A|$ represents the number of treatments;
+- **`gamma.vec` -** a numeric $1 \times 3$ vector of parameters corresponding to covariates;
+- **`cluster` -** a `TRUE/FALSE` argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level;
+- **`is.cov` -** a `TRUE/FALSE` argument indicating whether the dgp should include covariates or not.
+
+### Return Value
+An object that is a data frame with 'n' observations containing the generated values of the following variables:
+
+
 ## References
 Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. *Journal of the American Statistical Association*, 113(524), 1784–1796.
 
