@@ -213,8 +213,25 @@ sreg.rgen(n, Nmax = 50, n.strata, tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1), cl
 - **`is.cov` -** a `TRUE/FALSE` argument indicating whether the dgp should include covariates or not.
 
 ### Return Value
-An object that is a data frame with 'n' observations containing the generated values of the following variables:
+- **`Y` -** a numeric $n \times 1$ vector of the observed outcomes;
+- **`S` -** a numeric $n \times 1$ vector of strata indicators;
+- **`D` -** a numeric $n \times 1$ vector of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
+- **`G.id` -** a numeric $n \times 1$ vector of cluster indicators;
+- **`Ng` -** a numeric vector/matrix/data frame of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
+- **`X` -** a data frame with columns representing the covariate values for every observation;
 
+### Example
+``` r
+data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
+> head(data)
+         Y S D      x_1       x_2
+1 1.717293 1 0 4.772092 2.4138491
+2 2.553695 2 0 5.413440 2.0551019
+3 2.237556 3 2 6.611161 0.9300293
+4 1.825809 3 1 2.735503 1.7839981
+5 5.536280 2 2 2.469239 2.0495611
+6 1.628753 2 0 4.887561 2.1327071
+```
 
 ## References
 Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. *Journal of the American Statistical Association*, 113(524), 1784–1796.
