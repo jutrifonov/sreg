@@ -222,6 +222,7 @@ sreg.rgen(n, Nmax = 50, n.strata, tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1), cl
 
 ### Example
 ``` r
+library(sreg)
 data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
 > head(data)
          Y S D      x_1       x_2
