@@ -30,7 +30,7 @@ sreg.rgen(
 \item{is.cov}{a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not}
 }
 \value{
-An object that is a data frame with `n` observations containing the generated values of the following variables:
+An object that is a data frame with \eqn{n} observations containing the generated values of the following variables:
 \itemize{
 \item \code{Y}: a numeric \eqn{n \times 1} vector of observed outcomes
 \item \code{S}: a numeric \eqn{n \times 1} vector of strata indicators
