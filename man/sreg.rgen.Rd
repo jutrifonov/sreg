@@ -15,22 +15,29 @@ sreg.rgen(
 )
 }
 \arguments{
-\item{n}{number of observations}
+\item{n}{a total number of observations in a sample}
 
-\item{Nmax}{maximum size of clusters}
+\item{Nmax}{a maximum size of generated clusters (maximum number of observations in a cluster)}
 
-\item{n.strata}{number of strata}
+\item{n.strata}{an integer specifying the number of strata}
 
-\item{tau.vec}{a numeric vector of treatment effects}
+\item{tau.vec}{a numeric \eqn{1 \times |\mathcal A|} vector of treatment effects, where \eqn{|\mathcal A|} represents the number of treatments}
 
-\item{gamma.vec}{a numeric vector of parameters}
+\item{gamma.vec}{a numeric \eqn{1 \times 3} vector of parameters corresponding to covariates}
 
-\item{cluster}{a \code{TRUE/FALSE} argument indicating whether the dgp should include clusters or not}
+\item{cluster}{a \code{TRUE/FALSE} argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level}
 
 \item{is.cov}{a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not}
 }
 \value{
-a data frame containing the generated values of \code{Y}, \code{S}, \code{D}, \code{G.id}, \code{Ng}, and \code{X}
+An object that is a data frame with `n` observations containing the generated values of the following variables:
+\itemize{
+\item \code{Y}: a numeric \eqn{n \times 1} vector of observed outcomes
+\item \code{S}: a numeric \eqn{n \times 1} vector of strata indicators
+\item \code{D}: a numeric \eqn{n \times 1} vector of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
+\item \code{G.id}: a numeric \eqn{n \times 1} vector of cluster indicators
+\item \code{X}: a data frame with columns representing the covariate values for every observation
+}
 }
 \description{
 The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).

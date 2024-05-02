@@ -123,16 +123,22 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 #' Generates a Pseudo-Random Sample under the Stratified Block Randomization
 #'
 #' The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).
-#' @param n number of observations
-#' @param Nmax maximum size of clusters
-#' @param n.strata number of strata
-#' @param tau.vec a numeric vector of treatment effects
-#' @param gamma.vec a numeric vector of parameters
-#' @param cluster a \code{TRUE/FALSE} argument indicating whether the dgp should include clusters or not
+#' @param n a total number of observations in a sample
+#' @param Nmax a maximum size of generated clusters (maximum number of observations in a cluster)
+#' @param n.strata an integer specifying the number of strata
+#' @param tau.vec a numeric \eqn{1 \times |\mathcal A|} vector of treatment effects, where \eqn{|\mathcal A|} represents the number of treatments
+#' @param gamma.vec a numeric \eqn{1 \times 3} vector of parameters corresponding to covariates 
+#' @param cluster a \code{TRUE/FALSE} argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level
 #' @param is.cov a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not
 #'
-#' @return a data frame containing the generated values of \code{Y}, \code{S}, \code{D}, \code{G.id}, \code{Ng}, and \code{X}
-#'
+#' @return An object that is a data frame with `n` observations containing the generated values of the following variables:
+#' \itemize{
+#' \item \code{Y}: a numeric \eqn{n \times 1} vector of observed outcomes
+#' \item \code{S}: a numeric \eqn{n \times 1} vector of strata indicators
+#' \item \code{D}: a numeric \eqn{n \times 1} vector of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
+#' \item \code{G.id}: a numeric \eqn{n \times 1} vector of cluster indicators
+#' \item \code{X}: a data frame with columns representing the covariate values for every observation
+#' }
 #' @export
 #'
 #' @examples
