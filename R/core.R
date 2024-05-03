@@ -77,7 +77,6 @@
 #' X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 #' result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
 sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
-
   check.data.types(Y, S, D, G.id, Ng, X)
   check.integers(S, D, G.id, Ng)
 
@@ -87,33 +86,30 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   if (is.null(D)) {
     stop("Treatments have not been provided (D = NULL). Please provide the vector of treatments.")
   }
-  check.df <- tibble(Y, S, D, G.id, Ng, X) 
-  if (any(is.na(check.df))) 
-  {
+  check.df <- tibble(Y, S, D, G.id, Ng, X)
+  if (any(is.na(check.df))) {
     warning("The data contains one or more NA (or NaN) values. Proceeding while ignoring these values.")
   }
   clean.df <- na.omit(check.df)
   x.ind <- max(which(colnames(clean.df) %in% c("D", "G.id", "Ng")))
-  
+
   suppressWarnings({
-  Y <- clean.df$Y
-  S <- clean.df$S
-  D <- clean.df$D 
-  G.id <- clean.df$G.id
-  Ng <- clean.df$Ng
-  if ((x.ind + 1) >= ncol(clean.df))
-  {
-  X <- NULL
-  }else{
-  X <- clean.df[, (x.ind + 1):ncol(clean.df)]
-  }
+    Y <- clean.df$Y
+    S <- clean.df$S
+    D <- clean.df$D
+    G.id <- clean.df$G.id
+    Ng <- clean.df$Ng
+    if ((x.ind + 1) >= ncol(clean.df)) {
+      X <- NULL
+    } else {
+      X <- clean.df[, (x.ind + 1):ncol(clean.df)]
+    }
   })
 
   if (is.null(G.id)) {
     result <- res.sreg(Y, S, D, X, HC1)
     summary.sreg(result)
   } else {
-
     result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
     summary.creg(result)
   }
@@ -127,7 +123,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 #' @param Nmax a maximum size of generated clusters (maximum number of observations in a cluster)
 #' @param n.strata an integer specifying the number of strata
 #' @param tau.vec a numeric \eqn{1 \times |\mathcal A|} vector of treatment effects, where \eqn{|\mathcal A|} represents the number of treatments
-#' @param gamma.vec a numeric \eqn{1 \times 3} vector of parameters corresponding to covariates 
+#' @param gamma.vec a numeric \eqn{1 \times 3} vector of parameters corresponding to covariates
 #' @param cluster a \code{TRUE/FALSE} argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level
 #' @param is.cov a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not
 #'

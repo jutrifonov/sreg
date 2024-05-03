@@ -117,14 +117,14 @@ test_that("simulations with clusters work", {
     })),
     "variable has a different type than matrix, numeric vector, or data frame."
   )
-    S[2] <- 2.5
-    expect_error(
+  S[2] <- 2.5
+  expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
     })),
     "must contain only integer values."
   )
-    expect_error(
+  expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = NULL, X = X)
     })),
@@ -212,11 +212,11 @@ test_that("no cluster sizes warning works", {
 
 test_that("data contains one or more NA (or NaN) values warning works", {
   set.seed(123) # fix the random seed
-# Generate a pseudo-random sample with clusters and two treatments = c(0.2, 0.8)
-  
+  # Generate a pseudo-random sample with clusters and two treatments = c(0.2, 0.8)
+
   data <- sreg.rgen(
-  n = 100, tau.vec = c(0.2, 0.8),
-  n.strata = 4, cluster = T, Nmax = 50
+    n = 100, tau.vec = c(0.2, 0.8),
+    n.strata = 4, cluster = T, Nmax = 50
   )
   Y <- data$Y
   S <- data$S
@@ -228,27 +228,27 @@ test_that("data contains one or more NA (or NaN) values warning works", {
 
   msg <- "ignoring these values"
   expect_warning(
-      invisible(capture.output({
+    invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
     })),
-      msg
-    )
+    msg
+  )
   Y <- data$Y
   X[1, 1] <- NA
   expect_warning(
-      invisible(capture.output({
+    invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
     })),
-      msg
-    )
+    msg
+  )
   X[1:5, ] <- NA
   Y[1:10] <- NaN
   expect_warning(
-      invisible(capture.output({
+    invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
     })),
-      msg
-    )
+    msg
+  )
 })
 
 
