@@ -1,6 +1,6 @@
 Package: sreg
 Type: Package
-Title: ATE Estimation in Stratified Randomized Experiments
+Title: Stratified Randomized Experiments
 Version: 0.5.8
 Author: Juri Trifonov <jutrifonov@uchicago.edu>
 Maintainer: Juri Trifonov <jutrifonov@uchicago.edu>
