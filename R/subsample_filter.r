@@ -3,7 +3,7 @@
 # %#     for the subsequent iterative OLS estimation. Takes into
 # %#     account the number of observations and creates indicators.
 #-------------------------------------------------------------------
-filter.ols.sreg <- function(Y, S, D, X, s, d)
+subsample.ols.sreg <- function(Y, S, D, X, s, d)
 #-------------------------------------------------------------------
 {
   X <- as.matrix(X)
@@ -15,7 +15,7 @@ filter.ols.sreg <- function(Y, S, D, X, s, d)
   return(data.ols)
 }
 #-------------------------------------------------------------------
-filter.ols.creg <- function(data, s, d)
+subsample.ols.creg <- function(data, s, d)
 #-------------------------------------------------------------------
 {
   keep.s <- s

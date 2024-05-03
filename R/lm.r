@@ -12,7 +12,7 @@ lm.iter.sreg <- function(Y, S, D, X)
   {
     for (s in 1:max(S))
     {
-      data.filtered <- filter.ols.sreg(Y, S, D, X, s, d)
+      data.filtered <- subsample.ols.sreg(Y, S, D, X, s, d)
       data.X <- data.filtered[, 4:(4 + ncol(X) - 1)]
       data.filtered.adj <- data.frame(Y = data.filtered$Y, data.X)
       result <- tryCatch(
@@ -57,7 +57,7 @@ lm.iter.creg <- function(Y, S, D, G.id, Ng, X)
   {
     for (s in 1:max(S))
     {
-      data.filtered <- filter.ols.creg(data, s, d)
+      data.filtered <- subsample.ols.creg(data, s, d)
       data.X <- data.filtered[, 6:(6 + ncol(X) - 1)]
       data.filtered.adj <- data.frame(Y.bar.Ng = data.filtered$Y.bar * data.filtered$Ng, data.X)
       result <- tryCatch(
