@@ -2,8 +2,8 @@ name: Generate PDF from README
 
 on:
   push:
-    branches:
-      - main  # Change this to your main branch name
+    branches: [main, master]
+
 
 jobs:
   build:
@@ -21,7 +21,3 @@ jobs:
     - name: Convert README.md to PDF
       run: |
         pandoc README.md -o README.pdf
-    ```
-
-This workflow will run on every push to the main branch and will use Pandoc to convert README.md to README.pdf.
-
