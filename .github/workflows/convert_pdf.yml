@@ -23,7 +23,9 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add README.pdf
-          git commit -m "Update README.pdf" or echo "No changes to commit"
+          git commit -m "Update README.pdf" || echo "No changes to commit"
+          git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
           git push
+
 
 
