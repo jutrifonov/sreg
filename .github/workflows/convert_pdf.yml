@@ -1,34 +1,38 @@
-name: Update PDF
+name: Convert README to PDF and Commit
 
-on: push
+on: push  # Trigger on any push
 
 jobs:
-  build:
+  convert_and_commit_pdf:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v2
         with:
-          persist-credentials: false
+          persist-credentials: false  # Avoids automatic token setup
 
-      - name: Set up Git
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-plain-generic librsvg2-bin
+
+      - name: Convert Markdown to PDF
+        run: pandoc README.md --pdf-engine=xelatex -o README.pdf
+
+      - name: Setup Git Config
         run: |
           git config user.name 'GitHub Action'
           git config user.email 'action@github.com'
 
-      - name: Custom script to generate PDF
+      - name: Commit and Push PDF
         run: |
-          echo "Running script to generate PDF..."
-          pandoc -s README.md -o README.pdf
-
-      - name: Commit and Push
-        run: |
-          git add .
-          git commit -m 'Update PDF' || echo 'No changes to commit'
+          git add README.pdf
+          git commit -m "Update README.pdf" || echo "No changes to commit"
           git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
-          git push --set-upstream origin HEAD:main
+          git push origin HEAD:main
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
 
 
 
