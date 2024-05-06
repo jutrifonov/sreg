@@ -3,7 +3,7 @@ name: Update PDF
 on:
   push:
     paths:
-      - '**/*.md'  # Or any other paths and conditions you want to specify
+      - '**/*.md'
 
 jobs:
   build-and-push:
@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          persist-credentials: false  # This is important when using PATs
+          persist-credentials: false
 
       - name: Set up Git
         run: |
@@ -30,7 +30,7 @@ jobs:
           git commit -m 'Update PDF' || echo 'No changes to commit'
           git push --set-upstream origin HEAD:main
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Ensure this matches the name of your secret
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
 
 
