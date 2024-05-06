@@ -93,8 +93,8 @@ Here we provide an example of a data frame that can be used with `sreg`.
 | -2.25064316  | 4 | 2 |  2   | 30 |  0.8747419 | -0.77090031   |
 |  0.37962312  | 4 | 2 |  2   | 30 |  0.8747419 | -0.77090031   |
 ```
-### Value
-#### Summary
+### Summary
+
 `sreg` prints a *"Stata-style"* table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95\%$ asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below.
 ``` r
 Saturated Model Estimation Results under CAR with clusters and linear adjustments
@@ -111,7 +111,7 @@ Coefficients:
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
-#### Return Value
+### Return Value
 
 The function returns an object of class `sreg` that is a list containing the following elements:
 
@@ -131,7 +131,7 @@ The function returns an object of class `sreg` that is a list containing the fol
   
 - **`lin.adj` -** a data frame representing the covariates that were used in implementing linear adjustments.
 
-#### Empirical Example
+### Empirical Example
 
 Here, we provide the empirical application example using the data from (Chong et al., 2016), who studied the effect of iron deficiency anemia on school-age children's educational attainment and cognitive ability in Peru. The example replicates the empirical illustration from (Bugni et al., 2019). For replication purposes, the data is included in the package and can be accessed by running `data("AEJapp")`. This example can be accessed directly in `R` via `help(sreg)`.
 
