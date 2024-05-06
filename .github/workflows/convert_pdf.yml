@@ -1,9 +1,6 @@
 name: Update PDF
 
-on:
-  push:
-    paths:
-      - '**/*.md'
+on: push  # This triggers the workflow on any push to any branch in the repository
 
 jobs:
   build-and-push:
