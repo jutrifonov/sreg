@@ -14,11 +14,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install pandoc
-          sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-extra-utils texlive-latex-extra
-          sudo apt-get install librsvg2-bin  # This installs rsvg-convert
+          sudo apt-get install texlive-xetex texlive-fonts-recommended texlive-extra-utils texlive-latex-extra
+          sudo apt-get install librsvg2-bin
 
-      - name: Convert README to PDF
-        run: pandoc README.md -o README.pdf
+      - name: Convert README to PDF using XeLaTeX
+        run: pandoc README.md --pdf-engine=xelatex -o README.pdf
 
       - name: Commit PDF to repository
         run: |
@@ -27,3 +27,4 @@ jobs:
           git add README.pdf
           git commit -m "Update README.pdf" || echo "No changes to commit"
           git push
+
