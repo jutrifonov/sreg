@@ -3,7 +3,7 @@ name: Convert README to PDF
 on:
   push:
     branches:
-      - main  # Modify this based on your default branch
+      - main
 
 jobs:
   build:
