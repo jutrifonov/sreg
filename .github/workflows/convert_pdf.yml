@@ -10,8 +10,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Pandoc and LaTeX packages
-        run: sudo apt-get install pandoc texlive-latex-base texlive-fonts-recommended texlive-extra-utils texlive-latex-extra
+      - name: Install Pandoc, LaTeX, and SVG conversion packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install pandoc
+          sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-extra-utils texlive-latex-extra
+          sudo apt-get install librsvg2-bin  # This installs rsvg-convert
 
       - name: Convert README to PDF
         run: pandoc README.md -o README.pdf
