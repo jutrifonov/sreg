@@ -17,7 +17,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install pandoc texlive-latex-base texlive-fonts-recommended texlive-fonts-extra librsvg2-bin
-
+      - name: Debug Output
+        run: |
+          ls -l $GITHUB_WORKSPACE
+          cat $GITHUB_WORKSPACE/README.md
+          cat $GITHUB_WORKSPACE/template.tex
       - name: Convert README to PDF
         run: |
           pandoc $GITHUB_WORKSPACE/README.md -o $GITHUB_WORKSPACE/README.pdf --pdf-engine=pdflatex \
