@@ -17,7 +17,8 @@ jobs:
           sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-plain-generic librsvg2-bin
 
       - name: Convert Markdown to PDF
-        run: pandoc README.md --pdf-engine=xelatex --from markdown+raw_html+raw_tex -V colorlinks=true -o README.pdf
+        run: pandoc README.md --pdf-engine=xelatex --from markdown+raw_html+raw_tex -V geometry:"margin=1in" -V colorlinks=true -o README.pdf
+
 
       - name: Setup Git Config
         run: |
