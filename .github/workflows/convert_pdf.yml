@@ -19,7 +19,6 @@ jobs:
       - name: Convert Markdown to PDF
         run: pandoc README.md --pdf-engine=xelatex --from markdown+raw_html+raw_tex -V geometry:"margin=1in" -V colorlinks=true -o .github/README.pdf
 
-
       - name: Setup Git Config
         run: |
           git config user.name 'GitHub Action'
@@ -27,12 +26,13 @@ jobs:
 
       - name: Commit and Push PDF
         run: |
-          git add README.pdf
-          git commit -m "Update README.pdf" || echo "No changes to commit"
+          git add .github/README.pdf
+          git commit -m "Update README.pdf in .github directory" || echo "No changes to commit"
           git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
           git push origin HEAD:main
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
 
 
 
