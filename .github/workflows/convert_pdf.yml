@@ -1,9 +1,9 @@
 name: Update PDF
 
-on: push  # This triggers the workflow on any push to any branch in the repository
+on: push
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,17 +18,17 @@ jobs:
 
       - name: Custom script to generate PDF
         run: |
-          echo "Add your commands here"
-          # Example: pandoc -s README.md -o README.pdf
+          echo "Running script to generate PDF..."
+          pandoc -s README.md -o README.pdf
 
       - name: Commit and Push
         run: |
           git add .
           git commit -m 'Update PDF' || echo 'No changes to commit'
+          git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
           git push --set-upstream origin HEAD:main
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 
 
