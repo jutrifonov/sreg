@@ -64,6 +64,7 @@ library(sreg)
 
 ## The function `sreg()`
 Estimates the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
+
 ### Syntax
 ``` r
 sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
@@ -220,6 +221,7 @@ Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
 ## The function `sreg.rgen()`
 Generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect following the stratified block randomization design under covariate-adaptive randomization (CAR).
+
 ### Syntax
 ``` r
 sreg.rgen(n, Nmax = 50, n.strata,
