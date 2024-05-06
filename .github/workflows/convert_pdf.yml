@@ -1,31 +1,37 @@
-name: Convert README to PDF
+name: Update PDF
 
 on:
   push:
+    paths:
+      - '**/*.md'  # Or any other paths and conditions you want to specify
 
-  
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
+        with:
+          persist-credentials: false  # This is important when using PATs
+
       - name: Set up Git
         run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
-      - name: Your build or script steps
+          git config user.name 'GitHub Action'
+          git config user.email 'action@github.com'
+
+      - name: Custom script to generate PDF
         run: |
-          # Your script to modify files
-          echo "Performing build tasks..."
-      - name: Commit files
+          echo "Add your commands here"
+          # Example: pandoc -s README.md -o README.pdf
+
+      - name: Commit and Push
         run: |
           git add .
-          git commit -m 'Automate update' || echo "No changes to commit"
-      - name: Push changes
-        run: |
-          git push origin HEAD:main
+          git commit -m 'Update PDF' || echo 'No changes to commit'
+          git push --set-upstream origin HEAD:main
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Ensure this matches the name of your secret
+
 
 
 
