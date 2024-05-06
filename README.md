@@ -55,6 +55,7 @@ Downloading GitHub repo yurytrifonov/sreg@HEAD
 ```
 ``` r
 library(sreg)
+
 #>  ____  ____  _____ ____      Stratified Randomized
 #> / ___||  _ \| ____/ ___|     Experiments
 #> \___ \| |_) |  _|| |  _  
