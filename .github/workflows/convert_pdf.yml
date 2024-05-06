@@ -20,7 +20,7 @@ jobs:
 
       - name: Convert README to PDF
         run: |
-          pandoc README.md -o README.pdf --pdf-engine=pdflatex \
+          pandoc $GITHUB_WORKSPACE/README.md -o $GITHUB_WORKSPACE/README.pdf --pdf-engine=pdflatex \
             -V geometry:margin=1in \
             -V documentclass:report \
             -V lang=en-US \
@@ -29,7 +29,7 @@ jobs:
             -V inputenc=utf8 \
             -V fontfamily=mathpazo \
             -V fontfamilyoptions=sc \ 
-            --template=template.tex
+            --template=$GITHUB_WORKSPACE/template.tex
           
       - name: Upload PDF to GitHub
         uses: actions/upload-artifact@v2
