@@ -2,6 +2,14 @@
 [![R-CMD-check](https://github.com/yurytrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yurytrifonov/sreg/actions/workflows/R-CMD-check.yaml)
 <img src="https://github.com/yurytrifonov/sreg.dev/blob/main/r-lang-icon-2048x1543-ap9huf7l.png" alt="error in loading picture" align="right" width="100">
 
+<!-- This is the image for PDF output via Pandoc and LaTeX: -->
+<!--
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.5\textwidth]{https://raw.githubusercontent.com/yurytrifonov/sreg.dev/main/r-lang-icon-2048x1543-ap9huf7l.png}
+\end{figure}
+-->
+
 # Stratified Randomized Experiments
 The `sreg` package for `R`, offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. The package is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018), Bugni, Canay, Shaikh, Tabord-Meehan (2023), and Jiang, Linton, Tang, Zhang (2023).
 
