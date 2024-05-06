@@ -10,21 +10,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Pandoc, LaTeX, and SVG conversion packages
+      - name: Update packages and Install Pandoc, LaTeX, SVG conversion, and DejaVu fonts
         run: |
           sudo apt-get update
-          sudo apt-get install pandoc
-          sudo apt-get install texlive-xetex texlive-fonts-recommended texlive-extra-utils texlive-latex-extra
-          sudo apt-get install librsvg2-bin
+          sudo apt-get install pandoc texlive-xetex texlive-fonts-recommended texlive-extra-utils texlive-latex-extra librsvg2-bin fonts-dejavu
 
-      - name: Convert README to PDF using XeLaTeX
-        run: pandoc README.md --pdf-engine=xelatex -o README.pdf
+      - name: Convert README to PDF using XeLaTeX with DejaVu Font
+        run: pandoc README.md --pdf-engine=xelatex --variable mainfont="DejaVu Sans Mono" -o README.pdf
 
       - name: Commit PDF to repository
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add README.pdf
-          git commit -m "Update README.pdf" || echo "No changes to commit"
+          git commit -m "Update README.pdf" or echo "No changes to commit"
           git push
+
 
