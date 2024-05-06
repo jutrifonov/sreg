@@ -71,7 +71,7 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 ### Arguments
 - **`Y` -** a numeric vector/matrix/data frame of the observed outcomes;
 - **`S` -** a numeric vector/matrix/data frame of strata indicators; if `NULL` then the estimation is performed assuming no stratification;
-- **`D` -** a numeric  vector/matrix/data frame of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
+- **`D` -** a numeric  vector/matrix/data frame of treatments indexed by $\{0, 1, 2, \ldots\}$, where `D = 0` denotes the control;
 - **`G.id` -** a numeric vector/matrix/data frame of cluster indicators; if `NULL` then estimation is performed assuming treatment is assigned at the individual level;
 - **`Ng` -** a numeric vector/matrix/data frame of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
 - **`X` -** a data frame with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
@@ -95,7 +95,7 @@ Here we provide an example of a data frame that can be used with `sreg`.
 ```
 ### Value
 #### Summary
-`sreg` prints a *"Stata-style"* table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95\\%$ asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below.
+`sreg` prints a *"Stata-style"* table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95\%$ asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below.
 ``` r
 Saturated Model Estimation Results under CAR with clusters and linear adjustments
 Observations: 30000 
@@ -117,8 +117,8 @@ The function returns an object of class `sreg` that is a list containing the fol
 - **`se.rob` -** a $1 \times |\mathcal A|$ vector of standard errors estimates, where $|\mathcal A|$ represents the number of treatments;
 - **`t.stat` -** a $1 \times |\mathcal A|$ vector of $t$-statistics, where $|\mathcal A|$ represents the number of treatments;
 - **`p.value` -** a $1 \times |\mathcal A|$ vector of corresponding $p$-values, where $|\mathcal A|$ represents the number of treatments;
-- **`CI.left` -** a $1 \times |\mathcal A|$ vector of the left bounds of the $95\\%$ as. confidence interval;
-- **`CI.right` -** a $1 \times |\mathcal A|$ vector of the right bounds of the $95\\%$ as. confidence interval;
+- **`CI.left` -** a $1 \times |\mathcal A|$ vector of the left bounds of the $95\%$ as. confidence interval;
+- **`CI.right` -** a $1 \times |\mathcal A|$ vector of the right bounds of the $95\%$ as. confidence interval;
 - **`data` -** an original data of the form `data.frame(Y, S, D, G.id, Ng, X)`;
 - **`lin.adj` -** a data frame representing the covariates that were used in implementing linear adjustments.
 
@@ -225,7 +225,7 @@ sreg.rgen(n, Nmax = 50, n.strata, tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1), cl
 ### Return Value
 - **`Y` -** a numeric $n \times 1$ vector of the observed outcomes;
 - **`S` -** a numeric $n \times 1$ vector of strata indicators;
-- **`D` -** a numeric $n \times 1$ vector of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
+- **`D` -** a numeric $n \times 1$ vector of treatments indexed by $\{0, 1, 2, \ldots\}$, where `D = 0` denotes the control;
 - **`G.id` -** a numeric $n \times 1$ vector of cluster indicators;
 - **`Ng` -** a numeric vector/matrix/data frame of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
 - **`X` -** a data frame with columns representing the covariate values for every observation;
