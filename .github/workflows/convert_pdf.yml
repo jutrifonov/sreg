@@ -3,29 +3,29 @@ name: Convert README to PDF
 on:
   push:
 
+  
 jobs:
-  convert_to_pdf:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Update packages and Install Pandoc, LaTeX, SVG conversion, and DejaVu fonts
+      - uses: actions/checkout@v2
+      - name: Set up Git
         run: |
-          sudo apt-get update
-          sudo apt-get install pandoc texlive-xetex texlive-fonts-recommended texlive-extra-utils texlive-latex-extra librsvg2-bin fonts-dejavu
-
-      - name: Convert README to PDF using XeLaTeX with DejaVu Font
-        run: pandoc README.md --pdf-engine=xelatex --variable mainfont="DejaVu Sans Mono" -o README.pdf
-
-      - name: Commit PDF to repository
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+      - name: Your build or script steps
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add README.pdf
-          git commit -m "Update README.pdf" || echo "No changes to commit"
-          git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
-          git push
+          # Your script to modify files
+          echo "Performing build tasks..."
+      - name: Commit files
+        run: |
+          git add .
+          git commit -m 'Automate update' || echo "No changes to commit"
+      - name: Push changes
+        run: |
+          git push origin HEAD:main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
 
 
