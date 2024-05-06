@@ -13,10 +13,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Install Pandoc, pdflatex, and Dependencies
+      - name: Install Pandoc, LaTeX, and Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install pandoc texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
+          sudo apt-get install pandoc texlive-latex-base texlive-fonts-recommended texlive-fonts-extra librsvg2-bin
 
       - name: Convert README to PDF
         run: |
