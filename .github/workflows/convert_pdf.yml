@@ -28,7 +28,8 @@ jobs:
             -V papersize=a4 \
             -V inputenc=utf8 \
             -V fontfamily=mathpazo \
-            -V fontfamilyoptions=sc
+            -V fontfamilyoptions=sc \ 
+            --template=template.tex
           
       - name: Upload PDF to GitHub
         uses: actions/upload-artifact@v2
