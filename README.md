@@ -112,18 +112,29 @@ Coefficients:
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
 #### Return Value
+
 The function returns an object of class `sreg` that is a list containing the following elements:
+
 - **`tau.hat` -**  a $1 \times |\mathcal A|$ vector of ATE estimates, where $|\mathcal A|$ represents the number of treatments;
+  
 - **`se.rob` -** a $1 \times |\mathcal A|$ vector of standard errors estimates, where $|\mathcal A|$ represents the number of treatments;
+  
 - **`t.stat` -** a $1 \times |\mathcal A|$ vector of $t$-statistics, where $|\mathcal A|$ represents the number of treatments;
+  
 - **`p.value` -** a $1 \times |\mathcal A|$ vector of corresponding $p$-values, where $|\mathcal A|$ represents the number of treatments;
+  
 - **`CI.left` -** a $1 \times |\mathcal A|$ vector of the left bounds of the $95\%$ as. confidence interval;
+  
 - **`CI.right` -** a $1 \times |\mathcal A|$ vector of the right bounds of the $95\%$ as. confidence interval;
+  
 - **`data` -** an original data of the form `data.frame(Y, S, D, G.id, Ng, X)`;
+  
 - **`lin.adj` -** a data frame representing the covariates that were used in implementing linear adjustments.
 
 #### Empirical Example
+
 Here, we provide the empirical application example using the data from (Chong et al., 2016), who studied the effect of iron deficiency anemia on school-age children's educational attainment and cognitive ability in Peru. The example replicates the empirical illustration from (Bugni et al., 2019). For replication purposes, the data is included in the package and can be accessed by running `data("AEJapp")`. This example can be accessed directly in `R` via `help(sreg)`.
+
 ``` r
 library(sreg, dplyr, haven)
 ```
@@ -211,7 +222,9 @@ Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 Generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect following the stratified block randomization design under covariate-adaptive randomization (CAR).
 ### Syntax
 ``` r
-sreg.rgen(n, Nmax = 50, n.strata, tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1), cluster = TRUE, is.cov = TRUE)
+sreg.rgen(n, Nmax = 50, n.strata,
+         tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
+         cluster = TRUE, is.cov = TRUE)
 ```
 ### Arguments
 - **`n` -** a total number of observations in a sample;
