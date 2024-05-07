@@ -37,6 +37,6 @@ jobs:
         git add README.md
         git commit -m "Update version badge to ${{ steps.get_version.outputs.version }}" || echo "No changes to commit"
         git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
-        git push
+        git push origin HEAD:main
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
