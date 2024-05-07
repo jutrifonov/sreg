@@ -1,5 +1,5 @@
 ![version](https://img.shields.io/badge/sreg-v.0.5.8-green?style=flat&logo=github&labelColor=2A2523)
-![Static Badge](https://img.shields.io/badge/CRAN-Coming%20Soon!-orange?logo=R)
+![Static Badge](https://img.shields.io/badge/CRAN-Coming%20Soon!-orange?logo=R&labelColor=2A2523)
 [![R-CMD-check](https://github.com/yurytrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yurytrifonov/sreg/actions/workflows/R-CMD-check.yaml)
 <img src="https://github.com/yurytrifonov/sreg.dev/blob/main/r-lang-icon-2048x1543-ap9huf7l.png" alt="error in loading picture" align="right" width="100">
 
