@@ -1,6 +1,12 @@
 name: Convert README to PDF and Commit
 
-on: push  # Trigger on any push
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '.github/README.pdf'  # Ignore changes to PDF file to prevent loops
+    # Optional: Specify paths to include if you want to limit to certain files
 
 jobs:
   convert_and_commit_pdf:
