@@ -30,7 +30,7 @@ jobs:
         badge_url="https://img.shields.io/badge/version-$version-blue.svg"
         sed -i "s|!\\[version].*|!\\[version]($badge_url)|" README.md
 
-   - name: Commit and push if changed
+    - name: Commit and push if changed
       run: |
         git config user.name 'GitHub Action'
         git config user.email 'action@github.com'
