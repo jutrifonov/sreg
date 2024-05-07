@@ -1,4 +1,4 @@
-![version](https://img.shields.io/badge/sreg-v.0.5.7.8-green?style=flat&logo=github&labelColor=2A2523)
+![version](https://img.shields.io/badge/sreg-v.0.5.8-green?style=flat&logo=github&labelColor=2A2523)
 
 ![Static Badge](https://img.shields.io/badge/sreg-0.5.8(dev)-green?logo=GitHub) ![Static Badge](https://img.shields.io/badge/CRAN-Coming%20Soon!-orange?logo=R)
 [![R-CMD-check](https://github.com/yurytrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yurytrifonov/sreg/actions/workflows/R-CMD-check.yaml)
