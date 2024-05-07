@@ -28,8 +28,8 @@ jobs:
       run: |
         version=${{ steps.get_version.outputs.version }}
         echo "Version extracted: $version"
-        badge_url="https://img.shields.io/badge/sreg-v.$version-green?style=flat&logo=github&labelColor=2A2523"
-        sed -i "s|sreg-v\.[0-9]+\.[0-9]+|sreg-v.$version|" README.md
+        sed -i "s|https://img.shields.io/badge/sreg-v\.[0-9\.]*-green|https://img.shields.io/badge/sreg-v.$version-green|" README.md
+        git diff
 
     - name: Commit and push if changed
       run: |
