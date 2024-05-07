@@ -27,9 +27,8 @@ jobs:
     - name: Update README.md
       run: |
         version=${{ steps.get_version.outputs.version }}
-        badge_url="https://img.shields.io/badge/sreg-v.$version-green?style=flat\&logo=github\&labelColor=2A2523"
-        sed -i "s|!\[version\](.*sreg-v\..*?green.*)|![version]($badge_url)|" README.md
-
+        badge_url="https://img.shields.io/badge/sreg-v.$version-green?style=flat&logo=github&labelColor=2A2523"
+        sed -i "s|sreg-v\.[0-9]*\.[0-9]*|sreg-v.$version|" README.md
     - name: Commit and push if changed
       run: |
         git config user.name 'GitHub Action'
