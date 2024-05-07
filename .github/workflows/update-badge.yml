@@ -27,7 +27,7 @@ jobs:
     - name: Update README.md
       run: |
         version=${{ steps.get_version.outputs.version }}
-        badge_url="https://img.shields.io/badge/GitHub-sreg-grey?style=flat&logo=github&colorA=grey&colorB=green"
+        badge_url="https://img.shields.io/badge/sreg-$version(green)?logo=github&style=flat-square&colorA=grey&colorB=green"
         sed -i "s|!\\[version].*|![version]($badge_url)|" README.md
 
     - name: Commit and push if changed
@@ -35,7 +35,8 @@ jobs:
         git config user.name 'GitHub Action'
         git config user.email 'action@github.com'
         git add README.md
-        git commit -m "Update version badge to sreg" || echo "No changes to commit"
+        git commit -m "Update version badge to ${{ steps.get_version.outputs.version }}" || echo "No changes to commit"
         git remote set-url origin https://${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
         git push origin HEAD:main
+
 
