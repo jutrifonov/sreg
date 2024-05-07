@@ -28,7 +28,7 @@ jobs:
       run: |
         version=${{ steps.get_version.outputs.version }}
         echo "Version extracted: $version"
-        sed -i "s|https://img.shields.io/badge/sreg-v\.[0-9\.]*-green|https://img.shields.io/badge/sreg-v.$version-green|" README.md
+        sed -i "s|https://img.shields.io/badge/sreg-v\.[0-9\.]*-green|https://img.shields.io/badge/sreg-v.$version(dev)-green|" README.md
         git diff
 
     - name: Commit and push if changed
