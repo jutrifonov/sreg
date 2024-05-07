@@ -36,10 +36,19 @@ jobs:
         git config user.email 'action@github.com'
         git add README.md
         git commit -m "Update version badge to ${{ steps.get_version.outputs.version }}" || echo "No changes to commit"
-        git remote set-url origin https://${{ secrets.GH_PAT }}@github.com/${{ github.repository }}
+        git remote set-url origin https://${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git
         git push origin HEAD:main
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
+
+    - name: Check if custom PAT is set
+      run: |
+        if [ -z "${{ secrets.GH_PAT }}" ]; then
+          echo "PAT is NOT set."
+        else
+          echo "PAT is set."
+        fi
+
 
 
 
