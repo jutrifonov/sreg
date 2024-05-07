@@ -1,0 +1,39 @@
+name: Update Version Badge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'DESCRIPTION'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'DESCRIPTION'
+
+jobs:
+  update_badge:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Extract version from DESCRIPTION
+      id: get_version
+      run: |
+        version=$(grep -i '^Version:' DESCRIPTION | cut -d ' ' -f2)
+        echo "Version extracted: $version"
+        echo "::set-output name=version::$version"
+
+    - name: Update README.md
+      run: |
+        version=${{ steps.get_version.outputs.version }}
+        badge_url="https://img.shields.io/badge/version-$version-blue.svg"
+        sed -i "s|!\\[version].*|!\\[version]($badge_url)|" README.md
+
+    - name: Commit and push if changed
+      run: |
+        git config user.name 'GitHub Action'
+        git config user.email 'action@github.com'
+        git add README.md
+        git commit -m "Update version badge to ${{ steps.get_version.outputs.version }}" || echo "No changes to commit"
+        git push
