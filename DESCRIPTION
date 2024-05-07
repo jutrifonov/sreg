@@ -1,7 +1,7 @@
 Package: sreg
 Type: Package
 Title: Stratified Randomized Experiments
-Version: 0.5.6
+Version: 0.5.8
 Author: Juri Trifonov <jutrifonov@uchicago.edu>
 Maintainer: Juri Trifonov <jutrifonov@uchicago.edu>
 Description: The `sreg' package offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. 
