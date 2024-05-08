@@ -1,0 +1,55 @@
+---
+title: "Intro to sreg"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Intro to sreg}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+Here, we provide the empirical application example using the data from (Chong et al., 2016),
+who studied the effect of iron deficiency anemia on school-age children's educational attainment and cognitive ability in Peru. 
+The example replicates the empirical illustration from (Bugni et al., 2019). For replication purposes, the data is included in the package and can be accessed by running `data("AEJapp")`. 
+```{r}
+library(sreg)
+library(haven)
+library(dplyr)
+```
+We can upload the `AEJapp` dataset to the R session via `data()`:
+```{r}
+data(AEJapp)
+data <- AEJapp
+```
+It is pretty straightforward to prepare the data to fit the package syntax using `dplyr`:
+```{r}
+Y <- data$gradesq34
+D <- data$treatment
+S <- data$class_level
+data.clean <- data.frame(Y, D, S)
+data.clean <- data.clean %>%
+  mutate(D = ifelse(D == 3, 0, D))
+Y <- data.clean$Y
+D <- data.clean$D
+S <- data.clean$S
+head(data.clean)
+```
+We can take a look at the frequency table of `D` and `S`:
+```{r}
+table(D = data.clean$D, S = data.clean$S)
+```
+Now, it is straightforward to replicate the results from (Bugni et al, 2019) using `sreg()`:
+```{r}
+result <- sreg::sreg(Y = Y, S = S, D = D)
+```
+Besides that, sreg allows adding linear adjustments (covariates) to the estimation procedure:
+```{r}
+pills <- data$pills_taken
+age <- data$age_months
+data.clean <- data.frame(Y, D, S, pills, age)
+data.clean <- data.clean %>%
+  mutate(D = ifelse(D == 3, 0, D))
+Y <- data.clean$Y
+D <- data.clean$D
+S <- data.clean$S
+X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
+result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
+```
