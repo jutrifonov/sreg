@@ -134,9 +134,9 @@ The function returns an object of class `sreg` that is a list containing the fol
   
 - **`p.value` -** a $1 \times |\mathcal A|$ vector of corresponding $p$-values, where $|\mathcal A|$ represents the number of treatments;
   
-- **`CI.left` -** a $1 \times |\mathcal A|$ vector of the left bounds of the $95\%$ as. confidence interval;
+- **`CI.left` -** a $1 \times |\mathcal A|$ vector of the left bounds of the $95$% as. confidence interval;
   
-- **`CI.right` -** a $1 \times |\mathcal A|$ vector of the right bounds of the $95\%$ as. confidence interval;
+- **`CI.right` -** a $1 \times |\mathcal A|$ vector of the right bounds of the $95$% as. confidence interval;
   
 - **`data` -** an original data of the form `data.frame(Y, S, D, G.id, Ng, X)`;
   
@@ -250,7 +250,7 @@ sreg.rgen(n, Nmax = 50, n.strata,
 ### Return Value
 - **`Y` -** a numeric $n \times 1$ vector of the observed outcomes;
 - **`S` -** a numeric $n \times 1$ vector of strata indicators;
-- **`D` -** a numeric $n \times 1$ vector of treatments indexed by $\{0, 1, 2, \ldots\}$, where `D = 0` denotes the control;
+- **`D` -** a numeric $n \times 1$ vector of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
 - **`G.id` -** a numeric $n \times 1$ vector of cluster indicators;
 - **`Ng` -** a numeric vector/matrix/data frame of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
 - **`X` -** a data frame with columns representing the covariate values for every observation;
