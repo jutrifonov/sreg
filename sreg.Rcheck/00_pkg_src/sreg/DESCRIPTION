@@ -1,0 +1,20 @@
+Package: sreg
+Type: Package
+Title: Stratified Randomized Experiments
+Version: 0.5.9
+Author: Juri Trifonov <jutrifonov@uchicago.edu>
+Maintainer: Juri Trifonov <jutrifonov@uchicago.edu>
+Description: The `sreg' package offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. 
+             The package is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accomodates 
+             optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors 
+             based on Bugni, Canay, Shaikh (2018), Bugni, Canay, Shaikh, Tabord-Meehan (2023), and Jiang, Linton, Tang, Zhang (2023).
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Imports: dplyr, extraDistr, rlang, tidyr
+Suggests: haven, testthat (>= 3.0.0)
+Depends: R (>= 2.10)
+Config/testthat/edition: 3
+NeedsCompilation: no
+Packaged: 2024-05-07 22:26:04 UTC; trifonovjuri

@@ -1,0 +1,269 @@
+
+R version 4.3.1 (2023-06-16) -- "Beagle Scouts"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> pkgname <- "sreg"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> base::assign(".ExTimings", "sreg-Ex.timings", pos = 'CheckExEnv')
+> base::cat("name\tuser\tsystem\telapsed\n", file=base::get(".ExTimings", pos = 'CheckExEnv'))
+> base::assign(".format_ptime",
++ function(x) {
++   if(!is.na(x[4L])) x[1L] <- x[1L] + x[4L]
++   if(!is.na(x[5L])) x[2L] <- x[2L] + x[5L]
++   options(OutDec = '.')
++   format(x[1L:3L], digits = 7L)
++ },
++ pos = 'CheckExEnv')
+> 
+> ### * </HEADER>
+> library('sreg')
+Package 'sreg' version 0.5.9
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("AEJapp")
+> ### * AEJapp
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: AEJapp
+> ### Title: Replication data for: Iron Deficiency and Schooling Attainment
+> ###   in Peru (Chong et al, 2016)
+> ### Aliases: AEJapp
+> ### Keywords: datasets
+> 
+> ### ** Examples
+> 
+> data(AEJapp)
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("AEJapp", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+> nameEx("sreg")
+> ### * sreg
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: sreg
+> ### Title: Estimate Average Treatment Effects (ATEs) and Corresponding
+> ###   Standard Errors
+> ### Aliases: sreg
+> 
+> ### ** Examples
+> 
+> library("sreg")
+> library("dplyr")
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> library("haven")
+> ### Example 1. Simulated Data.
+> data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = FALSE)
+> Y <- data$Y
+> S <- data$S
+> D <- data$D
+> X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+> result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
+Saturated Model Estimation Results under CAR with linear adjustments
+Observations: 1000 
+Number of treatments: 1 
+Number of strata: 4 
+Covariates used in linear adjustments: x_1, x_2
+---
+Coefficients:
+       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
+1 -0.03836 0.06592 -0.58196 0.56059     -0.16757       0.09084             
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+> ### Example 2. Data taken from Chong et al. (2016).
+> ## Data description
+> ?AEJapp
+AEJapp                  package:sreg                   R Documentation
+
+_R_e_p_l_i_c_a_t_i_o_n _d_a_t_a _f_o_r: _I_r_o_n _D_e_f_i_c_i_e_n_c_y _a_n_d _S_c_h_o_o_l_i_n_g _A_t_t_a_i_n_m_e_n_t _i_n _P_e_r_u
+(_C_h_o_n_g _e_t _a_l, _2_0_1_6)
+
+_D_e_s_c_r_i_p_t_i_o_n:
+
+     The data is taken from Chong et al. (2016), who study the effect
+     of iron deficiency anemia (i.e., anemia caused by a lack of iron)
+     on school-age children’s educational attainment and cognitive
+     ability in Peru.
+
+_U_s_a_g_e:
+
+     data("AEJapp")
+     
+_F_o_r_m_a_t:
+
+     A data frame with 215 observations on the 62 variables.
+
+_S_o_u_r_c_e:
+
+     Chong, Alberto, Cohen, Isabelle, Field, Erica, Nakasone, Eduardo,
+     and Torero, Maximo.  Replication data for: Iron Deficiency and
+     Schooling Attainment in Peru. Nashville, TN: American Economic
+     Association [publisher], 2016. Ann Arbor, MI: Inter-university
+     Consortium for Political and Social Research [distributor],
+     2019-10-12. https://doi.org/10.3886/E113624V1.
+
+_R_e_f_e_r_e_n_c_e_s:
+
+     Chong, Alberto, Isabelle Cohen, Erica Field, Eduardo Nakasone, and
+     Maximo Torero. “Iron Deficiency and Schooling Attainment in Peru.”
+     American Economic Journal: Applied Economics 8, no.  4 (October
+     2016): 222–55. https://doi.org/10.1257/app.20140494.
+
+_E_x_a_m_p_l_e_s:
+
+     data(AEJapp)
+     
+
+> ## Upload the data from the package
+> data("AEJapp")
+> data <- AEJapp
+> head(data)
+# A tibble: 6 × 62
+  student_id  hhid exposure    treatment  class_level class non_placebo1 male   
+  <chr>      <dbl> <dbl+lbl>   <dbl+lbl>        <dbl> <chr> <dbl+lbl>    <dbl+l>
+1 001001         1 2 [Interim] 1 [Soccer…           1 1     1 [Yes]      1 [Yes]
+2 001002         1 2 [Interim] 3 [Placeb…           3 5     0 [No]       0 [No] 
+3 001003         1 1 [Early]   3 [Placeb…           5 9     0 [No]       1 [Yes]
+4 002001         2 1 [Early]   3 [Placeb…           1 1     0 [No]       0 [No] 
+5 002002         2 1 [Early]   2 [Physic…           2 4     1 [Yes]      1 [Yes]
+6 003001         3 1 [Early]   3 [Placeb…           1 1     0 [No]       1 [Yes]
+# ℹ 54 more variables: age_months <dbl>, pills_taken <dbl>,
+#   greater_equal_500 <dbl+lbl>, five_less_pills_taken <dbl>,
+#   weight_base <dbl>, height_base <dbl>, hemo_base <dbl>,
+#   anemic_base <dbl+lbl>, anemic_base_re <dbl+lbl>,
+#   anemic_base_miss <dbl+lbl>, hemo_end <dbl>, anemic <dbl+lbl>,
+#   wii_identify <dbl>, wii_memorize <dbl>, wii_analyze <dbl>,
+#   wii_compute <dbl>, wii_visualize <dbl>, wii_total <dbl>, gradesq1 <dbl>, …
+> ## Replicate the empirical illustration from (Bugni et al, 2019)
+> # Prepare the data
+> Y <- data$gradesq34
+> D <- data$treatment
+> S <- data$class_level
+> data.clean <- data.frame(Y, D, S)
+> data.clean <- data.clean %>%
++   mutate(D = ifelse(D == 3, 0, D))
+> Y <- data.clean$Y
+> D <- data.clean$D
+> S <- data.clean$S
+> # Look at the frequency table
+> table(D = data.clean$D, S = data.clean$S)
+   S
+D    1  2  3  4  5
+  0 15 19 16 12 10
+  1 16 19 15 10 10
+  2 17 20 15 11 10
+> # Replicate the results from (Bugni et al, 2019)
+> result <- sreg::sreg(Y, S, D)
+Saturated Model Estimation Results under CAR
+Observations: 215 
+Number of treatments: 2 
+Number of strata: 5 
+Covariates used in linear adjustments: 
+---
+Coefficients:
+       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
+1 -0.05113 0.20645 -0.24766 0.80440     -0.45577       0.35351             
+2  0.40903 0.20651  1.98065 0.04763      0.00427       0.81379            *
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+> 
+> ## Besides that, it is possible to add linear adjustments (covariates)
+> pills <- data$pills_taken
+> age <- data$age_months
+> data.clean <- data.frame(Y, D, S, pills, age)
+> data.clean <- data.clean %>%
++   mutate(D = ifelse(D == 3, 0, D))
+> Y <- data.clean$Y
+> D <- data.clean$D
+> S <- data.clean$S
+> X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
+> result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
+Saturated Model Estimation Results under CAR
+Observations: 215 
+Number of treatments: 2 
+Number of strata: 5 
+Covariates used in linear adjustments: pills, age
+---
+Coefficients:
+       Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
+1 -0.02862 0.17964 -0.15929 0.87344     -0.38071       0.32348             
+2  0.34609 0.18362  1.88477 0.05946     -0.01381       0.70598            .
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("sreg", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> cleanEx()
+
+detaching ‘package:haven’, ‘package:dplyr’
+
+> nameEx("sreg.rgen")
+> ### * sreg.rgen
+> 
+> flush(stderr()); flush(stdout())
+> 
+> base::assign(".ptime", proc.time(), pos = "CheckExEnv")
+> ### Name: sreg.rgen
+> ### Title: Generates a Pseudo-Random Sample under the Stratified Block
+> ###   Randomization
+> ### Aliases: sreg.rgen
+> 
+> ### ** Examples
+> 
+> data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
+> 
+> 
+> 
+> base::assign(".dptime", (proc.time() - get(".ptime", pos = "CheckExEnv")), pos = "CheckExEnv")
+> base::cat("sreg.rgen", base::get(".format_ptime", pos = 'CheckExEnv')(get(".dptime", pos = "CheckExEnv")), "\n", file=base::get(".ExTimings", pos = 'CheckExEnv'), append=TRUE, sep="\t")
+> ### * <FOOTER>
+> ###
+> cleanEx()
+> options(digits = 7L)
+> base::cat("Time elapsed: ", proc.time() - base::get("ptime", pos = 'CheckExEnv'),"\n")
+Time elapsed:  0.777 0.041 0.878 0.002 0.007 
+> grDevices::dev.off()
+null device 
+          1 
+> ###
+> ### Local variables: ***
+> ### mode: outline-minor ***
+> ### outline-regexp: "\\(> \\)?### [*]+" ***
+> ### End: ***
+> quit('no')

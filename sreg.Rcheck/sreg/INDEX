@@ -1,0 +1,7 @@
+AEJapp                  Replication data for: Iron Deficiency and
+                        Schooling Attainment in Peru (Chong et al,
+                        2016)
+sreg                    Estimate Average Treatment Effects (ATEs) and
+                        Corresponding Standard Errors
+sreg.rgen               Generates a Pseudo-Random Sample under the
+                        Stratified Block Randomization
