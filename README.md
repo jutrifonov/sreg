@@ -82,7 +82,7 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 ### Arguments
 - **`Y` -** a numeric vector/matrix/data frame of the observed outcomes;
 - **`S` -** a numeric vector/matrix/data frame of strata indicators; if `NULL` then the estimation is performed assuming no stratification;
-- **`D` -** a numeric  vector/matrix/data frame of treatments indexed by $\{0, 1, 2, \ldots\}$, where `D = 0` denotes the control;
+- **`D` -** a numeric  vector/matrix/data frame of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
 - **`G.id` -** a numeric vector/matrix/data frame of cluster indicators; if `NULL` then estimation is performed assuming treatment is assigned at the individual level;
 - **`Ng` -** a numeric vector/matrix/data frame of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
 - **`X` -** a data frame with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
