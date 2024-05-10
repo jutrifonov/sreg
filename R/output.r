@@ -62,7 +62,7 @@ summary.sreg <- function(model)
     "0.01 `*` 0.05 `.` 0.1 ` ` 1\n"
   ))
   if (any(sapply(model$ols.iter, function(x) any(is.na(x))))) {
-    warning("Warning: there are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+    stop("There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
   }
 }
 #-------------------------------------------------------------------
@@ -133,7 +133,7 @@ summary.creg <- function(model)
     warning("Warning: cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
   }
   if (any(sapply(model$ols.iter, function(x) any(is.na(x))))) {
-    warning("Warning: there are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+    stop("There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
   }
   if (!is.null(model$lin.adj)) {
     if (!check.cluster(data.frame("G.id" = model$data$G.id, model$lin.adj))) {
