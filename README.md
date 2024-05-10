@@ -240,7 +240,7 @@ sreg.rgen(n, Nmax = 50, n.strata,
 ```
 ### Arguments
 - **`n` -** a total number of observations in a sample;
-- **`Nmax` -** a maximum size of generated clusters (maximum number of observations in a cluster)
+- **`Nmax` -** a maximum size of generated clusters (maximum number of observations in a cluster);
 - **`n.strata` -** an integer specifying the number of strata;
 - **`tau.vec` -** a numeric $1 \times |\mathcal A|$ vector of treatment effects, where $|\mathcal A|$ represents the number of treatments;
 - **`gamma.vec` -** a numeric $1 \times 3$ vector of parameters corresponding to covariates;
@@ -253,7 +253,7 @@ sreg.rgen(n, Nmax = 50, n.strata,
 - **`D` -** a numeric $n \times 1$ vector of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
 - **`G.id` -** a numeric $n \times 1$ vector of cluster indicators;
 - **`Ng` -** a numeric vector/matrix/data frame of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
-- **`X` -** a data frame with columns representing the covariate values for every observation;
+- **`X` -** a data frame with columns representing the covariate values for every observation.
 
 ### Example
 ``` r
