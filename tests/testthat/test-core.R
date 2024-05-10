@@ -251,6 +251,40 @@ test_that("data contains one or more NA (or NaN) values warning works", {
   )
 })
 
+test_that("skipped values in range of S/D works", {
+  set.seed(123)
+  data <- sreg.rgen(
+    n = 100, tau.vec = c(0.2, 0.5),
+     n.strata = 5, cluster = F, is.cov = TRUE)
+  Y <- data$Y
+  S <- data$S
+  S[S==4] <- 1
+  D <- data$D
+  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "There are skipped values in the range"
+  )
+  set.seed(123)
+  data <- sreg.rgen(
+    n = 100, tau.vec = c(0.2, 0.5),
+    n.strata = 5, cluster = T, is.cov = TRUE)
+  Y <- data$Y
+  S <- data$S
+  S[S==3] <- 4
+  D <- data$D
+  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  G.id <- data$G.id
+  Ng <- data$Ng
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "There are skipped values in the range"
+  )
+})
 
 
 test_that("empirical example works", {

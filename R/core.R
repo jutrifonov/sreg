@@ -86,6 +86,13 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   if (is.null(D)) {
     stop("Treatments have not been provided (D = NULL). Please provide the vector of treatments.")
   }
+  if (!is.null(D)) {
+    check.range(D)
+  }
+  if (!is.null(S)) {
+     check.range(S)
+  }
+  
   check.df <- tibble(Y, S, D, G.id, Ng, X)
   if (any(is.na(check.df))) {
     warning("The data contains one or more NA (or NaN) values. Proceeding while ignoring these values.")

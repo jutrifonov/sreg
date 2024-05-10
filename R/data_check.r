@@ -24,3 +24,11 @@ check.integers <- function(S, D, G.id, Ng) {
     }
   }
 }
+check.range <- function(var, range.min = range(var)[1], range.max = range(var)[2]) {
+  missing_values <- setdiff(seq(range.min, range.max), var)
+  if (length(missing_values) > 0) {
+    stop(paste0("There are skipped values in the range of ",deparse(substitute(var)), ": ",
+     toString(missing_values), ". ",
+     "Variables S and D must not contain any skipped values within the range. For example, if min(S) = 1 and max(S) = 3, then S should encompass values 1, 2, and 3."))
+  } 
+}
