@@ -80,12 +80,12 @@ Estimates the ATE(s) and the corresponding standard error(s) for a (collection o
 sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 ```
 ### Arguments
-- **`Y` -** a numeric vector/matrix/data frame of the observed outcomes;
-- **`S` -** a numeric vector/matrix/data frame of strata indicators; if `NULL` then the estimation is performed assuming no stratification;
-- **`D` -** a numeric  vector/matrix/data frame of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
-- **`G.id` -** a numeric vector/matrix/data frame of cluster indicators; if `NULL` then estimation is performed assuming treatment is assigned at the individual level;
-- **`Ng` -** a numeric vector/matrix/data frame of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
-- **`X` -** a data frame with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
+- **`Y` -** a numeric `vector/matrix/data frame/tibble` of the observed outcomes;
+- **`S` -** a numeric `vector/matrix/data frame/tibble` of strata indicators; if `NULL` then the estimation is performed assuming no stratification;
+- **`D` -** a numeric `vector/matrix/data frame/tibble` of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
+- **`G.id` -** a numeric `vector/matrix/data frame/tibble` of cluster indicators; if `NULL` then estimation is performed assuming treatment is assigned at the individual level;
+- **`Ng` -** a numeric `vector/matrix/data frame/tibble` of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
+- **`X` -** a `matrix/data frame/tibble` with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
 - **`HC1` -** a `TRUE/FALSE` logical argument indicating whether the small sample correction should be applied to the variance estimator.
 [^*]: *Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages.*
 
