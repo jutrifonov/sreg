@@ -79,6 +79,7 @@
 sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   check.data.types(Y, S, D, G.id, Ng, X)
   check.integers(S, D, G.id, Ng)
+  boolean.check(HC1)
 
   if (is.null(Y)) {
     stop("Observed outcomes have not been provided (Y = NULL). Please provide the vector of observed outcomes.")

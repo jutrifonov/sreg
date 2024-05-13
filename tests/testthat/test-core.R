@@ -36,6 +36,19 @@ test_that("simulations without clusters work", {
 
   expect_error(
     invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X, HC1 = 5)
+    })),
+    "Error: the value of HC must be either TRUE or FALSE."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X, HC1 = "TRUE")
+    })),
+    "Error: the value of HC must be either TRUE or FALSE."
+  )
+
+  expect_error(
+    invisible(capture.output({
       result <- sreg::sreg(as.list(Y), S = S, D = D, G.id = NULL, Ng = NULL, X = X)
     })),
     "variable has a different type than matrix, numeric vector, or data frame."
@@ -146,6 +159,30 @@ test_that("simulations with clusters work", {
     result <- sreg::sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X)
   }))
 
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X, HC1 = 5)
+    })),
+    "Error: the value of HC must be either TRUE or FALSE."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X, HC1 = "TRUE")
+    })),
+    "Error: the value of HC must be either TRUE or FALSE."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = NULL, X = X, HC1 = "TRUE")
+    })),
+     "Error: the value of HC must be either TRUE or FALSE."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X, HC1 = "TRUE")
+    })),
+    "Error: the value of HC must be either TRUE or FALSE."
+  )
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y = NULL, S = S, D, G.id = G.id, Ng = NULL, X = X)
@@ -602,8 +639,6 @@ test_that("non cluster-level error for S, D, Ng works", {
 
   
 })
-
-
 
 
 test_that("empirical example works", {

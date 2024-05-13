@@ -55,4 +55,13 @@ check.range <- function(var, range.min = NULL, range.max = NULL) {
     }
   }
 }
+boolean.check <- function(var) {
+  is.boolean <- function(x) {
+  is.logical(x) && length(x) == 1 && !is.na(x)
+  }
+    if (!is.boolean(var)) {
+    stop("Error: the value of HC must be either TRUE or FALSE. A non-boolean value was provided.")
+  }
+}
+
 
