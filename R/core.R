@@ -117,6 +117,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
     result <- res.sreg(Y, S, D, X, HC1)
     summary.sreg(result)
   } else {
+    check.cluster.lvl(G.id, S, D, Ng)
     result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
     summary.creg(result)
   }

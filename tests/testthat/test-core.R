@@ -286,6 +286,85 @@ test_that("skipped values in range of S/D works", {
   )
 })
 
+test_that("non-individual level error for S, D, Ng works", {
+  set.seed(123)
+  data <- sreg.rgen(
+    n = 100, tau.vec = c(0.2, 0.5),
+    n.strata = 5, cluster = T, is.cov = TRUE)
+  Y <- data$Y
+  S <- data$S
+  D <- data$D
+  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  G.id <- data$G.id
+  Ng <- data$Ng
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    }))
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = Ng, X = X)
+    }))
+  )
+
+  S[41] <- 3
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "the values for S, D, and Ng must be consistent within each cluster"
+  )
+  S <- data$S
+  D[13:20] <- 1
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "the values for S, D, and Ng must be consistent within each cluster"
+  )
+  D <- data$D
+  Ng[300] <- 30
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "the values for S, D, and Ng must be consistent within each cluster"
+  )
+  Ng <- data$Ng
+  S[41] <- 3
+  D[13:20] <- 1
+  Ng[300] <- 30
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "the values for S, D, and Ng must be consistent within each cluster"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "the values for S, D, and Ng must be consistent within each cluster"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S, D = D, G.id = G.id, Ng = NULL, X = X)
+    })),
+    "the values for S, D, and Ng must be consistent within each cluster"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = NULL, X = X)
+    })),
+    "the values for S, D, and Ng must be consistent within each cluster"
+  )
+
+  
+})
+
+
+
 
 test_that("empirical example works", {
   library(haven)
