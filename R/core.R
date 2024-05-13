@@ -10,7 +10,7 @@
 #'
 #' @param Y a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of the observed outcomes
 #' @param S a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of strata indicators;  if \code{NULL} then the estimation is performed assuming no stratification
-#' @param D a numeric \eqn{n \times 1}\code{vector/matrix/data frame/tibble} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
+#' @param D a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
 #' @param G.id a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of cluster indicators; if \code{NULL} then estimation is performed assuming treatment is assigned at the individual level
 #' @param Ng a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of cluster sizes; if \code{NULL} then \code{Ng} is assumed to be equal to the number of available observations in every cluster
 #' @param X a \code{matrix/data frame/tibble} with columns representing the covariate values for every observation; if \code{NULL} then the estimator without linear adjustments is applied. (Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages)

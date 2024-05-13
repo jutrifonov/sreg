@@ -11,7 +11,7 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 
 \item{S}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of strata indicators;  if \code{NULL} then the estimation is performed assuming no stratification}
 
-\item{D}{a numeric \eqn{n \times 1}\code{vector/matrix/data frame/tibble} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control}
+\item{D}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control}
 
 \item{G.id}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of cluster indicators; if \code{NULL} then estimation is performed assuming treatment is assigned at the individual level}
 
