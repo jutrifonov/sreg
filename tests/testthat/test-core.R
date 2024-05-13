@@ -33,6 +33,35 @@ test_that("simulations without clusters work", {
 
   expect_equal(round(result$tau.hat, 7), c(0.1685108, 0.5022035))
   expect_equal(round(result$se.rob, 7), c(0.1145915, 0.1161482))
+
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(as.list(Y), S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  S[2] <- 2.5
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = NULL)
+    })),
+    "must contain only integer values."
+  )
+  S <- data$S
+  D[5] <- 0.5
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "must contain only integer values."
+  )
+  S[3] <- 5.5
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "must contain only integer values."
+  )
 })
 
 test_that("simulations with clusters work", {
@@ -207,6 +236,58 @@ test_that("simulations with clusters work", {
     })),
     "must contain only integer values."
   )
+  S <- data$S
+  D[5] <- 1.5
+  D[7] <- 1.5
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "must contain only integer values."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = NULL, X = X)
+    })),
+    "must contain only integer values."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = NULL, X = NULL)
+    })),
+    "must contain only integer values."
+  )
+  S[2] <- 2.5
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = NULL)
+    })),
+    "must contain only integer values."
+  )
+  S <- data$S
+  D <- data$D
+  Ng[2] <- 37.64
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "must contain only integer values."
+  )
+  Ng <- data$Ng
+  G.id[29] <- 29.23480
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "must contain only integer values."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = Ng, X = NULL)
+    })),
+    "must contain only integer values."
+  )
+
 })
 
 test_that("degrees of freedom error works", {
