@@ -111,6 +111,89 @@ test_that("simulations with clusters work", {
     })),
     "variable has a different type than matrix, numeric vector, or data frame."
   )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(as.character(Y), S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = as.character(D), G.id = G.id, Ng = Ng, X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = as.character(X))
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = as.list(S), D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(as.list(Y), S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = as.list(D), G.id = G.id, Ng = Ng, X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = as.list(G.id), Ng = Ng, X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = as.list(Ng), X = X)
+    })),
+    "variable has a different type than matrix, numeric vector, or data frame."
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(as.matrix(Y), S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    }))
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(as.numeric(Y), S = as.numeric(S), D = as.integer(D), G.id = as.integer(G.id), Ng = as.integer(Ng), X = as.matrix(X))
+    }))
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(tibble(Y), S = as.numeric(S), D = as.vector(D), G.id = as.integer(G.id), Ng = as.matrix(Ng), X = tibble(X))
+    }))
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(tibble(Y), S = as.data.frame(S), D = as.data.frame(D), G.id = as.data.frame(G.id), Ng = as.data.frame(Ng), X = as.data.frame(X))
+    }))
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(as.data.frame(Y), S = as.data.frame(S), D = as.data.frame(D), G.id = as.data.frame(G.id), Ng = as.data.frame(Ng), X = as.data.frame(X))
+    }))
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(as.matrix(Y), S = as.matrix(S), D = as.vector(D), G.id = as.matrix(G.id), Ng = as.matrix(Ng), X = as.matrix(X))
+    }))
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(tibble(Y), S = tibble(S), D = tibble(D), G.id = tibble(G.id), Ng = tibble(Ng), X = tibble(X))
+    }))
+  )
   S[2] <- 2.5
   expect_error(
     invisible(capture.output({
@@ -259,7 +342,7 @@ test_that("skipped values in range of S/D works", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
     })),
-    "There are skipped values in the range"
+    "there are skipped values in the range"
   )
   set.seed(123)
   data <- sreg.rgen(
@@ -276,7 +359,7 @@ test_that("skipped values in range of S/D works", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
     })),
-    "There are skipped values in the range"
+    "there are skipped values in the range"
   )
 })
 
