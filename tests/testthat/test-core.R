@@ -62,6 +62,36 @@ test_that("simulations without clusters work", {
     })),
     "must contain only integer values."
   )
+  S <- data$S
+  D <- data$D
+
+  X[10:12, ] <- NaN
+  Y[1:10] <- NaN
+  msg <- "ignoring these values"
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X, HC1 = TRUE)
+    })),
+    msg
+  )
+  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2) 
+  Y <- data$Y
+  S[12] <- NA
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X, HC1 = TRUE)
+    })),
+    msg
+  )
+  S <- data$S
+  S[19] <- NaN
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X, HC1 = TRUE)
+    })),
+    msg
+  )
+
 })
 
 test_that("simulations with clusters work", {
@@ -400,7 +430,48 @@ test_that("data contains one or more NA (or NaN) values warning works", {
     msg
   )
   X[1:5, ] <- NA
+  X[10:12, ] <- NA
   Y[1:10] <- NaN
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+    })),
+    msg
+  )
+  X[10:12, ] <- NaN
+  Y <- data$Y
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+    })),
+    msg
+  )
+  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  G.id[100:105] <- NA
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+    })),
+    msg
+  )
+  G.id <- data$G.id
+  Ng[4:5] <- NaN
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+    })),
+    msg
+  )
+  Ng <- data$Ng
+  D[24:25] <- NA
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+    })),
+    msg
+  )
+  D <- data$D
+  S[23] <- NaN
   expect_warning(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
