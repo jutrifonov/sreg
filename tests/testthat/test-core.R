@@ -513,6 +513,17 @@ test_that("skipped values in range of S/D works", {
     })),
     "there are skipped values in the range"
   )
+  S <- data$S
+  G.id[41:50] <- 3 
+  S[41:50] <- 3
+  Ng[41:50] <- 30
+  D[41:50] <- 2
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "sreg cannot use individual-level covariates for covariate adjustment"
+  )
 })
 
 test_that("non cluster-level error for S, D, Ng works", {
