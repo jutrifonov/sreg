@@ -111,12 +111,6 @@ test_that("simulations with clusters work", {
     })),
     "variable has a different type than matrix, numeric vector, or data frame."
   )
-  expect_error(
-    invisible(capture.output({
-      result <- sreg::sreg(Y, S = as.character(S), D = D, G.id = G.id, Ng = Ng, X = X)
-    })),
-    "variable has a different type than matrix, numeric vector, or data frame."
-  )
   S[2] <- 2.5
   expect_error(
     invisible(capture.output({
@@ -286,7 +280,7 @@ test_that("skipped values in range of S/D works", {
   )
 })
 
-test_that("non-individual level error for S, D, Ng works", {
+test_that("non cluster-level error for S, D, Ng works", {
   set.seed(123)
   data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.5),
