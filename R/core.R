@@ -91,9 +91,9 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
     check.range(D)
   }
   if (!is.null(S)) {
-     check.range(S)
+    check.range(S)
   }
-  
+
   check.df <- tibble(Y, S, D, G.id, Ng, X)
   if (any(is.na(check.df))) {
     warning("The data contains one or more NA (or NaN) values. Proceeding while ignoring these values.")
@@ -113,7 +113,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
       X <- clean.df[, (x.ind + 1):ncol(clean.df)]
     }
   })
-
+  if (!is.null(S)) {
+    if (min(S)!= 1) {
+            stop(paste0("Error: The strata should be indexed by {1, 2, 3, ...}. The minimum value in the provided data is ", min(S), "."))
+          }
+  }
   if (is.null(G.id)) {
     result <- res.sreg(Y, S, D, X, HC1)
     summary.sreg(result)

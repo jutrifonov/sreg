@@ -104,7 +104,32 @@ test_that("simulations without clusters work", {
     })),
     msg
   )
-
+  S <- data$S
+  S[1] <- 0
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "Error: The strata should be indexed by"
+  )
+  S[10] <- -1
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "Error: The strata should be indexed by"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = NULL)
+    })),
+    "Error: The strata should be indexed by"
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = NULL, Ng = NULL, X = X)
+    }))
+  )
 })
 
 test_that("simulations with clusters work", {
@@ -255,6 +280,44 @@ test_that("simulations with clusters work", {
     })),
     "variable has a different type than matrix, numeric vector, or data frame."
   )
+  S <- data$S
+  S[1] <- 0
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "Error: The strata should be indexed by"
+  )
+  S[10] <- -1
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "Error: The strata should be indexed by"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = NULL, X = X)
+    })),
+    "Error: The strata should be indexed by"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = NULL, X = NULL)
+    })),
+    "Error: The strata should be indexed by"
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = Ng, X = X)
+    }))
+  )
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = Ng, X = NULL)
+    }))
+  )
+  S <- data$S
   expect_silent(
     invisible(capture.output({
       result <- sreg::sreg(as.matrix(Y), S = S, D = D, G.id = G.id, Ng = Ng, X = X)
