@@ -118,6 +118,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
             stop(paste0("Error: The strata should be indexed by {1, 2, 3, ...}. The minimum value in the provided data is ", min(S), "."))
           }
   }
+  if (!is.null(D)) {
+    if (min(D)!= 0) {
+            stop(paste0("Error: The treatments should be indexed by {0, 1, 2, ...}, where D = 0 denotes the control. The minimum value in the provided data is ", min(D), "."))
+          }
+  }
   if (is.null(G.id)) {
     result <- res.sreg(Y, S, D, X, HC1)
     summary.sreg(result)

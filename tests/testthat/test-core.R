@@ -130,6 +130,48 @@ test_that("simulations without clusters work", {
       result <- sreg::sreg(Y, S = NULL, D = D, G.id = NULL, Ng = NULL, X = X)
     }))
   )
+  S <- data$S
+  D[1:3] <- -1
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "Error: The treatments should be indexed by"
+  )
+  D[4] <- -2
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "Error: The treatments should be indexed by"
+  )
+  D <- data$D
+  D[1] <- -1
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = NULL, Ng = NULL, X = X)
+    })),
+    "Error: The treatments should be indexed by"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = NULL)
+    })),
+    "Error: The treatments should be indexed by"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = NULL, Ng = NULL, X = NULL)
+    })),
+    "Error: The treatments should be indexed by"
+  )
+  D <- data$D
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
+    }))
+  )
+
 })
 
 test_that("simulations with clusters work", {
@@ -417,7 +459,48 @@ test_that("simulations with clusters work", {
     })),
     "must contain only integer values."
   )
-
+  set.seed(123) # fix the random seed
+  data <- sreg.rgen(
+    n = 100, tau.vec = c(0.2, 0.8),
+    n.strata = 4, cluster = T, Nmax = 50
+  )
+  Y <- data$Y
+  S <- data$S
+  D <- data$D
+  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  G.id <- data$G.id
+  Ng <- data$Ng
+  D[1:40] <- -1 
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "Error: The treatments should be indexed by"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = NULL)
+    })),
+    "Error: The treatments should be indexed by"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = Ng, X = X)
+    })),
+    "Error: The treatments should be indexed by"
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = Ng, X = NULL)
+    })),
+    "Error: The treatments should be indexed by"
+  )
+  D <- data$D
+  expect_silent(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
+    }))
+  )
 })
 
 test_that("degrees of freedom error works", {
