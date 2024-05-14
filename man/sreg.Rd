@@ -9,7 +9,7 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 \arguments{
 \item{Y}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of the observed outcomes}
 
-\item{S}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of strata indicators;  if \code{NULL} then the estimation is performed assuming no stratification}
+\item{S}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of strata indicators indexed by \eqn{\{1, 2, 3, \ldots\}};  if \code{NULL} then the estimation is performed assuming no stratification}
 
 \item{D}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control}
 

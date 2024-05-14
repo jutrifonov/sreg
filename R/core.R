@@ -9,7 +9,7 @@
 #' @importFrom utils packageVersion
 #'
 #' @param Y a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of the observed outcomes
-#' @param S a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of strata indicators;  if \code{NULL} then the estimation is performed assuming no stratification
+#' @param S a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of strata indicators indexed by \eqn{\{1, 2, 3, \ldots\}};  if \code{NULL} then the estimation is performed assuming no stratification
 #' @param D a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
 #' @param G.id a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of cluster indicators; if \code{NULL} then estimation is performed assuming treatment is assigned at the individual level
 #' @param Ng a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of cluster sizes; if \code{NULL} then \code{Ng} is assumed to be equal to the number of available observations in every cluster
