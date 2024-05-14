@@ -82,10 +82,10 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   boolean.check(HC1)
 
   if (is.null(Y)) {
-    stop("Observed outcomes have not been provided (Y = NULL). Please provide the vector of observed outcomes.")
+    stop("Error: Observed outcomes have not been provided (Y = NULL). Please provide the vector of observed outcomes.")
   }
   if (is.null(D)) {
-    stop("Treatments have not been provided (D = NULL). Please provide the vector of treatments.")
+    stop("Error: Treatments have not been provided (D = NULL). Please provide the vector of treatments.")
   }
   if (!is.null(D)) {
     check.range(D)
@@ -96,7 +96,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 
   check.df <- tibble(Y, S, D, G.id, Ng, X)
   if (any(is.na(check.df))) {
-    warning("The data contains one or more NA (or NaN) values. Proceeding while ignoring these values.")
+    warning("Warning: The data contains one or more NA (or NaN) values. Proceeding while ignoring these values.")
   }
   clean.df <- na.omit(check.df)
   x.ind <- max(which(colnames(clean.df) %in% c("D", "G.id", "Ng")))

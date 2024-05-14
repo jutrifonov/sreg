@@ -38,13 +38,13 @@ test_that("simulations without clusters work", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X, HC1 = 5)
     })),
-    "Error: the value of HC must be either TRUE or FALSE."
+    "Error: The value of HC must be either TRUE or FALSE."
   )
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X, HC1 = "TRUE")
     })),
-    "Error: the value of HC must be either TRUE or FALSE."
+    "Error: The value of HC must be either TRUE or FALSE."
   )
 
   expect_error(
@@ -230,25 +230,25 @@ test_that("simulations with clusters work", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X, HC1 = 5)
     })),
-    "Error: the value of HC must be either TRUE or FALSE."
+    "Error: The value of HC must be either TRUE or FALSE."
   )
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X, HC1 = "TRUE")
     })),
-    "Error: the value of HC must be either TRUE or FALSE."
+    "Error: The value of HC must be either TRUE or FALSE."
   )
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = NULL, X = X, HC1 = "TRUE")
     })),
-     "Error: the value of HC must be either TRUE or FALSE."
+     "Error: The value of HC must be either TRUE or FALSE."
   )
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X, HC1 = "TRUE")
     })),
-    "Error: the value of HC must be either TRUE or FALSE."
+    "Error: The value of HC must be either TRUE or FALSE."
   )
   expect_error(
     invisible(capture.output({
@@ -577,7 +577,7 @@ test_that("no cluster sizes warning works", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = NULL, X = X, HC1 = TRUE)
     })),
-    "cluster sizes have not been provided"
+    "Cluster sizes have not been provided"
   )
 })
 
@@ -677,7 +677,7 @@ test_that("skipped values in range of S/D works", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
     })),
-    "there are skipped values in the range"
+    "There are skipped values in the range"
   )
   set.seed(123)
   data <- sreg.rgen(
@@ -694,7 +694,7 @@ test_that("skipped values in range of S/D works", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
     })),
-    "there are skipped values in the range"
+    "There are skipped values in the range"
   )
   S <- data$S
   G.id[41:50] <- 3 
@@ -736,7 +736,7 @@ test_that("non cluster-level error for S, D, Ng works", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
     })),
-    "the values for S, D, and Ng must be consistent within each cluster"
+    "The values for S, D, and Ng must be consistent within each cluster"
   )
   S <- data$S
   D[13:20] <- 1
@@ -744,7 +744,7 @@ test_that("non cluster-level error for S, D, Ng works", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
     })),
-    "the values for S, D, and Ng must be consistent within each cluster"
+    "The values for S, D, and Ng must be consistent within each cluster"
   )
   D <- data$D
   Ng[300] <- 30
@@ -752,7 +752,7 @@ test_that("non cluster-level error for S, D, Ng works", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
     })),
-    "the values for S, D, and Ng must be consistent within each cluster"
+    "The values for S, D, and Ng must be consistent within each cluster"
   )
   Ng <- data$Ng
   S[41] <- 3
@@ -762,25 +762,25 @@ test_that("non cluster-level error for S, D, Ng works", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
     })),
-    "the values for S, D, and Ng must be consistent within each cluster"
+    "The values for S, D, and Ng must be consistent within each cluster"
   )
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = Ng, X = X)
     })),
-    "the values for S, D, and Ng must be consistent within each cluster"
+    "The values for S, D, and Ng must be consistent within each cluster"
   )
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S, D = D, G.id = G.id, Ng = NULL, X = X)
     })),
-    "the values for S, D, and Ng must be consistent within each cluster"
+    "The values for S, D, and Ng must be consistent within each cluster"
   )
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = NULL, X = X)
     })),
-    "the values for S, D, and Ng must be consistent within each cluster"
+    "The values for S, D, and Ng must be consistent within each cluster"
   )
 
   

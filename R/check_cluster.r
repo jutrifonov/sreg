@@ -27,7 +27,7 @@ check.cluster.lvl <- function(G.id, S, D, Ng) {
     if (length(unique(subset.dta$S)) > 1 ||
         length(unique(subset.dta$D)) > 1 ||
         length(unique(subset.dta$Ng)) > 1) {
-      stop("Error: the values for S, D, and Ng must be consistent within each cluster (i.e., S, D, and Ng are cluster-level variables). Please verify that there are no discrepancies at the individual level within any cluster.")
+      stop("Error: The values for S, D, and Ng must be consistent within each cluster (i.e., S, D, and Ng are cluster-level variables). Please verify that there are no discrepancies at the individual level within any cluster.")
     }
     })
   }

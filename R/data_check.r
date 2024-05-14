@@ -7,7 +7,7 @@ check.data.types <- function(Y, S, D, G.id, Ng, X) {
   )
 
   if (!all.correct.types) {
-    stop("Error: at least one non-NULL input variable has a different type than matrix, numeric vector, or data frame.")
+    stop("Error: At least one non-NULL input variable has a different type than matrix, numeric vector, or data frame.")
   }
 }
 check.integers <- function(S, D, G.id, Ng) {
@@ -19,11 +19,11 @@ check.integers <- function(S, D, G.id, Ng) {
     if (!is.null(var)) {
       if (is.data.frame(var)) {
         if (!all(sapply(var, function(col) all(is.na(col) | as.integer(col) == col)))) {
-          stop(paste("Variable", var.name, "must contain only integer values."))
+          stop(paste("Error: Variable", var.name, "must contain only integer values."))
         }
       } else {
         if (!all(is.na(var) | as.integer(var) == var)) {
-          stop(paste("Variable", var.name, "must contain only integer values."))
+          stop(paste("Error: Variable", var.name, "must contain only integer values."))
         }
       }
     }
@@ -38,7 +38,7 @@ check.range <- function(var, range.min = NULL, range.max = NULL) {
 
       missing_values <- setdiff(seq(current_range_min, current_range_max), data)
       if (length(missing_values) > 0) {
-        stop(paste0("Error: there are skipped values in the range of ", col, ": ",
+        stop(paste0("Error: There are skipped values in the range of ", col, ": ",
              toString(missing_values), ". ",
              "Variables S and D must not contain any skipped values within the range. For example, if min(S) = 1 and max(S) = 3, then S should encompass values 1, 2, and 3."))
       }
@@ -49,7 +49,7 @@ check.range <- function(var, range.min = NULL, range.max = NULL) {
 
     missing_values <- setdiff(seq(current_range_min, current_range_max), var)
     if (length(missing_values) > 0) {
-      stop(paste0("Error: there are skipped values in the range of ", deparse(substitute(var)), ": ",
+      stop(paste0("Error: There are skipped values in the range of ", deparse(substitute(var)), ": ",
            toString(missing_values), ". ",
            "Variables S and D must not contain any skipped values within the range. For example, if min(S) = 1 and max(S) = 3, then S should encompass values 1, 2, and 3."))
     }
@@ -60,7 +60,7 @@ boolean.check <- function(var) {
   is.logical(x) && length(x) == 1 && !is.na(x)
   }
     if (!is.boolean(var)) {
-    stop("Error: the value of HC must be either TRUE or FALSE. A non-boolean value was provided.")
+    stop("Error: The value of HC must be either TRUE or FALSE. A non-boolean value was provided.")
   }
 }
 
