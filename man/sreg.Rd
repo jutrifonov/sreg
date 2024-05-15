@@ -7,17 +7,17 @@
 sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 }
 \arguments{
-\item{Y}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of the observed outcomes}
+\item{Y}{a numeric \eqn{n \times 1} \code{vector/matrix/data.frame/tibble} of the observed outcomes}
 
-\item{S}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of strata indicators indexed by \eqn{\{1, 2, 3, \ldots\}};  if \code{NULL} then the estimation is performed assuming no stratification}
+\item{S}{a numeric \eqn{n \times 1} \code{vector/matrix/data.frame/tibble} of strata indicators indexed by \eqn{\{1, 2, 3, \ldots\}};  if \code{NULL} then the estimation is performed assuming no stratification}
 
-\item{D}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control}
+\item{D}{a numeric \eqn{n \times 1} \code{vector/matrix/data.frame/tibble} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control}
 
-\item{G.id}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of cluster indicators; if \code{NULL} then estimation is performed assuming treatment is assigned at the individual level}
+\item{G.id}{a numeric \eqn{n \times 1} \code{vector/matrix/data.frame/tibble} of cluster indicators; if \code{NULL} then estimation is performed assuming treatment is assigned at the individual level}
 
-\item{Ng}{a numeric \eqn{n \times 1} \code{vector/matrix/data frame/tibble} of cluster sizes; if \code{NULL} then \code{Ng} is assumed to be equal to the number of available observations in every cluster}
+\item{Ng}{a numeric \eqn{n \times 1} \code{vector/matrix/data.frame/tibble} of cluster sizes; if \code{NULL} then \code{Ng} is assumed to be equal to the number of available observations in every cluster}
 
-\item{X}{a \code{matrix/data frame/tibble} with columns representing the covariate values for every observation; if \code{NULL} then the estimator without linear adjustments is applied. (Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages)}
+\item{X}{a \code{matrix/data.frame/tibble} with columns representing the covariate values for every observation; if \code{NULL} then the estimator without linear adjustments is applied. (Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages)}
 
 \item{HC1}{a \code{TRUE/FALSE} logical argument indicating whether the small sample correction should be applied to the variance estimator}
 }
@@ -31,7 +31,7 @@ An object of class \code{sreg} that is a list containing the following elements:
 \item \code{CI.left}: a \eqn{1 \times |\mathcal A|} vector of the left bounds of the 95\% as. confidence interval
 \item \code{CI.right}: a \eqn{1 \times |\mathcal A|} vector of the right bounds of the 95\% as. confidence interval
 \item \code{data}: an original data of the form \code{data.frame(Y, S, D, G.id, Ng, X)}
-\item \code{lin.adj}: a data frame representing the covariates that were used in implementing linear adjustments
+\item \code{lin.adj}: a \code{data.frame} representing the covariates that were used in implementing linear adjustments
 }
 }
 \description{
