@@ -80,12 +80,12 @@ Estimates the ATE(s) and the corresponding standard error(s) for a (collection o
 sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 ```
 ### Arguments
-- **`Y` -** a numeric `vector/matrix/data frame/tibble` of the observed outcomes;
-- **`S` -** a numeric `vector/matrix/data frame/tibble` of strata indicators $\\{0, 1, 2, \ldots\\}$; if `NULL` then the estimation is performed assuming no stratification;
-- **`D` -** a numeric `vector/matrix/data frame/tibble` of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
-- **`G.id` -** a numeric `vector/matrix/data frame/tibble` of cluster indicators; if `NULL` then estimation is performed assuming treatment is assigned at the individual level;
-- **`Ng` -** a numeric `vector/matrix/data frame/tibble` of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
-- **`X` -** a `matrix/data frame/tibble` with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
+- **`Y` -** a numeric `vector/matrix/data.frame/tibble` of the observed outcomes;
+- **`S` -** a numeric `vector/matrix/data.frame/tibble` of strata indicators $\\{0, 1, 2, \ldots\\}$; if `NULL` then the estimation is performed assuming no stratification;
+- **`D` -** a numeric `vector/matrix/data.frame/tibble` of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
+- **`G.id` -** a numeric `vector/matrix/data.frame/tibble` of cluster indicators; if `NULL` then estimation is performed assuming treatment is assigned at the individual level;
+- **`Ng` -** a numeric `vector/matrix/data.frame/tibble` of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
+- **`X` -** a `matrix/data.frame/tibble` with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
 - **`HC1` -** a `TRUE/FALSE` logical argument indicating whether the small sample correction should be applied to the variance estimator.
 [^*]: *Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages.*
 
@@ -140,7 +140,7 @@ The function returns an object of class `sreg` that is a list containing the fol
   
 - **`data` -** an original data of the form `data.frame(Y, S, D, G.id, Ng, X)`;
   
-- **`lin.adj` -** a data frame representing the covariates that were used in implementing linear adjustments.
+- **`lin.adj` -** a `data.frame` representing the covariates that were used in implementing linear adjustments.
 
 ### Empirical Example
 
@@ -241,19 +241,19 @@ sreg.rgen(n, Nmax = 50, n.strata,
 ### Arguments
 - **`n` -** a total number of observations in a sample;
 - **`Nmax` -** a maximum size of generated clusters (maximum number of observations in a cluster);
-- **`n.strata` -** an integer specifying the number of strata;
+- **`n.strata` -** an `integer` specifying the number of strata;
 - **`tau.vec` -** a numeric $1 \times |\mathcal A|$ vector of treatment effects, where $|\mathcal A|$ represents the number of treatments;
-- **`gamma.vec` -** a numeric $1 \times 3$ vector of parameters corresponding to covariates;
+- **`gamma.vec` -** a numeric $1 \times 3$ `vector` of parameters corresponding to covariates;
 - **`cluster` -** a `TRUE/FALSE` argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level;
 - **`is.cov` -** a `TRUE/FALSE` argument indicating whether the dgp should include covariates or not.
 
 ### Return Value
-- **`Y` -** a numeric $n \times 1$ vector of the observed outcomes;
-- **`S` -** a numeric $n \times 1$ vector of strata indicators;
-- **`D` -** a numeric $n \times 1$ vector of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
-- **`G.id` -** a numeric $n \times 1$ vector of cluster indicators;
-- **`Ng` -** a numeric vector/matrix/data frame of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
-- **`X` -** a data frame with columns representing the covariate values for every observation.
+- **`Y` -** a numeric $n \times 1$ `vector` of the observed outcomes;
+- **`S` -** a numeric $n \times 1$ `vector` of strata indicators;
+- **`D` -** a numeric $n \times 1$ `vector` of treatments indexed by $\\{0, 1, 2, \ldots\\}$, where `D = 0` denotes the control;
+- **`G.id` -** a numeric $n \times 1$ `vector` of cluster indicators;
+- **`Ng` -** a numeric `vector/matrix/data.frame` of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
+- **`X` -** a `data.frame` with columns representing the covariate values for every observation.
 
 ### Example
 ``` r
