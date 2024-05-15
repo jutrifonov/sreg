@@ -242,7 +242,7 @@ sreg.rgen(n, Nmax = 50, n.strata,
 - **`n` -** a total number of observations in a sample;
 - **`Nmax` -** a maximum size of generated clusters (maximum number of observations in a cluster);
 - **`n.strata` -** an `integer` specifying the number of strata;
-- **`tau.vec` -** a numeric $1 \times |\mathcal A|$ vector of treatment effects, where $|\mathcal A|$ represents the number of treatments;
+- **`tau.vec` -** a numeric $1 \times |\mathcal A|$ `vector` of treatment effects, where $|\mathcal A|$ represents the number of treatments;
 - **`gamma.vec` -** a numeric $1 \times 3$ `vector` of parameters corresponding to covariates;
 - **`cluster` -** a `TRUE/FALSE` argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level;
 - **`is.cov` -** a `TRUE/FALSE` argument indicating whether the dgp should include covariates or not.
