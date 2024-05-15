@@ -268,6 +268,12 @@ data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
 5 5.536280 2 2 2.469239 2.0495611
 6 1.628753 2 0 4.887561 2.1327071
 ```
+## Author(s)
+Juri Trifonov jutrifonov@uchicago.edu
+
+Max Tabord-Meehan maxtm@uchicago.edu
+
+Azeem Shaikh amshaikh@uchicago.edu
 
 ## References
 Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. *Journal of the American Statistical Association*, 113(524), 1784–1796, doi:10.1080/01621459.2017.1375934.
