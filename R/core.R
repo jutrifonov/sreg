@@ -158,13 +158,13 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 #' @param cluster a \code{TRUE/FALSE} argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level
 #' @param is.cov a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not
 #'
-#' @return An object that is a data frame with \eqn{n} observations containing the generated values of the following variables:
+#' @return An object that is a `data.frame` with \eqn{n} observations containing the generated values of the following variables:
 #' \itemize{
-#' \item \code{Y}: a numeric \eqn{n \times 1} vector of observed outcomes
-#' \item \code{S}: a numeric \eqn{n \times 1} vector of strata indicators
-#' \item \code{D}: a numeric \eqn{n \times 1} vector of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
-#' \item \code{G.id}: a numeric \eqn{n \times 1} vector of cluster indicators
-#' \item \code{X}: a data frame with columns representing the covariate values for every observation
+#' \item \code{Y}: a numeric \eqn{n \times 1} `vector` of observed outcomes
+#' \item \code{S}: a numeric \eqn{n \times 1} `vector` of strata indicators
+#' \item \code{D}: a numeric \eqn{n \times 1} `vector` of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
+#' \item \code{G.id}: a numeric \eqn{n \times 1} `vector`of cluster indicators
+#' \item \code{X}: a `data.frame` with columns representing the covariate values for every observation
 #' }
 #' @export
 #'
