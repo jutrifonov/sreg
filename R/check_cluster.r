@@ -16,19 +16,19 @@ check.cluster <- function(df)
   return(cov.same$all.same)
 }
 check.cluster.lvl <- function(G.id, S, D, Ng) {
-    dta.check.lvl <- tibble(G.id, S, D, Ng)
+  dta.check.lvl <- tibble(G.id, S, D, Ng)
   # Check each cluster
   unique.clusters <- unique(dta.check.lvl$G.id)
   for (cluster in unique.clusters) {
     subset.dta <- dta.check.lvl[dta.check.lvl$G.id == cluster, ]
 
     suppressWarnings({
-    # Check if all entries for S, D, and Ng are the same within the cluster
-    if (length(unique(subset.dta$S)) > 1 ||
+      # Check if all entries for S, D, and Ng are the same within the cluster
+      if (length(unique(subset.dta$S)) > 1 ||
         length(unique(subset.dta$D)) > 1 ||
         length(unique(subset.dta$Ng)) > 1) {
-      stop("Error: The values for S, D, and Ng must be consistent within each cluster (i.e., S, D, and Ng are cluster-level variables). Please verify that there are no discrepancies at the individual level within any cluster.")
-    }
+        stop("Error: The values for S, D, and Ng must be consistent within each cluster (i.e., S, D, and Ng are cluster-level variables). Please verify that there are no discrepancies at the individual level within any cluster.")
+      }
     })
   }
 }

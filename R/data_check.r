@@ -38,9 +38,11 @@ check.range <- function(var, range.min = NULL, range.max = NULL) {
 
       missing_values <- setdiff(seq(current_range_min, current_range_max), data)
       if (length(missing_values) > 0) {
-        stop(paste0("Error: There are skipped values in the range of ", col, ": ",
-             toString(missing_values), ". ",
-             "Variables S and D must not contain any skipped values within the range. For example, if min(S) = 1 and max(S) = 3, then S should encompass values 1, 2, and 3."))
+        stop(paste0(
+          "Error: There are skipped values in the range of ", col, ": ",
+          toString(missing_values), ". ",
+          "Variables S and D must not contain any skipped values within the range. For example, if min(S) = 1 and max(S) = 3, then S should encompass values 1, 2, and 3."
+        ))
       }
     }
   } else {
@@ -49,19 +51,19 @@ check.range <- function(var, range.min = NULL, range.max = NULL) {
 
     missing_values <- setdiff(seq(current_range_min, current_range_max), var)
     if (length(missing_values) > 0) {
-      stop(paste0("Error: There are skipped values in the range of ", deparse(substitute(var)), ": ",
-           toString(missing_values), ". ",
-           "Variables S and D must not contain any skipped values within the range. For example, if min(S) = 1 and max(S) = 3, then S should encompass values 1, 2, and 3."))
+      stop(paste0(
+        "Error: There are skipped values in the range of ", deparse(substitute(var)), ": ",
+        toString(missing_values), ". ",
+        "Variables S and D must not contain any skipped values within the range. For example, if min(S) = 1 and max(S) = 3, then S should encompass values 1, 2, and 3."
+      ))
     }
   }
 }
 boolean.check <- function(var) {
   is.boolean <- function(x) {
-  is.logical(x) && length(x) == 1 && !is.na(x)
+    is.logical(x) && length(x) == 1 && !is.na(x)
   }
-    if (!is.boolean(var)) {
+  if (!is.boolean(var)) {
     stop("Error: The value of HC must be either TRUE or FALSE. A non-boolean value was provided.")
   }
 }
-
-

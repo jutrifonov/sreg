@@ -87,7 +87,7 @@ test_that("simulations without clusters work", {
     })),
     msg
   )
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2) 
+  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
   Y <- data$Y
   S[12] <- NA
   expect_warning(
@@ -171,7 +171,6 @@ test_that("simulations without clusters work", {
       result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
     }))
   )
-
 })
 
 test_that("simulations with clusters work", {
@@ -242,7 +241,7 @@ test_that("simulations with clusters work", {
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = NULL, X = X, HC1 = "TRUE")
     })),
-     "Error: The value of HC must be either TRUE or FALSE."
+    "Error: The value of HC must be either TRUE or FALSE."
   )
   expect_error(
     invisible(capture.output({
@@ -470,7 +469,7 @@ test_that("simulations with clusters work", {
   X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
   G.id <- data$G.id
   Ng <- data$Ng
-  D[1:40] <- -1 
+  D[1:40] <- -1
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
@@ -667,10 +666,11 @@ test_that("skipped values in range of S/D works", {
   set.seed(123)
   data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.5),
-     n.strata = 5, cluster = F, is.cov = TRUE)
+    n.strata = 5, cluster = F, is.cov = TRUE
+  )
   Y <- data$Y
   S <- data$S
-  S[S==4] <- 1
+  S[S == 4] <- 1
   D <- data$D
   X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
   expect_error(
@@ -682,10 +682,11 @@ test_that("skipped values in range of S/D works", {
   set.seed(123)
   data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.5),
-    n.strata = 5, cluster = T, is.cov = TRUE)
+    n.strata = 5, cluster = T, is.cov = TRUE
+  )
   Y <- data$Y
   S <- data$S
-  S[S==3] <- 4
+  S[S == 3] <- 4
   D <- data$D
   X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
   G.id <- data$G.id
@@ -697,7 +698,7 @@ test_that("skipped values in range of S/D works", {
     "There are skipped values in the range"
   )
   S <- data$S
-  G.id[41:50] <- 3 
+  G.id[41:50] <- 3
   S[41:50] <- 3
   Ng[41:50] <- 30
   D[41:50] <- 2
@@ -713,7 +714,8 @@ test_that("non cluster-level error for S, D, Ng works", {
   set.seed(123)
   data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.5),
-    n.strata = 5, cluster = T, is.cov = TRUE)
+    n.strata = 5, cluster = T, is.cov = TRUE
+  )
   Y <- data$Y
   S <- data$S
   D <- data$D
@@ -782,8 +784,6 @@ test_that("non cluster-level error for S, D, Ng works", {
     })),
     "The values for S, D, and Ng must be consistent within each cluster"
   )
-
-  
 })
 
 
