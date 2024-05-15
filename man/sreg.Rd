@@ -83,3 +83,17 @@ S <- data.clean$S
 X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
 }
+\references{
+Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. \emph{Journal of the American Statistical Association}, 113(524), 1784–1796, \doi{10.1080/01621459.2017.1375934}.
+
+Bugni, F., Canay, I., Shaikh, A., and Tabord-Meehan, M. (2024+). Inference for Cluster Randomized Experiments with Non-ignorable Cluster Sizes. \emph{Forthcoming in the Journal of Political Economy: Microeconomics}, \doi{10.48550/arXiv.2204.08356}.
+
+Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. \emph{Forthcoming in Review of Economics and Statistics}, \doi{10.48550/arXiv.2204.08356}.
+}
+\author{
+Juri Trifonov \email{jutrifonov@uchicago.edu}
+
+Max Tabord-Meehan \email{maxtm@uchicago.edu}
+
+Azeem Shaikh \email{amshaikh@uchicago.edu}
+}
