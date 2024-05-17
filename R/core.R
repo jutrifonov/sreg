@@ -107,11 +107,16 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
     check.range(S)
   }
 
+  if ("Ng" %in% names(X)) {
+    names(X)[names(X) == "Ng"] <- "Ng_1"
+  }
   check.df <- tibble(Y, S, D, G.id, Ng, X)
+
   if (any(is.na(check.df))) {
     warning("Warning: The data contains one or more NA (or NaN) values. Proceeding while ignoring these values.")
   }
   clean.df <- na.omit(check.df)
+
   x.ind <- max(which(colnames(clean.df) %in% c("D", "G.id", "Ng")))
 
   suppressWarnings({
@@ -126,6 +131,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
       X <- clean.df[, (x.ind + 1):ncol(clean.df)]
     }
   })
+
+  if ("Ng_1" %in% names(X)) {
+    names(X)[names(X) == "Ng_1"] <- "Ng"
+  }
+
   if (!is.null(S)) {
     if (min(S) != 1) {
       stop(paste0("Error: The strata should be indexed by {1, 2, 3, ...}. The minimum value in the provided data is ", min(S), "."))

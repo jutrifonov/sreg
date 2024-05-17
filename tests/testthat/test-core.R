@@ -177,7 +177,7 @@ test_that("simulations with clusters work", {
   set.seed(123) # fix the random seed
   data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.8),
-    n.strata = 4, cluster = T, Nmax = 50
+    n.strata = 4, cluster = T, Nmax = 50, is.cov = TRUE
   )
   Y <- data$Y
   S <- data$S
@@ -221,9 +221,14 @@ test_that("simulations with clusters work", {
   expect_equal(round(result$tau.hat, 7), c(0.1548014, 0.6955543))
   expect_equal(round(result$se.rob, 8), c(0.06201006, 0.05871032))
 
+  X <- data.frame("Ng" = data$Ng, "x_1" = data$x_1, "x_2" = data$x_2)
+
   invisible(capture.output({
-    result <- sreg::sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X)
+    result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
   }))
+  expect_equal(round(result$tau.hat, 7), c(0.3041215, 0.7184981))
+  expect_equal(round(result$se.rob, 7), c(0.1381628, 0.1343521))
+
 
   expect_error(
     invisible(capture.output({
