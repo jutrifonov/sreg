@@ -55,13 +55,20 @@ jobs:
         tarball=$(ls *.tar.gz)
         mv $tarball .github/package/
 
-    - name: Commit and push package
+    - name: Configure git
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
+
+    - name: Pull latest changes
+      run: |
+        git pull origin main --rebase
+
+    - name: Commit and push package
+      run: |
         git add .github/package/*.tar.gz
         git commit -m "Add new package build"
         git push
-
+        
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
