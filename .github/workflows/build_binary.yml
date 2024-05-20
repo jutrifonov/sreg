@@ -50,19 +50,28 @@ jobs:
     - name: Create directory for package
       run: mkdir -p .github/package
 
-    - name: Move package to .github folder
+    - name: Move package to .github folder with unique name
       run: |
         tarball=$(ls *.tar.gz)
-        mv $tarball .github/package/
+        timestamp=$(date +%Y%m%d%H%M%S)
+        mv $tarball .github/package/${tarball%.tar.gz}-$timestamp.tar.gz
 
     - name: Configure git
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
 
+    - name: Stash changes
+      run: |
+        git stash --include-untracked
+
     - name: Pull latest changes
       run: |
         git pull origin main --rebase
+
+    - name: Unstash changes
+      run: |
+        git stash pop
 
     - name: Commit and push package
       run: |
