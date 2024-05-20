@@ -39,7 +39,44 @@ jobs:
       run: |
         Rscript -e 'remotes::install_deps(dependencies = TRUE)'
 
-    - name: Install
-    
+    - name: Install rmarkdown
+      run: |
+        Rscript -e 'install.packages("rmarkdown")'
+
+    - name: Build tar.gz package
+      run: |
+        R CMD build .
+
+    - name: Create directory for package
+      run: mkdir -p .github/package
+
+    - name: Move package to .github folder with a consistent name
+      run: |
+        tarball=$(ls *.tar.gz)
+        mv $tarball .github/package/${tarball}
+
+    - name: Configure git
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+
+    - name: Stash changes
+      run: |
+        git stash --include-untracked
+
+    - name: Pull latest changes
+      run: |
+        git pull origin main --rebase
+
+    - name: Unstash changes
+      run: |
+        git stash pop
+
+    - name: Commit and push package
+      run: |
+        git add .github/package/*.tar.gz
+        git commit -m "Add new package build"
+        git push
+
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
