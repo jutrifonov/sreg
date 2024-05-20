@@ -21,7 +21,7 @@ jobs:
         r-version: 'latest'
 
     - name: Install system dependencies
-      run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+      run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev pandoc
 
     - name: Cache R packages
       uses: actions/cache@v2
@@ -38,6 +38,10 @@ jobs:
     - name: Install dependencies
       run: |
         Rscript -e 'remotes::install_deps(dependencies = TRUE)'
+
+    - name: Install rmarkdown
+      run: |
+        Rscript -e 'install.packages("rmarkdown")'
 
     - name: Build tar.gz package
       run: |
@@ -58,5 +62,6 @@ jobs:
         git add .github/package/*.tar.gz
         git commit -m "Add new package build"
         git push
+
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
