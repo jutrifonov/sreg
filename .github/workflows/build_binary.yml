@@ -1,0 +1,46 @@
+name: Build and Save R Package
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: '4.0.5'
+
+    - name: Install dependencies
+      run: Rscript -e 'install.packages(c("devtools", "roxygen2", "testthat", "knitr"))'
+
+    - name: Build tar.gz package
+      run: |
+        R CMD build .
+
+    - name: Create directory for package
+      run: mkdir -p .github/package
+
+    - name: Move package to .github folder
+      run: |
+        tarball=$(ls *.tar.gz)
+        mv $tarball .github/package/
+
+    - name: Commit and push package
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+        git add .github/package/*.tar.gz
+        git commit -m "Add new package build"
+        git push
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
