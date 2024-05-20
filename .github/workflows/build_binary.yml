@@ -47,13 +47,23 @@ jobs:
       run: |
         R CMD build .
 
+    - name: Extract package version
+      id: extract_version
+      run: |
+        VERSION=$(grep '^Version:' DESCRIPTION | awk '{print $2}')
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
     - name: Create directory for package
       run: mkdir -p .github/package
 
     - name: Move package to .github folder with a consistent name
       run: |
         tarball=$(ls *.tar.gz)
-        mv $tarball .github/package/${tarball}
+        mv $tarball .github/package/sreg_$VERSION.tar.gz
+
+    - name: Update README.md with the new package link
+      run: |
+        sed -i "s|\[Latest Build (v.*)\](.*)|[Latest Build (v$VERSION)](.github/package/sreg_$VERSION.tar.gz)|" README.md
 
     - name: Configure git
       run: |
@@ -72,10 +82,10 @@ jobs:
       run: |
         git stash pop
 
-    - name: Commit and push package
+    - name: Commit and push package and updated README.md
       run: |
-        git add .github/package/*.tar.gz
-        git commit -m "Add new package build"
+        git add .github/package/*.tar.gz README.md
+        git commit -m "Add new package build and update README with latest package link"
         git push
 
       env:
