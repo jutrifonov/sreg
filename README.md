@@ -107,7 +107,7 @@ Here we provide an example of a data frame that can be used with `sreg`.
 ```
 ### Summary
 
-`sreg` prints a *"Stata-style"* table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95\\%$ asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below.
+`sreg` prints a *"Stata-style"* table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95$% asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below.
 ``` r
 Saturated Model Estimation Results under CAR with clusters and linear adjustments
 Observations: 30000 
