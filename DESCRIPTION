@@ -16,7 +16,8 @@ Imports:
     dplyr,
     extraDistr,
     rlang,
-    tidyr
+    tidyr,
+    cli
 Suggests:
     haven,
     knitr,

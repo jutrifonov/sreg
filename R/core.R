@@ -5,6 +5,7 @@
 #' @import tidyr
 #' @import dplyr
 #' @import rlang
+#' @import cli
 #' @importFrom stats aggregate coef lm pnorm qnorm rbeta rnorm na.omit
 #' @importFrom utils packageVersion
 #'

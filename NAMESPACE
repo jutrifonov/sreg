@@ -2,6 +2,7 @@
 
 export(sreg)
 export(sreg.rgen)
+import(cli)
 import(dplyr)
 import(extraDistr)
 import(rlang)
