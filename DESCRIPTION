@@ -2,8 +2,11 @@ Package: sreg
 Type: Package
 Title: Stratified Randomized Experiments
 Version: 0.6.6
-Author: Juri Trifonov <jutrifonov@uchicago.edu>
-Maintainer: Juri Trifonov <jutrifonov@uchicago.edu>
+Authors@R: c(
+    person("Juri", "Trifonov", email = "jutrifonov@uchicago.edu", role = c("aut", "cre")),
+    person("Yuehao", "Bai", role = "aut"),
+    person("Azeem", "Shaikh", role = "aut"),
+    person("Max", "Tabord-Meehan", role = "aut"))
 Description: The `sreg` package offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. 
      The package is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accomodates 
      optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors 
@@ -27,5 +30,5 @@ Depends:
     R (>= 2.10)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: https://github.com/yurytrifonov/sreg, https://github.com/jutrifonov/sreg
+URL: https://github.com/jutrifonov/sreg
 BugReports: https://github.com/jutrifonov/sreg/issues
