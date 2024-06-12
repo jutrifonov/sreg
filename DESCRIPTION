@@ -27,5 +27,5 @@ Depends:
     R (>= 2.10)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: https://github.com/yurytrifonov/sreg
-BugReports: https://github.com/yurytrifonov/sreg/issues
+URL: https://github.com/yurytrifonov/sreg, https://github.com/jutrifonov/sreg
+BugReports: https://github.com/jutrifonov/sreg/issues
