@@ -7,10 +7,16 @@ Authors@R: c(
     person("Yuehao", "Bai", email = "yuehao.bai@usc.edu", role = "aut"),
     person("Azeem", "Shaikh", email = "amshaikh@uchicago.edu", role = "aut"),
     person("Max", "Tabord-Meehan", email = "maxtm@uchicago.edu", role = "aut"))
-Description: The `sreg` package offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. 
-     The package is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accomodates 
-     optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors 
-     based on Bugni, Canay, Shaikh (2018) <doi:10.1080/01621459.2017.1375934>; Bugni, Canay, Shaikh, Tabord-Meehan (2024+) <doi:10.48550/arXiv.2204.08356>; and Jiang, Linton, Tang, Zhang (2023+) <doi:10.48550/arXiv.2201.13004>.
+Description: The `sreg` package offers a toolkit for estimating average 
+     treatment effects (ATEs) in stratified randomized experiments. 
+     The package is designed to accommodate scenarios with 
+     multiple treatments and cluster-level treatment assignments, 
+     and accomodates optimal linear covariate adjustment based on 
+     baseline observable characteristics. The package computes 
+     estimators and standard errors based on 
+     Bugni, Canay, Shaikh (2018) <doi:10.1080/01621459.2017.1375934>; 
+     Bugni, Canay, Shaikh, Tabord-Meehan (2024+)<doi:10.48550/arXiv.2204.08356>;
+     and Jiang, Linton, Tang, Zhang (2023+) <doi:10.48550/arXiv.2201.13004>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
