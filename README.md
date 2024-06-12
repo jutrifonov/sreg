@@ -1,7 +1,7 @@
-# Stratified Randomized Experiments <img src="https://github.com/yurytrifonov/sreg.dev/blob/main/logo.png" align="right" height="250" /></a>
+# Stratified Randomized Experiments <img src="https://github.com/jutrifonov/sreg.dev/blob/main/logo.png" align="right" height="250" /></a>
 ![version](https://img.shields.io/badge/sreg-v.0.6.6-green?style=flat&logo=github&labelColor=2A2523)
 ![Static Badge](https://img.shields.io/badge/CRAN-Coming%20Soon!-orange?logo=R&labelColor=2A2523)
-[![R-CMD-check](https://github.com/yurytrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/yurytrifonov/sreg/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml)
 
 
 <!-- This is the image for PDF output via Pandoc and LaTeX: -->
@@ -24,11 +24,11 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 
 # Supplementary files 
-- PDF version of the manual: [Download PDF](https://github.com/yurytrifonov/sreg/blob/main/.github/README.pdf) 
+- PDF version of the manual: [Download PDF](https://github.com/jutrifonov/sreg/blob/main/.github/README.pdf) 
 
--  Sketch of the derivation of the ATE variance estimator under cluster-level treatment assignment: [Download PDF](https://github.com/yurytrifonov/sreg.dev/blob/main/cluster.pdf)
+-  Sketch of the derivation of the ATE variance estimator under cluster-level treatment assignment: [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/cluster.pdf)
 
--  Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/yurytrifonov/sreg.dev/blob/main/multiple.pdf)
+-  Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/multiple.pdf)
 
 
 
@@ -37,7 +37,7 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 The latest version can be installed using `devtools`. The official `CRAN` release will be available soon.
 ``` r
 library(devtools)
-install_github("yurytrifonov/sreg")
+install_github("jutrifonov/sreg")
 ```
 ``` r
 Downloading GitHub repo yurytrifonov/sreg@HEAD
