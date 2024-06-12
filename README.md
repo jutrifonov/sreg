@@ -40,9 +40,9 @@ library(devtools)
 install_github("jutrifonov/sreg")
 ```
 ``` r
-Downloading GitHub repo yurytrifonov/sreg@HEAD
+Downloading GitHub repo jutrifonov/sreg@HEAD
 ── R CMD build ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-✔  checking for file ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq/T/RtmpZh7j1Y/remotesfbf765906644/yurytrifonov-sreg-91d11dc/DESCRIPTION’ ...
+✔  checking for file ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq/T/RtmpZh7j1Y/remotesfbf765906644/jutrifonov-sreg-91d11dc/DESCRIPTION’ ...
 ─  preparing ‘sreg’:
 ✔  checking DESCRIPTION meta-information
 ─  checking for LF line-endings in source and make files and shell scripts
@@ -70,7 +70,7 @@ library(sreg)
 #> / ___||  _ \| ____/ ___|     Experiments
 #> \___ \| |_) |  _|| |  _  
 #>  ___) |  _ <| |__| |_| |  
-#> |____/|_| \_\_____\____| version 0.6.5                           
+#> |____/|_| \_\_____\____| version 0.6.6                           
 ```
 
 ## The function `sreg()`
