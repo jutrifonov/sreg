@@ -21,9 +21,16 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 [Source Build (v0.6.5)](.github/package/sreg_0.6.5.tar.gz)
 
+## Author(s)
+- Juri Trifonov jutrifonov@uchicago.edu
 
+- Yuehao Bai yuehao.bai@usc.edu
 
-# Supplementary files 
+- Azeem Shaikh amshaikh@uchicago.edu
+
+- Max Tabord-Meehan maxtm@uchicago.edu
+
+## Supplementary files 
 - PDF version of the manual: [Download PDF](https://github.com/jutrifonov/sreg/blob/main/.github/README.pdf) 
 
 -  Sketch of the derivation of the ATE variance estimator under cluster-level treatment assignment: [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/cluster.pdf)
