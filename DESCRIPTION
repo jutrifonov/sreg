@@ -28,3 +28,4 @@ Depends:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://github.com/yurytrifonov/sreg
+BugReports: https://github.com/yurytrifonov/sreg/issues
