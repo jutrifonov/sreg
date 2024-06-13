@@ -69,15 +69,11 @@
 #' D <- data$D
 #' X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 #' result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
-#' ### Example 2. Data taken from Chong et al. (2016).
-#' ## Data description
+#' ### Example 2. Empirical Data.
 #' ?AEJapp
-#' ## Upload the data from the package
 #' data("AEJapp")
 #' data <- AEJapp
 #' head(data)
-#' ## Replicate the empirical illustration from (Bugni et al, 2019)
-#' # Prepare the data
 #' Y <- data$gradesq34
 #' D <- data$treatment
 #' S <- data$class_level
@@ -87,12 +83,8 @@
 #' Y <- data.clean$Y
 #' D <- data.clean$D
 #' S <- data.clean$S
-#' # Look at the frequency table
 #' table(D = data.clean$D, S = data.clean$S)
-#' # Replicate the results from (Bugni et al, 2019)
 #' result <- sreg::sreg(Y, S, D)
-#'
-#' ## Besides that, it is possible to add linear adjustments (covariates)
 #' pills <- data$pills_taken
 #' age <- data$age_months
 #' data.clean <- data.frame(Y, D, S, pills, age)
