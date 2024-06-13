@@ -15,7 +15,7 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 **Dependencies:** `dplyr`, `tidyr`, `extraDistr`, `rlang`
 
-**Suggests:** `haven`
+**Suggests:** `haven`, `knitr`, `rmarkdown`, `testthat (>= 3.0.0)`
 
 **`R` version required:** `>= 2.10`
 
