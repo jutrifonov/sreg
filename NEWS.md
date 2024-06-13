@@ -1,25 +1,3 @@
 # sreg 0.6.6
 
-# sreg 0.6.5
-
-# sreg 0.6.4
-
-# sreg 0.6.3
-
-# sreg 0.6.2
-
-# sreg 0.6.1
-
-# sreg 0.6.0
-
-# sreg 0.6.1
-
-# sreg 0.6.0
-
-# sreg 0.5.10
-
-# sreg 0.5.9
-
-# sreg 0.5.8
-
 * Initial CRAN submission.
