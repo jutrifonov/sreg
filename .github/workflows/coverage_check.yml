@@ -9,12 +9,17 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
-      - name: Install dependencies
+      - name: Install system dependencies
+        run: sudo apt-get install -y libcurl4-openssl-dev libssl-dev
+      - name: Install R dependencies
         run: |
           Rscript -e 'install.packages("remotes")'
           Rscript -e 'remotes::install_deps(dependencies = TRUE)'
       - name: Install covr and testthat
-        run: Rscript -e "install.packages(c('covr', 'testthat'))"
+        run: |
+          Rscript -e 'install.packages("curl")'
+          Rscript -e 'install.packages("httr")'
+          Rscript -e 'install.packages(c("covr", "testthat"))'
       - name: Check
         run: R CMD check --no-manual --as-cran .
       - name: Test coverage
