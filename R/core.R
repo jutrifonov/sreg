@@ -1,6 +1,6 @@
 #' Estimate Average Treatment Effects (ATEs) and Corresponding Standard Errors
 #'
-#' This function estimates the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
+#' Estimates the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
 #' @import extraDistr
 #' @import tidyr
 #' @import dplyr
