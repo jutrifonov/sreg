@@ -55,6 +55,9 @@ jobs:
 
     - name: Create directory for package
       run: mkdir -p .github/package
+      
+    - name: Remove previous package files
+      run: rm -f .github/package/*.tar.gz
 
     - name: Move package to .github folder with a consistent name
       run: |
