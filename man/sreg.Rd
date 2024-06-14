@@ -83,7 +83,7 @@ Bugni, F., Canay, I., Shaikh, A., and Tabord-Meehan, M. (2024+). Inference for C
 Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. \emph{Forthcoming in Review of Economics and Statistics}, \doi{10.48550/arXiv.2204.08356}.
 }
 \author{
-\strong{Authors}: 
+\strong{Authors}:
 
 Juri Trifonov \email{jutrifonov@uchicago.edu}
 
@@ -94,7 +94,7 @@ Azeem Shaikh \email{amshaikh@uchicago.edu}
 Max Tabord-Meehan \email{maxtm@uchicago.edu}
 
 
-\strong{Maintainer}: 
+\strong{Maintainer}:
 
 Juri Trifonov \email{jutrifonov@uchicago.edu}
 }
