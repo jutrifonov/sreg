@@ -1,7 +1,7 @@
 Package: sreg
 Type: Package
 Title: Stratified Randomized Experiments
-Version: 0.7.3
+Version: 0.7.4
 Authors@R: c(
     person("Juri", "Trifonov", email = "jutrifonov@uchicago.edu", role = c("aut", "cre", "cph")),
     person("Yuehao", "Bai", email = "yuehao.bai@usc.edu", role = "aut"),
