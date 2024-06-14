@@ -1,11 +1,11 @@
 startupMessage <- function() {
   version <- packageVersion("sreg")
   msg <- c(paste0(
-   col_blue("  ____  ____  _____ ____      Stratified Randomized\n"),
-   col_blue(" / ___||  _ \\| ____/ ___|     Experiments\n"),
-   col_blue(" \\___ \\| |_) |  _|| |  _  \n"),
-   col_blue("  ___) |  _ <| |__| |_| |  \n"),
-   col_blue(" |____/|_| \\_\\_____\\____| "), col_cyan("version "), col_cyan(version), "\n",
+    col_blue("  ____  ____  _____ ____      Stratified Randomized\n"),
+    col_blue(" / ___||  _ \\| ____/ ___|     Experiments\n"),
+    col_blue(" \\___ \\| |_) |  _|| |  _  \n"),
+    col_blue("  ___) |  _ <| |__| |_| |  \n"),
+    col_blue(" |____/|_| \\_\\_____\\____| "), col_cyan("version "), col_cyan(version), "\n",
     "                           \n"
   ))
   return(msg)
@@ -22,6 +22,3 @@ startupMessage <- function() {
   packageStartupMessage(msg)
   invisible()
 }
-
-
-
