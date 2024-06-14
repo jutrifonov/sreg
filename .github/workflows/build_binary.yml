@@ -55,7 +55,7 @@ jobs:
 
     - name: Create directory for package
       run: mkdir -p .github/package
-      
+
     - name: Remove previous package files
       run: rm -f .github/package/*.tar.gz
 
@@ -73,18 +73,26 @@ jobs:
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
 
-    - name: Commit changes
+    - name: Add changes
       run: |
         git add .github/package/*.tar.gz README.md
+
+    - name: Commit changes
+      run: |
         git commit -m "Add new package build and update README with latest package link" || echo "No changes to commit"
 
     - name: Ensure clean working directory
       run: |
         git status
+        git stash --include-untracked
 
     - name: Pull and rebase latest changes
       run: |
         git pull --rebase origin main || (git rebase --abort && echo "Rebase failed")
+
+    - name: Unstash changes
+      run: |
+        git stash pop || echo "Nothing to stash pop"
 
     - name: Push changes
       run: |
