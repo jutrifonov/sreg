@@ -1,5 +1,5 @@
 # Stratified Randomized Experiments <img src="https://github.com/jutrifonov/sreg.dev/blob/main/logo.png" align="right" height="250" /></a>
-![version](https://img.shields.io/badge/sreg-v.0.7.1-green?style=flat&logo=github&labelColor=2A2523)
+![version](https://img.shields.io/badge/sreg-v.0.7.2-green?style=flat&logo=github&labelColor=2A2523)
 ![Static Badge](https://img.shields.io/badge/CRAN-Coming%20Soon!-orange?logo=R&labelColor=2A2523)
 [![R-CMD-check](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/github/jutrifonov/sreg/graph/badge.svg?token=KAUXB0ETCA)](https://app.codecov.io/github/jutrifonov/sreg)
