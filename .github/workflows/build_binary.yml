@@ -76,7 +76,7 @@ jobs:
     - name: Commit changes
       run: |
         git add .github/package/*.tar.gz README.md
-        git commit -m "Add new package build and update README with latest package link"
+        git commit -m "Add new package build and update README with latest package link" || echo "No changes to commit"
 
     - name: Pull and rebase latest changes
       run: |
