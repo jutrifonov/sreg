@@ -94,7 +94,7 @@
 #' D <- data.clean$D
 #' S <- data.clean$S
 #' X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
-#' result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
+#' result <- sreg(Y, S, D, G.id = NULL, X = X)
 sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   check.data.types(Y, S, D, G.id, Ng, X)
   check.integers(S, D, G.id, Ng)

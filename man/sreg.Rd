@@ -73,7 +73,7 @@ Y <- data.clean$Y
 D <- data.clean$D
 S <- data.clean$S
 X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
-result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
+result <- sreg(Y, S, D, G.id = NULL, X = X)
 }
 \references{
 Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. \emph{Journal of the American Statistical Association}, 113(524), 1784–1796, \doi{10.1080/01621459.2017.1375934}.
