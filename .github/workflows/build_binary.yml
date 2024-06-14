@@ -78,9 +78,13 @@ jobs:
         git add .github/package/*.tar.gz README.md
         git commit -m "Add new package build and update README with latest package link" || echo "No changes to commit"
 
+    - name: Ensure clean working directory
+      run: |
+        git status
+
     - name: Pull and rebase latest changes
       run: |
-        git pull --rebase origin main
+        git pull --rebase origin main || (git rebase --abort && echo "Rebase failed")
 
     - name: Push changes
       run: |
