@@ -1,6 +1,6 @@
 #' Estimate Average Treatment Effects (ATEs) and Corresponding Standard Errors
 #'
-#' Estimates the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
+#' Estimate the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
 #' @import extraDistr
 #' @import tidyr
 #' @import dplyr
@@ -163,7 +163,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   return(result)
 }
 
-#' Generates a Pseudo-Random Sample under the Stratified Block Randomization
+#' Generate a Pseudo-Random Sample under the Stratified Block Randomization Design
 #'
 #' The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).
 #' @param n a total number of observations in a sample

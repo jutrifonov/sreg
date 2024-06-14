@@ -35,7 +35,7 @@ An object of class \code{sreg} that is a list containing the following elements:
 }
 }
 \description{
-Estimates the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
+Estimate the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
 }
 \examples{
 library("sreg")

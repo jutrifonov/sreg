@@ -2,7 +2,7 @@
 % Please edit documentation in R/core.R
 \name{sreg.rgen}
 \alias{sreg.rgen}
-\title{Generates a Pseudo-Random Sample under the Stratified Block Randomization}
+\title{Generate a Pseudo-Random Sample under the Stratified Block Randomization Design}
 \usage{
 sreg.rgen(
   n,

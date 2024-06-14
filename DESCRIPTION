@@ -7,7 +7,7 @@ Authors@R: c(
     person("Yuehao", "Bai", email = "yuehao.bai@usc.edu", role = "aut"),
     person("Azeem", "Shaikh", email = "amshaikh@uchicago.edu", role = "aut"),
     person("Max", "Tabord-Meehan", email = "maxtm@uchicago.edu", role = "aut"))
-Description: Offers a toolkit for estimating average 
+Description: A toolkit for estimating average 
      treatment effects (ATEs) in stratified randomized experiments. 
      `sreg` is designed to accommodate scenarios with 
      multiple treatments and cluster-level treatment assignments, 
