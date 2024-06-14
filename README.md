@@ -19,7 +19,7 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 **`R` version required:** `>= 2.10`
 
-[Latest Build (v.0.7.3)](.github/package/sreg_0.7.3.tar.gz)
+[Latest Build (v.0.7.4)](.github/package/sreg_0.7.4.tar.gz)
 
 ## Authors
 - Juri Trifonov jutrifonov@uchicago.edu
