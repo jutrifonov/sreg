@@ -62,7 +62,7 @@ jobs:
     - name: Move package to .github folder with a consistent name
       run: |
         tarball=$(ls *.tar.gz)
-        mv $tarball  https://github.com/jutrifonov/sreg/tree/main/.github/package/sreg_$VERSION.tar.gz
+        mv $tarball  .github/package/sreg_$VERSION.tar.gz
 
     - name: Update README.md with the new package link
       run: |
