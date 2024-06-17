@@ -1,4 +1,4 @@
-citHeader("To cite the sreg package in publications please use:")
+citHeader("To cite the 'sreg' package in publications please use:")
 
 bibentry(
   bibtype = "Manual",
