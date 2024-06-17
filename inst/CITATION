@@ -1,0 +1,14 @@
+citHeader("To cite the sreg package in publications please use:")
+
+bibentry(
+  bibtype = "Manual",
+  title = "sreg: Stratified Randomized Experiments",
+  author = c(
+    person("Juri", "Trifonov", email = "jutrifonov@uchicago.edu", role = c("aut", "cre", "cph")),
+    person("Yuehao", "Bai", email = "yuehao.bai@usc.edu", role = "aut"),
+    person("Azeem", "Shaikh", email = "amshaikh@uchicago.edu", role = "aut"),
+    person("Max", "Tabord-Meehan", email = "maxtm@uchicago.edu", role = "aut")),
+  year = 2024,
+  note = "R package version 1.0.0",
+  url = "https://github.com/jutrifonov/sreg"
+)
