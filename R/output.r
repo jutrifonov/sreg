@@ -14,27 +14,27 @@ print.sreg <- function(model)
     CI.right <- as.vector(model$CI.right)
 
     if (!is.null(model$data$x_1)) {
-      cat("Saturated Model Estimation Results under CAR with linear adjustments\n")
+      cat(col_blue("Saturated Model Estimation Results under CAR with linear adjustments\n"))
     } else {
-      cat("Saturated Model Estimation Results under CAR\n")
+      cat(col_blue("Saturated Model Estimation Results under CAR\n"))
     }
 
-    cat(paste("Observations:", n, "\n"))
+    cat(paste(col_blue("Observations:"), n, "\n"))
     cat(paste(
-        "Number of treatments:",
+        col_blue("Number of treatments:"),
         max(model$data$D), "\n"
       ))
     cat(paste(
-        "Number of strata:",
+        col_blue("Number of strata:"),
         max(model$data$S), "\n"
       ))
     cat(paste0(
-        "Covariates used in linear adjustments: ",
+        col_blue("Covariates used in linear adjustments: "),
         paste(names(model$lin.adj), collapse = ", "), "\n"
       ))
     cat("---\n")
 
-    cat("Coefficients:\n")
+    cat(col_blue("Coefficients:\n"))
 
     m <- length(tau.hat)
 
@@ -59,8 +59,8 @@ print.sreg <- function(model)
     print.data.frame(df)
     cat("---\n")
     cat(paste(
-        "Signif. codes:  0 `***` 0.001 `**`",
-        "0.01 `*` 0.05 `.` 0.1 ` ` 1\n"
+        col_cyan("Signif. codes:  0 `***` 0.001 `**`",
+        "0.01 `*` 0.05 `.` 0.1 ` ` 1\n")
       ))
     if (any(sapply(model$ols.iter, function(x) any(is.na(x))))) {
         stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
@@ -76,28 +76,28 @@ print.sreg <- function(model)
   CI.right <- as.vector(model$CI.right)
 
   if (!is.null(model$lin.adj)) {
-    cat("Saturated Model Estimation Results under CAR with clusters and linear adjustments\n")
+    cat(col_blue("Saturated Model Estimation Results under CAR with clusters and linear adjustments\n"))
   } else {
-    cat("Saturated Model Estimation Results under CAR with clusters\n")
+    cat(col_blue("Saturated Model Estimation Results under CAR with clusters\n"))
   }
-  cat(paste("Observations:", n, "\n"))
-  cat(paste("Clusters:", G, "\n"))
+  cat(paste(col_blue("Observations:"), n, "\n"))
+  cat(paste(col_blue("Clusters:"), G, "\n"))
   cat(paste(
-    "Number of treatments:",
+    col_blue("Number of treatments:"),
     max(model$data$D), "\n"
   ))
-  cat(paste(
-    "Number of strata:",
+  cat(paste(col_blue(
+    "Number of strata:"),
     max(model$data$S), "\n"
   ))
   cat(paste0(
-    "Covariates used in linear adjustments: ",
+    col_blue("Covariates used in linear adjustments: "),
     paste(names(model$lin.adj), collapse = ", "), "\n"
   ))
 
   cat("---\n")
 
-  cat("Coefficients:\n")
+  cat(col_blue("Coefficients:\n"))
 
   m <- length(tau.hat)
 
@@ -122,8 +122,8 @@ print.sreg <- function(model)
   print.data.frame(df)
   cat("---\n")
   cat(paste(
-    "Signif. codes:  0 `***` 0.001 `**`",
-    "0.01 `*` 0.05 `.` 0.1 ` ` 1\n"
+    col_cyan("Signif. codes:  0 `***` 0.001 `**`",
+    "0.01 `*` 0.05 `.` 0.1 ` ` 1\n")
   ))
   ### Warnings: ###
   if (is.null(model$data$Ng)) {
