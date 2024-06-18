@@ -5,8 +5,7 @@ dgp.po.sreg <- function(n, theta.vec, gamma.vec, n.treat, is.cov = TRUE)
 #-----------------------------------------------------------------------
 {
   if (n.treat != length(theta.vec)) {
-    return(print("The number of treatments doesn't
-                 match the length of vector theta.vec"))
+    stop("The number of treatments doesn't match the length of vector theta.vec.")
   }
   for (a in seq_along(theta.vec))
   {

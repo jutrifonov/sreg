@@ -8,8 +8,7 @@ dgp.obs.sreg <- function(baseline, I.S, pi.vec, n.treat, is.cov = TRUE)
 #----------------------------------------------------------------------
 {
   if (n.treat != length(pi.vec)) {
-    return(print("The number of treatments doesn't
-                 match the length of vector pi.vec"))
+    stop("The number of treatments doesn't match the length of vector pi.vec.")
   }
   num.strata <- ncol(I.S)
   n <- length(baseline$Y.0)
@@ -53,8 +52,7 @@ dgp.obs.creg <- function(baseline, I.S, pi.vec, n.treat)
 #-------------------------------------------------------------------
 {
   if (n.treat != length(pi.vec)) {
-    return(print("The number of treatments doesn't
-                 match the length of vector pi.vec"))
+    stop("The number of treatments doesn't match the length of vector pi.vec.")
   }
   num.strata <- ncol(I.S)
   n <- baseline$G
