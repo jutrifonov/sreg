@@ -143,7 +143,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
         "lin.adj"  = NULL
       )
     }
-    class(res.list) <- "sreg"
-    return(res.list)
   }
+  class(res.list) <- "sreg"
+  return(res.list)
 }
