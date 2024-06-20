@@ -1,6 +1,8 @@
-#-------------------------------------------------------------------
-# %#    Summary method for sreg(). Provides the output table.
-#-------------------------------------------------------------------
+#' Print 'sreg' Objects
+#'
+#' @description Print the summary table of estimation results for 'sreg' objects.
+#' @method print sreg
+#' @keywords internal
 print.sreg <- function(model)
 #-------------------------------------------------------------------
 {
