@@ -841,8 +841,8 @@ test_that("dgp.po warning work", {
   set.seed(123)
   expect_error(
     invisible(capture.output({
-  result <- dgp.po.sreg(n = 100, theta.vec = c(0, 0.5), n.treat = 3, gamma.vec = c(0.4, 0.2, 1))
-      })),
+      result <- dgp.po.sreg(n = 100, theta.vec = c(0, 0.5), n.treat = 3, gamma.vec = c(0.4, 0.2, 1))
+    })),
     "The number of treatments doesn't match the length of vector theta.vec."
   )
 })
