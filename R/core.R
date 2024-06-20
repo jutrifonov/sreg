@@ -85,7 +85,7 @@
 #' D <- data.clean$D
 #' S <- data.clean$S
 #' table(D = data.clean$D, S = data.clean$S)
-#' result <- sreg::sreg(Y, S, D)
+#' result <- sreg(Y, S, D)
 #' print(result)
 #' pills <- data$pills_taken
 #' age <- data$age_months
