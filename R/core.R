@@ -69,6 +69,7 @@
 #' D <- data$D
 #' X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 #' result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
+#' print(result)
 #' ### Example 2. Empirical Data.
 #' ?AEJapp
 #' data("AEJapp")
@@ -85,6 +86,7 @@
 #' S <- data.clean$S
 #' table(D = data.clean$D, S = data.clean$S)
 #' result <- sreg::sreg(Y, S, D)
+#' print(result)
 #' pills <- data$pills_taken
 #' age <- data$age_months
 #' data.clean <- data.frame(Y, D, S, pills, age)
@@ -95,6 +97,7 @@
 #' S <- data.clean$S
 #' X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 #' result <- sreg(Y, S, D, G.id = NULL, X = X)
+#' print(result)
 sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   check.data.types(Y, S, D, G.id, Ng, X)
   check.integers(S, D, G.id, Ng)
@@ -160,7 +163,6 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   } else {
     check.cluster.lvl(G.id, S, D, Ng)
     result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
-      ### Warnings: ###
     if (is.null(result$data$Ng)) {
     warning("Warning: Cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
   }
@@ -207,7 +209,7 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
     Nmax <- Nmax
     n.treat <- length(tau.vec)
     max.support <- Nmax / 10 - 1
-    Ng <- gen.cluster.sizes(G, max.support) # [, 1]
+    Ng <- gen.cluster.sizes(G, max.support)
     # Ng <- rep(Nmax, G)                                                            # uncomment and comment the previous line for a equal-size design
     data.pot <- dgp.po.creg(
       Ng = Ng, tau.vec = tau.vec, G = G,
@@ -226,22 +228,22 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
     G.id <- data.sim$G.id
     data.sim <- data.frame(Y, S, D, G.id, Ng, X)
   } else {
-    n.treat <- length(tau.vec) # number of treatments
+    n.treat <- length(tau.vec)
     pot.outcomes <- dgp.po.sreg(
       n = n, tau.vec, gamma.vec = gamma.vec,
       n.treat = n.treat, is.cov = is.cov
-    ) # generate pot. outcomes and W
-    strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata) # generate strata
-    strata_set <- data.frame(strata) # generate strata
-    strata_set$S <- max.col(strata_set) # generate strata
+    )
+    strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata)
+    strata_set <- data.frame(strata)
+    strata_set$S <- max.col(strata_set)
     pi.vec <- rep(c(1 / (n.treat + 1)), n.treat) # vector of target proportions (equal allocation)
     data.test <- dgp.obs.sreg(pot.outcomes,
-      I.S = strata, # simulate observed outcomes
+      I.S = strata,
       pi.vec = pi.vec, n.treat = n.treat, is.cov = is.cov
-    ) # simulate observed outcomes
-    Y <- as.numeric(data.test$Y) # Y
-    D <- as.numeric(data.test$D) # D
-    S <- strata_set$S # S
+    )
+    Y <- as.numeric(data.test$Y)
+    D <- as.numeric(data.test$D)
+    S <- strata_set$S
     if (is.cov == TRUE) {
       X <- data.test$X
       data.sim <- data.frame(Y, S, D, X)

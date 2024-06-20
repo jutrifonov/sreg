@@ -48,6 +48,7 @@ S <- data$S
 D <- data$D
 X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
+print(result)
 ### Example 2. Empirical Data.
 ?AEJapp
 data("AEJapp")
@@ -64,6 +65,7 @@ D <- data.clean$D
 S <- data.clean$S
 table(D = data.clean$D, S = data.clean$S)
 result <- sreg::sreg(Y, S, D)
+print(result)
 pills <- data$pills_taken
 age <- data$age_months
 data.clean <- data.frame(Y, D, S, pills, age)
@@ -74,6 +76,7 @@ D <- data.clean$D
 S <- data.clean$S
 X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 result <- sreg(Y, S, D, G.id = NULL, X = X)
+print(result)
 }
 \references{
 Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. \emph{Journal of the American Statistical Association}, 113(524), 1784–1796, \doi{10.1080/01621459.2017.1375934}.

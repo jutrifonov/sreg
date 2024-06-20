@@ -39,6 +39,7 @@ table(D = data.clean$D, S = data.clean$S)
 Now, it is straightforward to replicate the results from (Bugni et al, 2019) using `sreg()`:
 ```{r}
 result <- sreg::sreg(Y = Y, S = S, D = D)
+print(result)
 ```
 Besides that, sreg allows adding linear adjustments (covariates) to the estimation procedure:
 ```{r}
@@ -52,4 +53,5 @@ D <- data.clean$D
 S <- data.clean$S
 X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
+print(result)
 ```
