@@ -193,6 +193,7 @@ D    1  2  3  4  5
 Now, it is straightforward to replicate the results from (Bugni et al, 2019) using `sreg`:
 ``` r
 result <- sreg::sreg(Y = Y, S = S, D = D)
+print(result)
 ```
 ``` r
 Saturated Model Estimation Results under CAR
@@ -219,6 +220,7 @@ D <- data.clean$D
 S <- data.clean$S
 X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
+print(result)
 Saturated Model Estimation Results under CAR
 Observations: 215 
 Number of treatments: 2 
