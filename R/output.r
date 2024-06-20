@@ -140,7 +140,7 @@ print.sreg <- function(model)
   }
 
 }
-registerS3method("print", "sreg", print.sreg)
+#registerS3method("print", "sreg", print.sreg)
 # Register the method
 
 #-------------------------------------------------------------------

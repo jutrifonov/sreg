@@ -14,9 +14,6 @@ startupMessage <- function() {
   return(msg)
 }
 
-
-
-
 .onAttach <- function(lib, pkg) {
   msg <- startupMessage()
   if (!interactive()) {
@@ -24,4 +21,8 @@ startupMessage <- function() {
   }
   packageStartupMessage(msg)
   invisible()
+}
+
+.onLoad <- function(libname, pkgname) {
+  registerS3method("print", "sreg", print.sreg)
 }
