@@ -4,9 +4,22 @@
 \alias{print.sreg}
 \title{Print 'sreg' Objects}
 \usage{
-\method{print}{sreg}(model)
+\method{print}{sreg}(x, ...)
+}
+\arguments{
+\item{x}{An object of class \code{sreg}.}
+
+\item{...}{Additional arguments passed to other methods.}
 }
 \description{
 Print the summary table of estimation results for 'sreg' objects.
 }
-\keyword{internal}
+\examples{
+data <- sreg.rgen(n = 200, tau.vec = c(0.1), n.strata = 4, cluster = TRUE)
+Y <- data$Y
+S <- data$S
+D <- data$D
+X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
+print(result)
+}

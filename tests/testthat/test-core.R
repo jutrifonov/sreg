@@ -1,5 +1,5 @@
 test_that("simulations without clusters work", {
-  set.seed(123) # fix the random seed
+  set.seed(123)
   data <- sreg.rgen(n = 1000, tau.vec = c(0.2, 0.5), n.strata = 10, cluster = F, is.cov = TRUE)
   Y <- data$Y
   S <- data$S
@@ -836,13 +836,12 @@ test_that("empirical example works", {
     "Treatments have not been provided"
   )
 })
-
 test_that("dgp.po warning work", {
   set.seed(123)
   expect_error(
     invisible(capture.output({
-      result <- dgp.po.sreg(n = 100, theta.vec = c(0, 0.5), n.treat = 3, gamma.vec = c(0.4, 0.2, 1))
-    })),
+  result <- dgp.po.sreg(n = 100, theta.vec = c(0, 0.5), n.treat = 3, gamma.vec = c(0.4, 0.2, 1))
+      })),
     "The number of treatments doesn't match the length of vector theta.vec."
   )
 })
