@@ -145,3 +145,5 @@ print.sreg <- function(model) {
     }
   }
 }
+
+
