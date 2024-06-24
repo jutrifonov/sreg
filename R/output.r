@@ -1,6 +1,6 @@
-#' Print 'sreg' Objects
+#' Print \code{sreg} Objects
 #'
-#' Print the summary table of estimation results for 'sreg' objects.
+#' Print the summary table of estimation results for \code{sreg} objects.
 #' @param x An object of class \code{sreg}.
 #' @param ... Additional arguments passed to other methods.
 #' @examples
@@ -13,6 +13,7 @@
 #' print(result)
 #' @method print sreg
 #' @export
+#' @return No return value, called for side effects.
 print.sreg <- function(x, ...) {
   if (is.null(x$data$G.id)) {
     n <- length(x$data$Y)
