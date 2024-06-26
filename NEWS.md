@@ -1,3 +1,5 @@
+# sreg (development version)
+
 # sreg 1.0.0
 
 # sreg 0.7.4
