@@ -203,7 +203,27 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
 #' data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
 sreg.rgen <- function(n, Nmax = 50, n.strata,
                       tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
-                      cluster = TRUE, is.cov = TRUE) {
+                      cluster = TRUE, is.cov = TRUE, pi.vec = NULL) {
+  n.treat <- length(tau.vec)  # Number of treatments
+  total.arms <- n.treat + 1   # Including control group
+  
+  if (is.null(pi.vec)) {
+    # Default to equal allocation if pi_vec is not provided
+    pi.vec <- rep(1 / total.arms, n.treat)
+  } else {
+    # Use provided pi.vec
+    pi.vec <- pi.vec
+  }
+  
+  # Ensure that pi.vec sums to less than 1 (since control group allocation is 1 - sum(pi.vec))
+  if (sum(pi.vec) >= 1) {
+    stop("Sum of treatment allocations in pi.vec must be less than 1.")
+  }
+  
+  # Ensure that pi.vec has the correct length
+  if (length(pi.vec) != n.treat) {
+    stop(paste("pi.vec must be of length", n.treat))
+  }
   if (cluster == T) {
     G <- n
     Nmax <- Nmax
@@ -218,7 +238,7 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
     strata <- form.strata.creg(data.pot, n.strata)
     strata.set <- data.frame(strata)
     strata.set$S <- max.col(strata.set)
-    pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)
+    #pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)
     data.sim <- dgp.obs.creg(data.pot, I.S = strata, pi.vec, n.treat)
     Y <- data.sim$Y
     D <- data.sim$D
@@ -236,7 +256,7 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
     strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata)
     strata_set <- data.frame(strata)
     strata_set$S <- max.col(strata_set)
-    pi.vec <- rep(c(1 / (n.treat + 1)), n.treat) # vector of target proportions (equal allocation)
+    #pi.vec <- rep(c(1 / (n.treat + 1)), n.treat) # vector of target proportions (equal allocation)
     data.test <- dgp.obs.sreg(pot.outcomes,
       I.S = strata,
       pi.vec = pi.vec, n.treat = n.treat, is.cov = is.cov

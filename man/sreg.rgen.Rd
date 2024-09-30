@@ -11,7 +11,8 @@ sreg.rgen(
   tau.vec = c(0),
   gamma.vec = c(0.4, 0.2, 1),
   cluster = TRUE,
-  is.cov = TRUE
+  is.cov = TRUE,
+  pi.vec = NULL
 )
 }
 \arguments{
