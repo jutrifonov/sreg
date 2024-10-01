@@ -266,7 +266,8 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
     S <- strata_set$S
     if (is.cov == TRUE) {
       X <- data.test$X
-      data.sim <- data.frame(Y, S, D, X)
+      W <- data.test$W
+      data.sim <- data.frame(Y, S, D, X, W)
     } else {
       data.sim <- data.frame(Y, S, D)
     }

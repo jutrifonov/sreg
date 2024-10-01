@@ -37,7 +37,8 @@ dgp.obs.sreg <- function(baseline, I.S, pi.vec, n.treat, is.cov = TRUE)
     ret.list <- list(
       "Y" = Y.obs,
       "D" = A,
-      "X" = baseline$X
+      "X" = baseline$X,
+      "W" = baseline$W
     )
   } else {
     ret.list <- list(
