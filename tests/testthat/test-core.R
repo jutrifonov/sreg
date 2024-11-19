@@ -183,6 +183,7 @@ test_that("simulations with clusters work", {
   S <- data$S
   D <- data$D
   X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  
   G.id <- data$G.id
   Ng <- data$Ng
 
@@ -371,7 +372,7 @@ test_that("simulations with clusters work", {
   )
   expect_silent(
     invisible(capture.output({
-      result <- sreg::sreg(as.numeric(Y), S = as.numeric(S), D = as.integer(D), G.id = as.integer(G.id), Ng = as.integer(Ng), X = as.matrix(X))
+      result <- sreg::sreg(as.numeric(Y), S = as.numeric(S), D = as.integer(D), G.id = as.integer(G.id), Ng = as.integer(Ng), X = X)
     }))
   )
   expect_silent(
@@ -391,7 +392,7 @@ test_that("simulations with clusters work", {
   )
   expect_silent(
     invisible(capture.output({
-      result <- sreg::sreg(as.matrix(Y), S = as.matrix(S), D = as.vector(D), G.id = as.matrix(G.id), Ng = as.matrix(Ng), X = as.matrix(X))
+      result <- sreg::sreg(as.matrix(Y), S = as.matrix(S), D = as.vector(D), G.id = as.matrix(G.id), Ng = as.matrix(Ng), X = X)
     }))
   )
   expect_silent(

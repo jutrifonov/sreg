@@ -127,14 +127,13 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   clean.df <- na.omit(check.df)
 
   x.ind <- max(which(colnames(clean.df) %in% c("D", "G.id", "Ng")))
-
   suppressWarnings({
     Y <- clean.df$Y
     S <- clean.df$S
     D <- clean.df$D
     G.id <- clean.df$G.id
     Ng <- clean.df$Ng
-    if ((x.ind + 1) >= ncol(clean.df)) {
+    if ((x.ind + 1) > ncol(clean.df)) {
       X <- NULL
     } else {
       X <- clean.df[, (x.ind + 1):ncol(clean.df)]
