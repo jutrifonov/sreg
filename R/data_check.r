@@ -67,3 +67,34 @@ boolean.check <- function(var) {
     stop("Error: The value of HC must be either TRUE or FALSE. A non-boolean value was provided.")
   }
 }
+
+check.within.stratatreatment.variation <- function(data) {
+  covariate_columns <- names(data)[-(1:2)]
+
+  variation_check <- data %>%
+    group_by(.data$S, .data$D) %>%
+    summarise(across(all_of(covariate_columns), ~ n_distinct(.) > 1, .names = "check_{.col}"),
+              .groups = "drop")
+  
+  all_variation <- variation_check %>%
+    summarise(across(starts_with("check_"), all)) %>%
+    unlist()
+  
+  all(all_variation)
+}
+
+check.within.strata.variation <- function(data) {
+
+  covariate_columns <- names(data)[-(1:2)]
+
+  variation_check <- data %>%
+    group_by(.data$S) %>%
+    summarise(across(all_of(covariate_columns), ~ n_distinct(.) > 1, .names = "check_{.col}"),
+              .groups = "drop") 
+  
+  all_variation <- variation_check %>%
+    summarise(across(starts_with("check_"), all)) %>%
+    unlist()
+  
+  all(all_variation)
+}

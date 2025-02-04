@@ -508,7 +508,7 @@ test_that("simulations with clusters work", {
   )
 })
 
-test_that("degrees of freedom error works", {
+test_that("covariates do not vary within one or more strata-treatment combinations", {
   set.seed(123)
   data <- sreg.rgen(n = 25, tau.vec = c(0.2, 0.5), n.strata = 3, cluster = F, is.cov = TRUE)
   Y <- data$Y
@@ -516,11 +516,11 @@ test_that("degrees of freedom error works", {
   D <- data$D
   X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 
-  expect_error(
+  expect_warning(
     invisible(capture.output({
       result <- sreg::sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X)
     })),
-    "too many covariates relative to the number of observations"
+    "covariates do not vary within one or more strata-treatment combinations"
   )
 
   set.seed(123)

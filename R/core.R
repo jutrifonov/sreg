@@ -132,13 +132,12 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
     S <- clean.df$S
     D <- clean.df$D
     G.id <- clean.df$G.id
-    Ng <- clean.df$Ng
+    Ng <- clean.df$Ng})
     if ((x.ind + 1) > ncol(clean.df)) {
       X <- NULL
     } else {
       X <- clean.df[, (x.ind + 1):ncol(clean.df)]
     }
-  })
 
   if ("Ng_1" %in% names(X)) {
     names(X)[names(X) == "Ng_1"] <- "Ng"
@@ -154,7 +153,33 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
       stop(paste0("Error: The treatments should be indexed by {0, 1, 2, ...}, where D = 0 denotes the control. The minimum value in the provided data is ", min(D), "."))
     }
   }
+
   if (is.null(G.id)) {
+      if (!is.null(X)){
+          if (!is.null(S)){
+        dta.temp <- data.frame(S, D, X)
+        if (!check.within.strata.variation(dta.temp)) {
+          warning("Warning: One or more covariates do not vary within one or more strata. Proceeding with unadjusted estimator.")
+          X <- NULL
+        } 
+        if (!check.within.stratatreatment.variation(dta.temp)) {
+          warning("Warning: One or more covariates do not vary within one or more strata-treatment combinations. Proceeding with unadjusted estimator.")
+          X <- NULL
+        }
+      } 
+      if (is.null(S)){
+        S.temp <- rep(1, length(D))
+        dta.temp <- data.frame("S" = S.temp, D, X)
+        if (!check.within.strata.variation(dta.temp)) {
+          warning("Warning: One or more covariates do not vary within one or more strata. Proceeding with unadjusted estimator.")
+          X <- NULL
+        } 
+        if (!check.within.stratatreatment.variation(dta.temp)) {
+          warning("Warning: One or more covariates do not vary within one or more strata-treatment combinations. Proceeding with unadjusted estimator.")
+          X <- NULL
+        }
+      }
+      }
     result <- res.sreg(Y, S, D, X, HC1)
     if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
       stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
