@@ -36,7 +36,6 @@ jobs:
       # Convert the downloaded SVG badges to PNG at a higher resolution.
       - name: Convert downloaded SVG badges to PNG
         run: |
-          # Increase resolution by setting a higher width (e.g., 600 pixels)
           rsvg-convert -w 600 actions_badge.svg -o actions_badge.png
           rsvg-convert -w 600 codecov_badge.svg -o codecov_badge.png
           rsvg-convert -w 600 version_badge.svg -o version_badge.png
@@ -45,13 +44,9 @@ jobs:
       # Update the temporary README so that badge URLs point to the local PNG files.
       - name: Update remote SVG references in README_pdf.md
         run: |
-          # Replace the R-CMD-check badge URL.
           sed -i -E 's|https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg|actions_badge.png|g' README_pdf.md
-          # Replace the Codecov badge URL (escape the '?' with \?).
           sed -i -E 's|https://codecov.io/github/jutrifonov/sreg/graph/badge.svg\?token=KAUXB0ETCA|codecov_badge.png|g' README_pdf.md
-          # Replace the version badge URL, stopping at the first closing parenthesis.
           sed -i -E 's|https://img\.shields\.io/badge/sreg-v\.1\.0\.1-green[^)]*|version_badge.png|g' README_pdf.md
-          # Replace the CRAN badge URL similarly.
           sed -i -E 's|https://img\.shields\.io/badge/CRAN-v\.1\.0\.0-orange[^)]*|cran_badge.png|g' README_pdf.md
 
       # Convert the modified Markdown file to PDF.
@@ -63,7 +58,7 @@ jobs:
             -V geometry:"margin=1in" \
             -V colorlinks=true \
             -V monofont="DejaVu Sans Mono" \
-            -V header-includes:"\setkeys{Gin}{width=0.15\linewidth}" \
+            -V header-includes:"\setkeys{Gin}{height=0.8cm,keepaspectratio}" \
             -o .github/README.pdf
 
       - name: Setup Git Config
@@ -80,7 +75,6 @@ jobs:
           git push origin HEAD:main
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
 
 
 
