@@ -58,7 +58,7 @@ jobs:
             -V geometry:"margin=1in" \
             -V colorlinks=true \
             -V monofont="DejaVu Sans Mono" \
-            -V header-includes:"\setkeys{Gin}{height=0.8cm,keepaspectratio}" \
+            -V header-includes:"\setkeys{Gin}{height=0.5cm,keepaspectratio}" \
             -o .github/README.pdf
 
       - name: Setup Git Config
@@ -75,6 +75,5 @@ jobs:
           git push origin HEAD:main
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
 
 
