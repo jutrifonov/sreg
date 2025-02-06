@@ -34,7 +34,49 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 
 ## Installation
-The latest version can be installed using `devtools`. The official `CRAN` release will be available soon.
+The official latest `CRAN` release can be installed in a usual way:
+``` r
+install.packages("sreg")
+```
+``` r
+trying URL 'https://mirror.las.iastate.edu/CRAN/src/contrib/sreg_1.0.0.tar.gz'
+Content type 'application/x-gzip' length 42789 bytes (41 KB)
+==================================================
+downloaded 41 KB
+
+* installing *source* package ‘sreg’ ...
+** package ‘sreg’ successfully unpacked and MD5 sums checked
+** using staged installation
+** R
+** data
+*** moving datasets to lazyload DB
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (sreg)
+
+The downloaded source packages are in
+        ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq/T/RtmpHqU4e9/downloaded_packages’
+```
+``` r
+library(sreg)
+```
+``` r
+#>  ____  ____  _____ ____      Stratified Randomized
+#> / ___||  _ \| ____/ ___|     Experiments
+#> \___ \| |_) |  _|| |  _  
+#>  ___) |  _ <| |__| |_| |  
+#> |____/|_| \_\_____\____| version 1.0.0
+
+#> Type 'citation("sreg")' for citing this R package in publications. 
+```
+The latest development version can be installed using `devtools`. 
 ``` r
 library(devtools)
 install_github("jutrifonov/sreg")
@@ -42,7 +84,7 @@ install_github("jutrifonov/sreg")
 ``` r
 Downloading GitHub repo jutrifonov/sreg@HEAD
 ── R CMD build ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-✔  checking for file ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq/T/RtmpZh7j1Y/remotesfbf765906644/jutrifonov-sreg-91d11dc/DESCRIPTION’ ...
+✔  checking for file ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq...
 ─  preparing ‘sreg’:
 ✔  checking DESCRIPTION meta-information
 ─  checking for LF line-endings in source and make files and shell scripts
@@ -65,12 +107,14 @@ Downloading GitHub repo jutrifonov/sreg@HEAD
 ```
 ``` r
 library(sreg)
+```
+``` r
 
 #>  ____  ____  _____ ____      Stratified Randomized
 #> / ___||  _ \| ____/ ___|     Experiments
 #> \___ \| |_) |  _|| |  _  
 #>  ___) |  _ <| |__| |_| |  
-#> |____/|_| \_\_____\____| version 1.0.0
+#> |____/|_| \_\_____\____| version 1.0.1
 
 #> Type 'citation("sreg")' for citing this R package in publications.                    
 ```
