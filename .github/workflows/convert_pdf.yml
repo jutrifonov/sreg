@@ -21,9 +21,41 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-plain-generic librsvg2-bin
-  
+
+      - name: Create a temporary copy of README.md for PDF conversion
+        run: cp README.md README_pdf.md
+
+      # Download all remote SVG badges.
+      - name: Download remote SVG badges
+        run: |
+          wget -O actions_badge.svg "https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg"
+          wget -O codecov_badge.svg "https://codecov.io/github/jutrifonov/sreg/graph/badge.svg?token=KAUXB0ETCA"
+          wget -O version_badge.svg "https://img.shields.io/badge/sreg-v.1.0.1-green?style=flat&logo=github&labelColor=2A2523"
+          wget -O cran_badge.svg "https://img.shields.io/badge/CRAN-v.1.0.0-orange?logo=R&labelColor=2A2523"
+
+      # Convert the downloaded SVG badges to PNG.
+      - name: Convert downloaded SVG badges to PNG
+        run: |
+          rsvg-convert actions_badge.svg -o actions_badge.png
+          rsvg-convert codecov_badge.svg -o codecov_badge.png
+          rsvg-convert version_badge.svg -o version_badge.png
+          rsvg-convert cran_badge.svg -o cran_badge.png
+
+      # Update the temporary README_pdf.md file so that badge URLs point to the local PNG files.
+      - name: Update remote SVG references in README_pdf.md
+        run: |
+          sed -i 's|https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg|actions_badge.png|g' README_pdf.md
+          sed -i 's|https://codecov.io/github/jutrifonov/sreg/graph/badge.svg?token=KAUXB0ETCA|codecov_badge.png|g' README_pdf.md
+          sed -i 's|https://img.shields.io/badge/sreg-v.1.0.1-green?style=flat&logo=github&labelColor=2A2523|version_badge.png|g' README_pdf.md
+          sed -i 's|https://img.shields.io/badge/CRAN-v.1.0.0-orange?logo=R&labelColor=2A2523|cran_badge.png|g' README_pdf.md
+
       - name: Convert Markdown to PDF
-        run: pandoc README.md --pdf-engine=lualatex --from markdown+raw_html+raw_tex -V geometry:"margin=1in" -V colorlinks=true -o .github/README.pdf
+        run: |
+          pandoc README_pdf.md --pdf-engine=xelatex --from markdown+raw_html+raw_tex \
+            -V geometry:"margin=1in" -V colorlinks=true -o .github/README.pdf
+      
+      - name: Convert Markdown to PDF
+        run: pandoc README.md --pdf-engine=xelatex --from markdown+raw_html+raw_tex -V geometry:"margin=1in" -V colorlinks=true -o .github/README.pdf
 
       - name: Setup Git Config
         run: |
