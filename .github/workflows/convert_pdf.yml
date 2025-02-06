@@ -75,6 +75,9 @@ jobs:
           git add .github/README.pdf
           git commit -m "Update README.pdf in .github directory" || echo "No changes to commit"
           git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
+          # Pull remote changes first (rebasing to keep a linear history)
+          git pull --rebase origin main
+          # Then push the updated branch
           git push origin HEAD:main
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
