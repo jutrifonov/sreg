@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - '.github/README.pdf'  # Ignore changes to PDF file to prevent loops
+      - '.github/README.pdf'  # Prevent loops
 
 jobs:
   convert_and_commit_pdf:
@@ -14,14 +14,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          persist-credentials: false  # Avoids automatic token setup
+          persist-credentials: false
 
       - name: Install Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-plain-generic librsvg2-bin wget
 
-      # Create a temporary copy of README.md for PDF conversion.
+      # Create a temporary copy so that our modifications do not affect the live README.
       - name: Create a temporary copy of README.md for PDF conversion
         run: cp README.md README_pdf.md
 
@@ -41,17 +41,17 @@ jobs:
           rsvg-convert version_badge.svg -o version_badge.png
           rsvg-convert cran_badge.svg -o cran_badge.png
 
-      # Update the temporary README_pdf.md so that badge URLs point to the local PNG files.
+      # Update the temporary README to point to the local PNG files.
       - name: Update remote SVG references in README_pdf.md
         run: |
           # Replace the R-CMD-check badge URL.
           sed -i -E 's|https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg|actions_badge.png|g' README_pdf.md
-          # Replace the Codecov badge URL. Note that the '?' is escaped.
+          # Replace the Codecov badge URL (note that the '?' is escaped).
           sed -i -E 's|https://codecov.io/github/jutrifonov/sreg/graph/badge.svg\?token=KAUXB0ETCA|codecov_badge.png|g' README_pdf.md
-          # Replace the version badge URL – match everything starting with the base URL.
-          sed -i -E 's|https://img.shields.io/badge/sreg-v\.1\.0\.1-green.*|version_badge.png|g' README_pdf.md
-          # Replace the CRAN badge URL – match everything starting with the base URL.
-          sed -i -E 's|https://img.shields.io/badge/CRAN-v\.1\.0\.0-orange.*|cran_badge.png|g' README_pdf.md
+          # Replace the version badge URL, matching up to the first closing parenthesis.
+          sed -i -E 's|https://img\.shields\.io/badge/sreg-v\.1\.0\.1-green[^)]*|version_badge.png|g' README_pdf.md
+          # Replace the CRAN badge URL similarly.
+          sed -i -E 's|https://img\.shields\.io/badge/CRAN-v\.1\.0\.0-orange[^)]*|cran_badge.png|g' README_pdf.md
 
       # Convert the modified Markdown file to PDF.
       - name: Convert Markdown to PDF
@@ -62,6 +62,7 @@ jobs:
             -V geometry:"margin=1in" \
             -V colorlinks=true \
             -V monofont="DejaVu Sans Mono" \
+            -V header-includes:"\setkeys{Gin}{width=0.3\linewidth}" \
             -o .github/README.pdf
 
       - name: Setup Git Config
