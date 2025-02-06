@@ -22,6 +22,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-plain-generic librsvg2-bin
 
+      - name: Convert SVG to PNG (if needed)
+        run: |
+          for img in $(find . -name "*.svg"); do
+            rsvg-convert "$img" -o "${img%.svg}.png"
+          done
+
+      - name: Update image references in README.md
+        run: sed -i 's/\.svg)/\.png)/g' README.md
+  
       - name: Convert Markdown to PDF
         run: pandoc README.md --pdf-engine=xelatex --from markdown+raw_html+raw_tex -V geometry:"margin=1in" -V colorlinks=true -o .github/README.pdf
 
