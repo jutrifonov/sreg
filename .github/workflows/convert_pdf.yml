@@ -21,7 +21,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-plain-generic librsvg2-bin wget
 
-      # Create a temporary copy so that our modifications do not affect the live README.
+      # Create a temporary copy of README.md so the original is not modified.
       - name: Create a temporary copy of README.md for PDF conversion
         run: cp README.md README_pdf.md
 
@@ -33,22 +33,23 @@ jobs:
           wget -O version_badge.svg "https://img.shields.io/badge/sreg-v.1.0.1-green?style=flat&logo=github&labelColor=2A2523"
           wget -O cran_badge.svg "https://img.shields.io/badge/CRAN-v.1.0.0-orange?logo=R&labelColor=2A2523"
 
-      # Convert the downloaded SVG badges to PNG.
+      # Convert the downloaded SVG badges to PNG at a higher resolution.
       - name: Convert downloaded SVG badges to PNG
         run: |
-          rsvg-convert actions_badge.svg -o actions_badge.png
-          rsvg-convert codecov_badge.svg -o codecov_badge.png
-          rsvg-convert version_badge.svg -o version_badge.png
-          rsvg-convert cran_badge.svg -o cran_badge.png
+          # Increase resolution by setting a higher width (e.g., 600 pixels)
+          rsvg-convert -w 600 actions_badge.svg -o actions_badge.png
+          rsvg-convert -w 600 codecov_badge.svg -o codecov_badge.png
+          rsvg-convert -w 600 version_badge.svg -o version_badge.png
+          rsvg-convert -w 600 cran_badge.svg -o cran_badge.png
 
-      # Update the temporary README to point to the local PNG files.
+      # Update the temporary README so that badge URLs point to the local PNG files.
       - name: Update remote SVG references in README_pdf.md
         run: |
           # Replace the R-CMD-check badge URL.
           sed -i -E 's|https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg|actions_badge.png|g' README_pdf.md
-          # Replace the Codecov badge URL (note that the '?' is escaped).
+          # Replace the Codecov badge URL (escape the '?' with \?).
           sed -i -E 's|https://codecov.io/github/jutrifonov/sreg/graph/badge.svg\?token=KAUXB0ETCA|codecov_badge.png|g' README_pdf.md
-          # Replace the version badge URL, matching up to the first closing parenthesis.
+          # Replace the version badge URL, stopping at the first closing parenthesis.
           sed -i -E 's|https://img\.shields\.io/badge/sreg-v\.1\.0\.1-green[^)]*|version_badge.png|g' README_pdf.md
           # Replace the CRAN badge URL similarly.
           sed -i -E 's|https://img\.shields\.io/badge/CRAN-v\.1\.0\.0-orange[^)]*|cran_badge.png|g' README_pdf.md
@@ -62,7 +63,7 @@ jobs:
             -V geometry:"margin=1in" \
             -V colorlinks=true \
             -V monofont="DejaVu Sans Mono" \
-            -V header-includes:"\setkeys{Gin}{width=0.3\linewidth}" \
+            -V header-includes:"\setkeys{Gin}{width=0.15\linewidth}" \
             -o .github/README.pdf
 
       - name: Setup Git Config
@@ -75,9 +76,7 @@ jobs:
           git add .github/README.pdf
           git commit -m "Update README.pdf in .github directory" || echo "No changes to commit"
           git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
-          # Pull remote changes first (rebasing to keep a linear history)
           git pull --rebase origin main
-          # Then push the updated branch
           git push origin HEAD:main
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
