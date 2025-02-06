@@ -34,7 +34,7 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 
 ## Installation
-The official latest `CRAN` release can be installed in a usual way:
+Install the official CRAN release using:
 ``` r
 install.packages("sreg")
 ```
