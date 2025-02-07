@@ -30,7 +30,7 @@ jobs:
         run: |
           wget -O actions_badge.svg "https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg"
           wget -O codecov_badge.svg "https://codecov.io/github/jutrifonov/sreg/graph/badge.svg?token=KAUXB0ETCA"
-          wget -O version_badge.svg "https://img.shields.io/badge/sreg-v.1.0.2-green?style=flat&logo=github&labelColor=2A2523"
+          wget -O version_badge.svg "https://img.shields.io/badge/sreg-v.1.0.1.9000-green?style=flat&logo=github&labelColor=2A2523"
           wget -O cran_badge.svg "https://img.shields.io/badge/CRAN-v.1.0.1-orange?logo=R&labelColor=2A2523"
 
       # Convert the downloaded SVG badges to PNG at a higher resolution.
