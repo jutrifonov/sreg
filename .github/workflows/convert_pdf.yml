@@ -46,8 +46,8 @@ jobs:
         run: |
           sed -i -E 's|https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg|actions_badge.png|g' README_pdf.md
           sed -i -E 's|https://codecov.io/github/jutrifonov/sreg/graph/badge.svg\?token=KAUXB0ETCA|codecov_badge.png|g' README_pdf.md
-          sed -i -E 's|https://img\.shields\.io/badge/sreg-v\.1\.0\.1-green[^)]*|version_badge.png|g' README_pdf.md
-          sed -i -E 's|https://img\.shields\.io/badge/CRAN-v\.1\.0\.0-orange[^)]*|cran_badge.png|g' README_pdf.md
+          sed -i -E 's|https://img\.shields\.io/badge/sreg-v\.1\.0\.1\.9000-green[^)]*|version_badge.png|g' README_pdf.md
+          sed -i -E 's|https://img\.shields\.io/badge/CRAN-v\.1\.0\.1-orange[^)]*|cran_badge.png|g' README_pdf.md
 
       # Convert the modified Markdown file to PDF.
       - name: Convert Markdown to PDF
