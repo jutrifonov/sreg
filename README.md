@@ -89,7 +89,7 @@ Downloading GitHub repo jutrifonov/sreg@HEAD
 ✔  checking DESCRIPTION meta-information
 ─  checking for LF line-endings in source and make files and shell scripts
 ─  checking for empty or unneeded directories
-─  building ‘sreg_1.0.2.tar.gz’
+─  building ‘sreg_1.0.1.9000.tar.gz’
    
 * installing *source* package ‘sreg’ ...
 ** using staged installation
@@ -114,7 +114,7 @@ library(sreg)
 #> / ___||  _ \| ____/ ___|     Experiments
 #> \___ \| |_) |  _|| |  _  
 #>  ___) |  _ <| |__| |_| |  
-#> |____/|_| \_\_____\____| version 1.0.2
+#> |____/|_| \_\_____\____| version 1.0.1.9000
 
 #> Type 'citation("sreg")' for citing this R package in publications.                    
 ```
