@@ -39,7 +39,7 @@ Install the official CRAN release using:
 install.packages("sreg")
 ```
 ``` r
-trying URL 'https://mirror.las.iastate.edu/CRAN/src/contrib/sreg_1.0.0.tar.gz'
+trying URL 'https://mirror.las.iastate.edu/CRAN/src/contrib/sreg_1.0.1.tar.gz'
 Content type 'application/x-gzip' length 42789 bytes (41 KB)
 ==================================================
 downloaded 41 KB
@@ -72,7 +72,7 @@ library(sreg)
 #> / ___||  _ \| ____/ ___|     Experiments
 #> \___ \| |_) |  _|| |  _  
 #>  ___) |  _ <| |__| |_| |  
-#> |____/|_| \_\_____\____| version 1.0.0
+#> |____/|_| \_\_____\____| version 1.0.1
 
 #> Type 'citation("sreg")' for citing this R package in publications. 
 ```
@@ -89,7 +89,7 @@ Downloading GitHub repo jutrifonov/sreg@HEAD
 ✔  checking DESCRIPTION meta-information
 ─  checking for LF line-endings in source and make files and shell scripts
 ─  checking for empty or unneeded directories
-─  building ‘sreg_0.5.8.tar.gz’
+─  building ‘sreg_1.0.2.tar.gz’
    
 * installing *source* package ‘sreg’ ...
 ** using staged installation
@@ -114,7 +114,7 @@ library(sreg)
 #> / ___||  _ \| ____/ ___|     Experiments
 #> \___ \| |_) |  _|| |  _  
 #>  ___) |  _ <| |__| |_| |  
-#> |____/|_| \_\_____\____| version 1.0.1
+#> |____/|_| \_\_____\____| version 1.0.2
 
 #> Type 'citation("sreg")' for citing this R package in publications.                    
 ```
