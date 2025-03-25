@@ -9,6 +9,6 @@ bibentry(
     person("Azeem", "Shaikh", email = "amshaikh@uchicago.edu", role = "aut"),
     person("Max", "Tabord-Meehan", email = "maxtm@uchicago.edu", role = "aut")),
   year = 2024,
-  note = "R package version 1.0.1",
+  note = "R package version 1.0.0",
   url = "https://github.com/jutrifonov/sreg"
 )
