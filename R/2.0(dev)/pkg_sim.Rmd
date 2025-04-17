@@ -122,7 +122,7 @@ theta_hat_vec <- theta_hat_mult(Y, D, X, S)$tau.hat
 
 theta_hat_vec
 
-nsim = 5000
+nsim = 1000
 n = 1200
 k = 3
 theta_vec = c(0.5, 1.5)
