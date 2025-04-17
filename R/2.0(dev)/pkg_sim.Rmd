@@ -6,12 +6,14 @@ output: html_document
 
 ## Core functions and packages
 ```{r}
-rm(list = ls())
-source("/Users/trifonovjuri/Desktop/sreg 2.0/code/fun.r")
 library(sreg)
 library(dplyr)
 library(tidyr)
 library(extraDistr)
+library(tidyverse)
+rm(list = ls())
+source("/Users/trifonovjuri/Desktop/sreg/R/2.0(dev)/fun_new.r")
+
 ```
 
 ## Individual level treatment assignment
@@ -40,12 +42,12 @@ for (s in 1:nsim)
     v_hat_mtrx[s, ] <- v_hat_vec
     upper  <- theta_hat_vec + qnorm(0.975) * sqrt(v_hat_vec)
     lower  <- theta_hat_vec - qnorm(0.975) * sqrt(v_hat_vec)
-    hit[s, ] <- (theta.vec < upper) & (theta.vec > lower)
+    hit[s, ] <- (tau_vec < upper) & (tau_vec > lower)
     print(s)
 
 }
 result_table <- data.frame(
-  `True tau` = theta.vec,
+  `True tau` = tau_vec,
   `E[tau_n]` = round(colMeans(theta_hat_mtrx), 4),
   `True Variance` = round(colMeans(v_hat_mtrx), 4),
   `E[V_n]` = round(apply(theta_hat_mtrx, 2, var), 4),
@@ -99,3 +101,119 @@ result_table <- data.frame(
 )
 print(result_table)
 ``` 
+
+```{r}
+tau_vec = c(0.5, 1.5)
+n.treat = 2
+k = 3
+n = 1200
+treat_sizes <- c(1, 1, 1)
+
+data_raw <- dgp_po(n = n, theta.vec = tau_vec,  n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1))          # Checked that now it returns several X's
+    data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes)      # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
+    Y <- data_df$y
+    D <- data_df$A
+    X <- data.frame('x_1' = data_df$x_1, 'x_2' = data_df$x_2)
+    S <- data_df$block
+    data_full <- data.frame(Y, D, X, S)
+    N = nrow(data_full)
+
+theta_hat_vec <- theta_hat_mult(Y, D, X, S)$tau.hat
+
+theta_hat_vec
+
+nsim = 1000
+n = 1200
+k = 3
+theta_vec = c(0.5, 1.5)
+n.treat = 2
+treat_sizes <- c(1, 1, 1)
+res <- matrix(nrow = nsim, ncol = n.treat)
+
+for (s in 1:nsim)
+{
+    data_raw <- dgp_po(n = n, theta.vec = tau_vec,  n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1))          # Checked that now it returns several X's
+    data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes)      # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
+    Y <- data_df$y
+    D <- data_df$A
+    X <- data.frame('x_1' = data_df$x_1, 'x_2' = data_df$x_2)
+    S <- data_df$block
+    data_full <- data.frame(Y, D, X, S)
+    N = nrow(data_full)
+
+  theta_hat_vec <- theta_hat_mult(Y, D, X, S)$tau.hat
+
+  res[s, ] <- theta_hat_vec
+  print(s)
+}
+
+colMeans(res)
+apply(res, 2, var)
+
+
+data_full %>%
+  group_by(S) %>%
+  summarize(
+    Y_treated = mean(Y[D == 1], na.rm = TRUE),
+    Y_control = mean(Y[D == 0], na.rm = TRUE),
+    X_treated = list(colMeans(X[D == 1, , drop = FALSE], na.rm = TRUE)),
+    X_control = list(colMeans(X[D == 0, , drop = FALSE], na.rm = TRUE)),
+    k = n(),
+    l = sum(D == 1),
+    q = sum(D == 0), 
+    .groups = "drop"
+  )
+
+
+agg_data_old <- data_full %>%
+  group_by(S) %>%
+  summarize(
+    Y_treated = mean(Y[D == 1], na.rm = TRUE),
+    Y_control = mean(Y[D == 0], na.rm = TRUE),
+    X_treated = list(colMeans(X[D == 1, , drop = FALSE], na.rm = TRUE)),
+    X_control = list(colMeans(X[D == 0, , drop = FALSE], na.rm = TRUE)),
+    k = n(),
+    l = sum(D == 1),
+    q = sum(D == 0), 
+    .groups = "drop"
+  )
+
+# Turn list columns into two separate columns per covariate
+agg_data_old <- agg_data_old %>%
+  mutate(
+    X_treated_1 = map_dbl(X_treated, 1),
+    X_treated_2 = map_dbl(X_treated, 2),
+    X_control_1 = map_dbl(X_control, 1),
+    X_control_2 = map_dbl(X_control, 2)
+  )
+
+# Now view the first few rows
+agg_data_old
+
+
+ agg_data <- data_full %>%
+  group_split(S) %>%
+  map_dfr(~{
+    df <- .
+    list(
+      S = df$S[1],
+      Y_treated = mean(df$Y[df$D == 1], na.rm = TRUE),
+      Y_control = mean(df$Y[df$D == 0], na.rm = TRUE),
+      X_treated = list(colMeans(df[df$D == 1, grep("^x_", names(df)), drop = FALSE])),
+      X_control = list(colMeans(df[df$D == 0, grep("^x_", names(df)), drop = FALSE])),
+      k = nrow(df),
+      l = sum(df$D == 1),
+      q = sum(df$D == 0)
+    )
+  })
+
+  # Turn list columns into two separate columns per covariate
+agg_data <- agg_data %>%
+  mutate(
+    X_treated_1 = map_dbl(X_treated, 1),
+    X_treated_2 = map_dbl(X_treated, 2),
+    X_control_1 = map_dbl(X_control, 1),
+    X_control_2 = map_dbl(X_control, 2)
+  )
+
+```

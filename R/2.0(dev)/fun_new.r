@@ -218,52 +218,74 @@ theta_hat_mult <- function(Y, D, X, S)
 {
     tau.hat <- numeric(max(D))
     beta.hat <- numeric(max(D))
+    beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
     data_full <- data.frame(Y, D, X, S)
     for (d in 1:max(D))
     {
     # Compute averages for treated and control within each stratum
-    agg_data <- data_full %>%
-        group_by(S) %>%
-    summarise(
-        Y_treated = mean(Y[D == d], na.rm = TRUE),
-        Y_control = mean(Y[D == 0], na.rm = TRUE),
-        X_treated = mean(X[D == d], na.rm = TRUE),
-        X_control = mean(X[D == 0], na.rm = TRUE),
-        k = n(),           # Total units in stratum (should be 2)
-        l = sum(D == d),   # Number of treated units (should be 1)
-        q = sum(D == 0)
-    ) %>%
-  mutate(
-        Y_diff = (1/l) * Y_treated - (1/q) * Y_control,
-        X_diff = (1/l) * X_treated - (1/q) * X_control,
-        k = k,
-        l = l, 
-        q = q
-  )
-    #print(agg_data$l)
-    #print(agg_data$q)
+#agg_data <- data_full %>%
+#  group_by(S) %>%
+#  summarize(
+#    Y_treated = mean(Y[D == d], na.rm = TRUE),
+#    Y_control = mean(Y[D == 0], na.rm = TRUE),
+#    X_treated = list(colMeans(X[D == d, , drop = FALSE], na.rm = TRUE)),
+#    X_control = list(colMeans(X[D == 0, , drop = FALSE], na.rm = TRUE)),
+#    k = n(),
+#    l = sum(D == d),
+#    q = sum(D == 0), 
+#    .groups = "drop"
+#  ) 
+
+  agg_data <- data_full %>%
+  group_split(S) %>%
+  map_dfr(~{
+    df <- .
+    list(
+      S = df$S[1],
+      Y_treated = mean(df$Y[df$D == d], na.rm = TRUE),
+      Y_control = mean(df$Y[df$D == 0], na.rm = TRUE),
+      X_treated = list(colMeans(df[df$D == d, grep("^x_", names(df)), drop = FALSE])), # mean value among treated in each stratum
+      X_control = list(colMeans(df[df$D == 0, grep("^x_", names(df)), drop = FALSE])), # mean value among control in each stratum
+      k = nrow(df),
+      l = sum(df$D == d),
+      q = sum(df$D == 0)
+    )
+  })
+
+# Create Y_diff vector
+  Y_diff <- with(agg_data, Y_treated - Y_control)
+# Compute differences correctly: row-wise for each pair of treated/control vectors
+X_diff_mat <- map2(agg_data$X_treated, agg_data$X_control,
+                   ~ .x - .y) %>%
+  do.call(rbind, .)
+#print(X_diff_mat)
+#print(Y_diff)
+  
+
 
 data_decomp <- as.data.frame(agg_data)  
+X_treated_mat <- do.call(rbind, data_decomp$X_treated)
+X_control_mat <- do.call(rbind, data_decomp$X_control)
 
-# run the linear model for covariate adjustments
-lm_model <- lm(Y_diff ~ X_diff, data = data_decomp)
-#summary(lm_model)
-beta_hat <- coef(lm_model)[2]
 
-X_bar <- mean(data_full$X)
-X_dem <- data_full$X - X_bar
+lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
 
+#print(summary(lm_model))
+beta_hat <- unname(lm_model$coefficients[-1])
+
+X_mat <- as.matrix(data_full[, grepl("^x_", names(data_full))])
+X_bar <- colMeans(X_mat)
+X_dem <- sweep(X_mat, 2, X_bar)
 
 # adjusted estimator:
 theta_hat_adj <- sum((data_full$Y * (data_full$D == d))) / sum((data_full$D == d)) -
-                    sum((data_full$Y) * (data_full$D == 0)) / sum(data_full$D == 0) -
-                    (sum(X_dem * (data_full$D == d)) / sum((data_full$D == d)) - 
-                    sum(X_dem * (data_full$D == 0)) / sum((data_full$D == 0))) * beta_hat
+                 sum((data_full$Y) * (data_full$D == 0)) / sum(data_full$D == 0) -
+                 as.numeric(t(colMeans(X_dem[data_full$D == d, , drop = FALSE]) -
+                             colMeans(X_dem[data_full$D == 0, , drop = FALSE])) %*% beta_hat)
 tau.hat[d] <- theta_hat_adj
-beta.hat[d] <- beta_hat
+beta.hat[d, ] <- beta_hat
     }
-#return(c(tau.hat, beta.hat)) #NB! WORK ON THE WAY HOW TO EXTRACT BOTH SEPARATELY! -- DONE!
-#return(tau.hat)
+
 ret_list <- list(
     tau.hat = tau.hat,
     beta.hat = beta.hat
