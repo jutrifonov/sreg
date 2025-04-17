@@ -132,7 +132,7 @@ res <- matrix(nrow = nsim, ncol = n.treat)
 
 for (s in 1:nsim)
 {
-    data_raw <- dgp_po(n = n, theta.vec = tau_vec,  n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1))          # Checked that now it returns several X's
+    data_raw <- dgp_po(n = n, theta.vec = theta_vec,  n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1))          # Checked that now it returns several X's
     data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes)      # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
     Y <- data_df$y
     D <- data_df$A

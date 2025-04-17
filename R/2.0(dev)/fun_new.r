@@ -26,7 +26,7 @@ dgp_po <- function(n, theta.vec, gamma.vec, n.treat, is.cov = TRUE)
   if (is.cov == TRUE) {
     X <- data.frame(x_1, x_2)
     #X <- data.frame(x_1)
-    m.0 <- gamma.vec[1] * W + gamma.vec[2] * x_1 #+ gamma.vec[3] * x_2
+    m.0 <- gamma.vec[1] * W + gamma.vec[2] * x_1 + gamma.vec[3] * x_2
   } else {
     m.0 <- gamma.vec[1] * W
   }
