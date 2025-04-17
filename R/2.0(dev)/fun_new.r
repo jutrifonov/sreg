@@ -324,31 +324,35 @@ pi.hat.sreg <- function(S, D, inverse = FALSE, vector = FALSE)
   return(as.matrix(ret_df[S, ]))
 }
 
-var_hat_mult <- function(data) {
+var_hat_mult <- function(Y, D, X, S, fit) {
   # n = number of blocks
-  n <- max(data$S)
+  n <- max(S)
   
   # Center X and compute the augmented outcome Y_a
-  X_bar   <- mean(data$X)
-  X_dem   <- data$X - X_bar
-  pi_hat_vec <- pi.hat.sreg(data$S, data$D, vector = TRUE)
-  pi_hat_0   <- pi.hat.sreg(data$S, data$D, vector = TRUE, inverse = TRUE)[1]
-  V <- numeric(max(data$D))
-  for (d in 1:max(data$D))
+  X_bar   <- colMeans(X)
+  X_dem   <- sweep(as.matrix(X), 2, X_bar)
+  pi_hat_vec <- pi.hat.sreg(S, D, vector = TRUE)
+  pi_hat_0   <- pi.hat.sreg(S, D, vector = TRUE, inverse = TRUE)[1]
+  V <- numeric(max(D))
+  for (d in 1:max(D))
   {
-    beta_hat <- theta_hat_mult(data$Y, data$D, data$X, data$S)$beta.hat[d]
+    #beta_hat <- theta_hat_mult(Y, D, X, S)$beta.hat[d, ]
+    beta_hat <- fit$beta.hat[d, ]
+    #print(beta_hat)
+    #print(X_dem)
+    #Y_a     <- Y - beta_hat * X_dem
+    Y_a     <- Y - X_dem %*% beta_hat
 
-    Y_a     <- data$Y - beta_hat * X_dem
-    l = sum(data$D == d) / n
-    q = sum(data$D == 0) / n
+    l = sum(D == d) / n
+    q = sum(D == 0) / n
 
     pi_hat <- pi_hat_vec[d]
     # Compute Gamma_hat_1 and Gamma_hat_0
-    Gamma_hat_1 <- sum(Y_a[data$D == d]) * (1 / sum(data$D == d))
-    Gamma_hat_0 <- sum(Y_a[data$D == 0]) * (1 / sum(data$D == 0))
+    Gamma_hat_1 <- sum(Y_a[D == d]) * (1 / sum(D == d))
+    Gamma_hat_0 <- sum(Y_a[D == 0]) * (1 / sum(D == 0))
   # Precompute sums of Y_a for treated & untreated in each block
-  sums_treated   <- tapply(Y_a * (data$D == d), data$S, sum)
-  sums_untreated <- tapply(Y_a * (data$D == 0), data$S, sum)
+  sums_treated   <- tapply(Y_a * (D == d), S, sum)
+  sums_untreated <- tapply(Y_a * (D == 0), S, sum)
   
   #----------------------------------------
   # Compute rho_hat_00 and rho_hat_11
@@ -383,8 +387,8 @@ var_hat_mult <- function(data) {
   #----------------------------------------
   # Compute sigma_hat_1 and sigma_hat_0
   #----------------------------------------
-  sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (data$D == d)) * (1 / (n * l))
-  sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (data$D == 0)) * (1 / (n * q))
+  sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (D == d)) * (1 / (n * l))
+  sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (D == 0)) * (1 / (n * q))
   #print(s)
   #----------------------------------------
   # Compute the final variance components
