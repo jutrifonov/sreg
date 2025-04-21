@@ -227,12 +227,62 @@ agg_data <- agg_data %>%
 
 ```
 
+```{r}
+n_treat = 2
+nsim = 1000
+tau_vec = c(0.5, 1.5)
+gamma_vec = c(0.4, 0.2, 1)
+n.treat = 2
+k = 3
+treat_sizes <- c(1, 1, 1)
+tau_hat_mtrx <- matrix(ncol = n_treat, nrow = nsim)
+tau_hat_mtrx_old <- matrix(ncol = n_treat, nrow = nsim)
+var_hat_mtrx <- matrix(ncol = n_treat, nrow = nsim)
+hit_mtrx     <- matrix(ncol = n_treat, nrow = nsim)
+G    = 1200
+Nmax <- 50
 
+#treat_sizes = c(2, 1, 1, 1) # treatment 0 - p_1 individuals, treatment 1 - p_2 individuals, ...
+max.support <- Nmax / 10 - 1
+#Ng <- rep(Nmax, G) 
+Ng <- gen.cluster.sizes(G, max.support)
+
+for (s in 1:nsim)
+{
+  Ng <- gen.cluster.sizes(G, max.support)
+  data_pot            <- dgp.po.creg(Ng = Ng, tau.vec = tau_vec, G = G, gamma.vec = gamma_vec, n.treat = n_treat)
+  proba               <- dgp.obs.creg(baseline = data_pot, n.treat = n_treat, k = k, treat_sizes = treat_sizes)
+  data_cl             <- data.frame('Y' = proba$Y, 'D' = proba$D, proba$X, 'S' = proba$S, 'Ng' = proba$Ng, 'G.id' = proba$G.id)
+  Y <- data_cl$Y
+  D <- data_cl$D
+  X <- data.frame('x_1' = data_cl$x_1, 'x_2' = data_cl$x_2)
+  S <- data_cl$S
+  G.id <- data_cl$G.id
+  Ng <- data_cl$Ng
+  data_full <- data.frame(Y, D, X, S, G.id, Ng)
+
+  tau_hat               <- theta_hat_mult_cl(Y, D, X, S, G.id, Ng)
+  tau_hat_old           <- theta_hat_mult_cl_old(Y, D, X, S, G.id, Ng)
+  tau_hat_mtrx[s, ]     <- tau_hat$tau.hat
+  tau_hat_mtrx_old[s, ]  <-  tau_hat_old$tau.hat
+  #var_hat             <- var_hat_mult_cl(Y = data_cl$Y, D = data_cl$D, X = data_cl$x_1, S = data_cl$S, G.id = data_cl$G.id, Ng = data_cl$Ng, tau.hat = tau_hat) / G
+  #var_hat_mtrx[s, ]   <- var_hat
+  #upper               <- tau_hat$tau.hat + qnorm(0.975) * sqrt(var_hat)
+  #lower               <- tau_hat$tau.hat - qnorm(0.975) * sqrt(var_hat)
+  #hit_mtrx[s, ]       <- (tau_vec < upper) & (tau_vec > lower)
+  print(s)
+}
+
+colMeans(tau_hat_mtrx)
+colMeans(tau_hat_mtrx_old)
+apply(tau_hat_mtrx, 2, var)
+apply(tau_hat_mtrx_old, 2, var)
+
+```
 
 theta_hat_mult <- function(Y, D, X, S)
 {
     tau.hat <- numeric(max(D))
-    beta.hat <- numeric(max(D))
     beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
     data_full <- data.frame(Y, D, X, S)
     for (d in 1:max(D))
@@ -302,6 +352,75 @@ tau.hat[d] <- theta_hat_adj
 beta.hat[d, ] <- beta_hat
     }
 
+ret_list <- list(
+    tau.hat = tau.hat,
+    beta.hat = beta.hat
+)
+return(ret_list)
+}
+
+
+
+theta_hat_mult_cl_old <- function(Y, D, X, S, G.id, Ng)
+
+{   
+    tau.hat <- numeric(max(D))
+    beta.hat <- numeric(max(D))
+    
+    working.df <- data.frame(Y, S, D, G.id, Ng, X)
+    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
+    #print(Y.bar.g)
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", names(working.df)[6:ncol(working.df)])])
+    cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
+    data <- cl.lvl.data
+    N.bar.G <- mean(data$Ng) #??? Why is this so weird?
+    #N.bar.G <- Ng
+    #print(N.bar.g)
+
+    #print(data)
+    #print(head(working.df, 200))
+    #print(data)
+    for (d in 1:max(D))
+    {
+    # Compute averages for treated and control within each stratum
+    agg_data <- data %>%
+        group_by(S) %>%
+    summarise(
+        Y_treated = mean(Y.bar[D == d] * N.bar.G, na.rm = TRUE),
+        Y_control = mean(Y.bar[D == 0] * N.bar.G, na.rm = TRUE),
+        X_treated = mean(x_1[D == d], na.rm = TRUE),
+        X_control = mean(x_1[D == 0], na.rm = TRUE),
+        k = n(),           # Total units in stratum (should be 2)
+        l = sum(D == d),   # Number of treated units (should be 1)
+        q = sum(D == 0)
+    ) %>%
+  mutate(
+        Y_diff = (1/l) * Y_treated - (1/q) * Y_control,
+        X_diff = (1/l) * X_treated - (1/q) * X_control,
+        k = k,
+        l = l, 
+        q = q
+  )
+
+
+data_decomp <- as.data.frame(agg_data)  
+#print(data_decomp)
+# run the linear model for covariate adjustments
+lm_model <- lm(Y_diff ~ X_diff, data = data_decomp)
+print(summary(lm_model))
+beta_hat <- coef(lm_model)[2]
+X_bar <- mean(data$x_1)
+X_dem <- data$x_1 - X_bar
+# adjusted estimator:
+theta_hat_adj <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
+                    sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng) -
+                    (sum(X_dem * (data$D == d)) / sum((data$D == d) * data$Ng) - 
+                    sum(X_dem * (data$D == 0)) / sum((data$D == 0) * data$Ng)) * beta_hat
+tau.hat[d] <- theta_hat_adj
+beta.hat[d] <- beta_hat
+    }
+#return(c(tau.hat, beta.hat)) #NB! WORK ON THE WAY HOW TO EXTRACT BOTH SEPARATELY! -- DONE!
+#return(tau.hat)
 ret_list <- list(
     tau.hat = tau.hat,
     beta.hat = beta.hat
