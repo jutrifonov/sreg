@@ -13,18 +13,17 @@ library(extraDistr)
 library(tidyverse)
 rm(list = ls())
 source("/Users/trifonovjuri/Desktop/sreg/R/2.0(dev)/fun_new.r")
-
 ```
 
 ## Individual level treatment assignment
 Here we provide the results for the case with multiple treatments but without clusters (one covariate so far).
 
 ```{r}
-nsim = 2000
-tau_vec = c(0.5, 1.5)
-n.treat = 2
-k = 3
-n = 1200
+nsim <- 2000
+tau_vec <- c(0.5, 1.5)
+n.treat <- 2
+k <- 3
+n <- 1200
 treat_sizes <- c(1, 1, 1)
 theta_hat_mtrx <- matrix(ncol = n.treat, nrow = nsim)
 v_hat_mtrx <- matrix(ncol = n.treat, nrow = nsim)
@@ -32,19 +31,18 @@ hit <- matrix(ncol = n.treat, nrow = nsim)
 
 for (s in 1:nsim)
 {
-    data_raw <- dgp_po(n = n, theta.vec = tau_vec,  n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1)) # Checked that now it returns several X's
-    data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes)      # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
-    data_full <- data.frame('Y' = data_df$y, 'D' = data_df$A, 'X' = data_df$X, 'S' = data_df$block)
-    N = nrow(data_full)
-    theta_hat_vec <- theta_hat_mult(data_full$Y, data_full$D, data_full$X, data_full$S)$tau.hat
-    v_hat_vec <- var_hat_mult(data_full) / N
-    theta_hat_mtrx[s, ] <- theta_hat_vec
-    v_hat_mtrx[s, ] <- v_hat_vec
-    upper  <- theta_hat_vec + qnorm(0.975) * sqrt(v_hat_vec)
-    lower  <- theta_hat_vec - qnorm(0.975) * sqrt(v_hat_vec)
-    hit[s, ] <- (tau_vec < upper) & (tau_vec > lower)
-    print(s)
-
+  data_raw <- dgp_po(n = n, theta.vec = tau_vec, n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1)) # Checked that now it returns several X's
+  data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes) # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
+  data_full <- data.frame("Y" = data_df$y, "D" = data_df$A, "X" = data_df$X, "S" = data_df$block)
+  N <- nrow(data_full)
+  theta_hat_vec <- theta_hat_mult(data_full$Y, data_full$D, data_full$X, data_full$S)$tau.hat
+  v_hat_vec <- var_hat_mult(data_full) / N
+  theta_hat_mtrx[s, ] <- theta_hat_vec
+  v_hat_mtrx[s, ] <- v_hat_vec
+  upper <- theta_hat_vec + qnorm(0.975) * sqrt(v_hat_vec)
+  lower <- theta_hat_vec - qnorm(0.975) * sqrt(v_hat_vec)
+  hit[s, ] <- (tau_vec < upper) & (tau_vec > lower)
+  print(s)
 }
 result_table <- data.frame(
   `True tau` = tau_vec,
@@ -61,35 +59,34 @@ print(result_table)
 ## Cluster level treatment assignment
 Here we provide the results for the case of cluster level treatment assignment with multiple treatments (one covariate so far).
 ```{r}
-n_treat = 3
-nsim = 10000
-tau_vec = c(0.2, 1.2, 0.7)
-gamma_vec = c(0.4, 0.2, 1)
+n_treat <- 3
+nsim <- 10000
+tau_vec <- c(0.2, 1.2, 0.7)
+gamma_vec <- c(0.4, 0.2, 1)
 tau_hat_mtrx <- matrix(ncol = n_treat, nrow = nsim)
 var_hat_mtrx <- matrix(ncol = n_treat, nrow = nsim)
-hit_mtrx     <- matrix(ncol = n_treat, nrow = nsim)
-G    = 500
+hit_mtrx <- matrix(ncol = n_treat, nrow = nsim)
+G <- 500
 Nmax <- 50
-k = 5
-treat_sizes = c(2, 1, 1, 1) # treatment 0 - p_1 individuals, treatment 1 - p_2 individuals, ...
+k <- 5
+treat_sizes <- c(2, 1, 1, 1) # treatment 0 - p_1 individuals, treatment 1 - p_2 individuals, ...
 max.support <- Nmax / 10 - 1
-#Ng <- rep(Nmax, G) 
+# Ng <- rep(Nmax, G)
 Ng <- gen.cluster.sizes(G, max.support)
 
 for (s in 1:nsim)
 {
-  data_pot            <- dgp.po.creg(Ng = Ng, tau.vec = tau_vec, G = G, gamma.vec = gamma_vec, n.treat = n_treat)
-  proba               <- dgp.obs.creg(baseline = data_pot, n.treat = n_treat, k = k, treat_sizes = treat_sizes)
-  data_cl             <- data.frame('Y' = proba$Y, 'D' = proba$D, proba$X, 'S' = proba$S, 'Ng' = proba$Ng, 'G.id' = proba$G.id)
-  tau_hat             <- theta_hat_mult_cl(Y = data_cl$Y, D = data_cl$D, X = data_cl$x_1, S = data_cl$S, G.id = data_cl$G.id, Ng = data_cl$Ng)
-  tau_hat_mtrx[s, ]   <- tau_hat$tau.hat
-  var_hat             <- var_hat_mult_cl(Y = data_cl$Y, D = data_cl$D, X = data_cl$x_1, S = data_cl$S, G.id = data_cl$G.id, Ng = data_cl$Ng, tau.hat = tau_hat) / G
-  var_hat_mtrx[s, ]   <- var_hat
-  upper               <- tau_hat$tau.hat + qnorm(0.975) * sqrt(var_hat)
-  lower               <- tau_hat$tau.hat - qnorm(0.975) * sqrt(var_hat)
-  hit_mtrx[s, ]       <- (tau_vec < upper) & (tau_vec > lower)
+  data_pot <- dgp.po.creg(Ng = Ng, tau.vec = tau_vec, G = G, gamma.vec = gamma_vec, n.treat = n_treat)
+  proba <- dgp.obs.creg(baseline = data_pot, n.treat = n_treat, k = k, treat_sizes = treat_sizes)
+  data_cl <- data.frame("Y" = proba$Y, "D" = proba$D, proba$X, "S" = proba$S, "Ng" = proba$Ng, "G.id" = proba$G.id)
+  tau_hat <- theta_hat_mult_cl_old(Y = data_cl$Y, D = data_cl$D, X = data_cl$x_1, S = data_cl$S, G.id = data_cl$G.id, Ng = data_cl$Ng)
+  tau_hat_mtrx[s, ] <- tau_hat$tau.hat
+  var_hat <- var_hat_mult_cl(Y = data_cl$Y, D = data_cl$D, X = data_cl$x_1, S = data_cl$S, G.id = data_cl$G.id, Ng = data_cl$Ng, tau.hat = tau_hat) / G
+  var_hat_mtrx[s, ] <- var_hat
+  upper <- tau_hat$tau.hat + qnorm(0.975) * sqrt(var_hat)
+  lower <- tau_hat$tau.hat - qnorm(0.975) * sqrt(var_hat)
+  hit_mtrx[s, ] <- (tau_vec < upper) & (tau_vec > lower)
   print(s)
-
 }
 result_table <- data.frame(
   `True tau` = tau_vec,
@@ -103,55 +100,55 @@ print(result_table)
 ``` 
 
 ```{r}
-tau_vec = c(0.5, 1.5)
-n.treat = 2
-k = 3
-n = 1200
+tau_vec <- c(0.5, 1.5)
+n.treat <- 2
+k <- 3
+n <- 1200
 treat_sizes <- c(1, 1, 1)
 
-data_raw <- dgp_po(n = n, theta.vec = tau_vec,  n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1))          # Checked that now it returns several X's
-    data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes)      # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
-    Y <- data_df$y
-    D <- data_df$A
-    X <- data.frame('x_1' = data_df$x_1, 'x_2' = data_df$x_2)
-    S <- data_df$block
-    data_full <- data.frame(Y, D, X, S)
-    N = nrow(data_full)
+data_raw <- dgp_po(n = n, theta.vec = tau_vec, n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1)) # Checked that now it returns several X's
+data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes) # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
+Y <- data_df$y
+D <- data_df$A
+X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2)
+S <- data_df$block
+data_full <- data.frame(Y, D, X, S)
+N <- nrow(data_full)
 
 theta_hat_vec <- theta_hat_mult(Y, D, X, S)$tau.hat
 
 theta_hat_vec
 
-nsim = 1000
-n = 1200
-k = 3
-theta_vec = c(0.5, 1.5)
-n.treat = 2
+nsim <- 1000
+n <- 1200
+k <- 3
+theta_vec <- c(0.5, 1.5)
+n.treat <- 2
 treat_sizes <- c(1, 1, 1)
 theta_hat_mtrx <- matrix(nrow = nsim, ncol = n.treat)
-var_hat_mtrx   <- matrix(nrow = nsim, ncol = n.treat)
-hit_mtrx   <- matrix(nrow = nsim, ncol = n.treat)
+var_hat_mtrx <- matrix(nrow = nsim, ncol = n.treat)
+hit_mtrx <- matrix(nrow = nsim, ncol = n.treat)
 for (s in 1:nsim)
 {
-    data_raw <- dgp_po(n = n, theta.vec = theta_vec,  n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1))          # Checked that now it returns several X's
-    data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes)      # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
-    Y <- data_df$y
-    D <- data_df$A
-    X <- data.frame('x_1' = data_df$x_1, 'x_2' = data_df$x_2)
-    S <- data_df$block
-    data_full <- data.frame(Y, D, X, S)
-    N = nrow(data_full)
+  data_raw <- dgp_po(n = n, theta.vec = theta_vec, n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1)) # Checked that now it returns several X's
+  data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes) # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
+  Y <- data_df$y
+  D <- data_df$A
+  X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2)
+  S <- data_df$block
+  data_full <- data.frame(Y, D, X, S)
+  N <- nrow(data_full)
 
-  fit           <- theta_hat_mult(Y, D, X, S)
+  fit <- theta_hat_mult(Y, D, X, S)
   theta_hat_vec <- fit$tau.hat
-  var_hat_vec   <- var_hat_mult(Y, D, X, S, fit) / N
+  var_hat_vec <- var_hat_mult(Y, D, X, S, fit) / N
 
   theta_hat_mtrx[s, ] <- theta_hat_vec
-  var_hat_mtrx[s, ]   <- var_hat_vec
+  var_hat_mtrx[s, ] <- var_hat_vec
 
-  upper               <- theta_hat_vec + qnorm(0.975) * sqrt(var_hat_vec)
-  lower               <- theta_hat_vec - qnorm(0.975) * sqrt(var_hat_vec)
-  hit_mtrx[s, ]       <- (theta_vec < upper) & (theta_vec > lower)
+  upper <- theta_hat_vec + qnorm(0.975) * sqrt(var_hat_vec)
+  lower <- theta_hat_vec - qnorm(0.975) * sqrt(var_hat_vec)
+  hit_mtrx[s, ] <- (theta_vec < upper) & (theta_vec > lower)
   print(s)
 }
 
@@ -169,7 +166,7 @@ data_full %>%
     X_control = list(colMeans(X[D == 0, , drop = FALSE], na.rm = TRUE)),
     k = n(),
     l = sum(D == 1),
-    q = sum(D == 0), 
+    q = sum(D == 0),
     .groups = "drop"
   )
 
@@ -183,7 +180,7 @@ agg_data_old <- data_full %>%
     X_control = list(colMeans(X[D == 0, , drop = FALSE], na.rm = TRUE)),
     k = n(),
     l = sum(D == 1),
-    q = sum(D == 0), 
+    q = sum(D == 0),
     .groups = "drop"
   )
 
@@ -200,9 +197,9 @@ agg_data_old <- agg_data_old %>%
 agg_data_old
 
 
- agg_data <- data_full %>%
+agg_data <- data_full %>%
   group_split(S) %>%
-  map_dfr(~{
+  map_dfr(~ {
     df <- .
     list(
       S = df$S[1],
@@ -216,7 +213,7 @@ agg_data_old
     )
   })
 
-  # Turn list columns into two separate columns per covariate
+# Turn list columns into two separate columns per covariate
 agg_data <- agg_data %>%
   mutate(
     X_treated_1 = map_dbl(X_treated, 1),
@@ -224,60 +221,68 @@ agg_data <- agg_data %>%
     X_control_1 = map_dbl(X_control, 1),
     X_control_2 = map_dbl(X_control, 2)
   )
-
 ```
 
 ```{r}
-n_treat = 2
-nsim = 1000
-tau_vec = c(0.5, 1.5)
-gamma_vec = c(0.4, 0.2, 1)
-n.treat = 2
-k = 3
-treat_sizes <- c(1, 1, 1)
+n_treat <- 3
+nsim <- 10000
+tau_vec <- c(0.2, 1.2, 0.7)
+gamma_vec <- c(0.4, 0.2, 1)
+# n.treat = 2
+k <- 5
+treat_sizes <- c(2, 1, 1, 1)
 tau_hat_mtrx <- matrix(ncol = n_treat, nrow = nsim)
 tau_hat_mtrx_old <- matrix(ncol = n_treat, nrow = nsim)
 var_hat_mtrx <- matrix(ncol = n_treat, nrow = nsim)
-hit_mtrx     <- matrix(ncol = n_treat, nrow = nsim)
-G    = 1200
+var_hat_old_mtrx <- matrix(ncol = n_treat, nrow = nsim)
+hit_mtrx <- matrix(ncol = n_treat, nrow = nsim)
+G <- 500
 Nmax <- 50
 
-#treat_sizes = c(2, 1, 1, 1) # treatment 0 - p_1 individuals, treatment 1 - p_2 individuals, ...
+# treat_sizes = c(2, 1, 1, 1) # treatment 0 - p_1 individuals, treatment 1 - p_2 individuals, ...
 max.support <- Nmax / 10 - 1
-#Ng <- rep(Nmax, G) 
+# Ng <- rep(Nmax, G)
 Ng <- gen.cluster.sizes(G, max.support)
 
 for (s in 1:nsim)
 {
   Ng <- gen.cluster.sizes(G, max.support)
-  data_pot            <- dgp.po.creg(Ng = Ng, tau.vec = tau_vec, G = G, gamma.vec = gamma_vec, n.treat = n_treat)
-  proba               <- dgp.obs.creg(baseline = data_pot, n.treat = n_treat, k = k, treat_sizes = treat_sizes)
-  data_cl             <- data.frame('Y' = proba$Y, 'D' = proba$D, proba$X, 'S' = proba$S, 'Ng' = proba$Ng, 'G.id' = proba$G.id)
+  data_pot <- dgp.po.creg(Ng = Ng, tau.vec = tau_vec, G = G, gamma.vec = gamma_vec, n.treat = n_treat)
+  proba <- dgp.obs.creg(baseline = data_pot, n.treat = n_treat, k = k, treat_sizes = treat_sizes)
+  data_cl <- data.frame("Y" = proba$Y, "D" = proba$D, proba$X, "S" = proba$S, "Ng" = proba$Ng, "G.id" = proba$G.id)
   Y <- data_cl$Y
   D <- data_cl$D
-  X <- data.frame('x_1' = data_cl$x_1, 'x_2' = data_cl$x_2)
+  X <- data.frame("x_1" = data_cl$x_1) # , 'x_2' = data_cl$x_2)
   S <- data_cl$S
   G.id <- data_cl$G.id
   Ng <- data_cl$Ng
   data_full <- data.frame(Y, D, X, S, G.id, Ng)
 
-  tau_hat               <- theta_hat_mult_cl(Y, D, X, S, G.id, Ng)
-  tau_hat_old           <- theta_hat_mult_cl_old(Y, D, X, S, G.id, Ng)
-  tau_hat_mtrx[s, ]     <- tau_hat$tau.hat
-  tau_hat_mtrx_old[s, ]  <-  tau_hat_old$tau.hat
-  #var_hat             <- var_hat_mult_cl(Y = data_cl$Y, D = data_cl$D, X = data_cl$x_1, S = data_cl$S, G.id = data_cl$G.id, Ng = data_cl$Ng, tau.hat = tau_hat) / G
-  #var_hat_mtrx[s, ]   <- var_hat
-  #upper               <- tau_hat$tau.hat + qnorm(0.975) * sqrt(var_hat)
-  #lower               <- tau_hat$tau.hat - qnorm(0.975) * sqrt(var_hat)
-  #hit_mtrx[s, ]       <- (tau_vec < upper) & (tau_vec > lower)
+  tau_hat <- theta_hat_mult_cl(Y, D, X, S, G.id, Ng)
+  var_hat <- var_hat_mult_cl(Y, D, X, S, G.id, Ng, fit = tau_hat) / G
+  # tau_hat_old           <- theta_hat_mult_cl_old(Y, D, X, S, G.id, Ng)
+  # var_hat_old           <- var_hat_mult_cl_old(Y, D, X, S, G.id, Ng, tau.hat = tau_hat_old) / G
+  tau_hat_mtrx[s, ] <- tau_hat$tau.hat
+  # tau_hat_mtrx_old[s, ] <- tau_hat_old$tau.hat
+  var_hat_mtrx[s, ] <- var_hat
+  # var_hat_old_mtrx[s, ] <- var_hat_old
+  upper <- tau_hat$tau.hat + qnorm(0.975) * sqrt(var_hat)
+  lower <- tau_hat$tau.hat - qnorm(0.975) * sqrt(var_hat)
+  hit_mtrx[s, ] <- (tau_vec < upper) & (tau_vec > lower)
+  # var_hat             <- var_hat_mult_cl(Y = data_cl$Y, D = data_cl$D, X = data_cl$x_1, S = data_cl$S, G.id = data_cl$G.id, Ng = data_cl$Ng, tau.hat = tau_hat) / G
+  # var_hat_mtrx[s, ]   <- var_hat
+  # upper               <- tau_hat$tau.hat + qnorm(0.975) * sqrt(var_hat)
+  # lower               <- tau_hat$tau.hat - qnorm(0.975) * sqrt(var_hat)
+  # hit_mtrx[s, ]       <- (tau_vec < upper) & (tau_vec > lower)
   print(s)
 }
 
 colMeans(tau_hat_mtrx)
 colMeans(tau_hat_mtrx_old)
 apply(tau_hat_mtrx, 2, var)
+colMeans(var_hat_mtrx)
 apply(tau_hat_mtrx_old, 2, var)
-
+colMeans(hit_mtrx)
 ```
 
 theta_hat_mult <- function(Y, D, X, S)
@@ -427,3 +432,130 @@ ret_list <- list(
 )
 return(ret_list)
 }
+
+################## try to parallelize ####################
+library(devtools) # install devtools
+library(sreg)
+library(sandwich)
+library(lubridate)
+library(compiler)
+library(extraDistr)
+library(VGAM)
+library(Matrix)
+library(parallel)
+library(progress)
+library(purrr)
+library(SimDesign)
+library(pbapply)
+
+###############
+rm(list = ls())
+###############
+options(scipen = 999) # disable scientific notation
+
+
+
+num_cores <- detectCores()
+cl <- makeCluster(num_cores, outfile = "")
+
+# Upload the libraries to the cluster
+clusterEvalQ(cl, {
+  library(lubridate)
+  library(compiler)
+  library(extraDistr)
+  library(Matrix)
+  library(progress)
+  library(parallel)
+  library(sreg)
+  library(pbapply)
+  library(dplyr)
+  library(purrr)
+  library(tidyverse)
+  source("/Users/trifonovjuri/Desktop/sreg/R/2.0(dev)/fun_new.r")
+})
+
+sim.func <- function(sim.id) {
+  seed <- 1000 + sim.id
+  set.seed(seed)
+
+  # --- DGP settings ---
+  n.treat <- 2
+  tau.vec <- c(0.2, 1.2)   # true ATEs
+  gamma.vec <- c(0.4, 0.2, 1)
+  k <- 4
+  treat_sizes <- c(1, 1, 2)
+  G <- 12000
+  Nmax <- 50
+  max.support <- Nmax / 10 - 1
+
+  # --- Generate data ---
+  Ng <- gen.cluster.sizes(G, max.support)
+  data_pot <- dgp.po.creg(Ng = Ng, tau.vec = tau.vec, G = G, gamma.vec = gamma.vec, n.treat = n.treat)
+  proba <- dgp.obs.creg(baseline = data_pot, n.treat = n.treat, k = k, treat_sizes = treat_sizes)
+
+  data_cl <- data.frame(
+    Y = proba$Y,
+    D = proba$D,
+    proba$X,
+    S = proba$S,
+    Ng = proba$Ng,
+    G.id = proba$G.id
+  )
+
+  Y <- data_cl$Y
+  D <- data_cl$D
+  X <- data.frame("x_1" = data_cl$x_1)  # or include other covariates as needed
+  S <- data_cl$S
+  G.id <- data_cl$G.id
+  Ng <- data_cl$Ng
+
+  result <- tryCatch({
+    # Estimate ATEs and variances
+    theta_res <- theta_hat_mult_cl(Y, D, X, S, G.id, Ng)
+    tau_hat <- theta_res$tau.hat
+    var_hat <- var_hat_mult_cl(Y, D, X, S, G.id, Ng, fit = theta_res) / G
+    se_hat <- sqrt(var_hat)
+
+    # Confidence intervals and coverage
+    CI.left <- tau_hat - qnorm(0.975) * se_hat
+    CI.right <- tau_hat + qnorm(0.975) * se_hat
+    tstat <- tau_hat / se_hat
+    ci.hit <- as.numeric(tau.vec >= CI.left & tau.vec <= CI.right)
+
+    list(
+      tau = tau_hat,
+      se = se_hat,
+      tstat = tstat,
+      CI.left = CI.left,
+      CI.right = CI.right,
+      ci.hit = ci.hit
+    )
+  },
+  error = function(e) {
+    cat("Simulation", sim.id, "encountered an error:", conditionMessage(e), "\n")
+    list(
+      tau = NA,
+      se = NA,
+      tstat = NA,
+      CI.left = NA,
+      CI.right = NA,
+      ci.hit = NA
+    )
+  })
+
+  return(result)
+}
+
+simres <- pblapply(1:50000, sim.func, cl=cl)
+stopCluster(cl)
+tau <- na.omit(as.matrix(sapply(simres, function(simres) simres$tau)))
+se <- na.omit(as.matrix(sapply(simres, function(simres) simres$se)))
+ci.hit <- na.omit(as.matrix(sapply(simres, function(simres) simres$ci.hit)))
+rowMeans(tau)
+apply(tau, 1, sd)
+rowMeans(se)
+rowMeans(ci.hit)
+
+
+
+
