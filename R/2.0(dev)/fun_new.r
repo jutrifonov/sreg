@@ -224,20 +224,6 @@ theta_hat_mult <- function(Y, D, X = NULL, S) {
     data_full <- data.frame(Y, D, X, S)
     for (d in 1:max(D))
     {
-      # Compute averages for treated and control within each stratum
-      # agg_data <- data_full %>%
-      #  group_by(S) %>%
-      #  summarize(
-      #    Y_treated = mean(Y[D == d], na.rm = TRUE),
-      #    Y_control = mean(Y[D == 0], na.rm = TRUE),
-      #    X_treated = list(colMeans(X[D == d, , drop = FALSE], na.rm = TRUE)),
-      #    X_control = list(colMeans(X[D == 0, , drop = FALSE], na.rm = TRUE)),
-      #    k = n(),
-      #    l = sum(D == d),
-      #    q = sum(D == 0),
-      #    .groups = "drop"
-      #  )
-
       agg_data <- data_full %>%
         group_split(S) %>%
         map_dfr(~ {
@@ -291,8 +277,8 @@ theta_hat_mult <- function(Y, D, X = NULL, S) {
     }
   } else {
     tau.hat <- numeric(max(D))
-    #beta.hat <- numeric(max(D))
-    #beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
+    # beta.hat <- numeric(max(D))
+    # beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
     data_full <- data.frame(Y, D, S)
     for (d in 1:max(D))
     {
@@ -320,7 +306,7 @@ theta_hat_mult <- function(Y, D, X = NULL, S) {
         sum((data_full$Y) * (data_full$D == 0)) / sum(data_full$D == 0)
 
       tau.hat[d] <- theta_hat
-      beta.hat   <- NULL
+      beta.hat <- NULL
     }
   }
 
@@ -366,92 +352,96 @@ var_hat_mult <- function(Y, D, X, S, fit) {
   # n = number of blocks
   n <- max(S)
 
-  # Center X and compute the augmented outcome Y_a
-  X_bar <- colMeans(X)
-  X_dem <- sweep(as.matrix(X), 2, X_bar)
-  pi_hat_vec <- pi.hat.sreg(S, D, vector = TRUE)
-  pi_hat_0 <- pi.hat.sreg(S, D, vector = TRUE, inverse = TRUE)[1]
-  V <- numeric(max(D))
-  for (d in 1:max(D))
-  {
-    # beta_hat <- theta_hat_mult(Y, D, X, S)$beta.hat[d, ]
-    beta_hat <- fit$beta.hat[d, ]
-    # print(beta_hat)
-    # print(X_dem)
-    # Y_a     <- Y - beta_hat * X_dem
-    Y_a <- Y - X_dem %*% beta_hat # check carefully here and in the cluster function what is wrong with the transpose sign?
+  if (!is.null(X)) {
+    # Center X and compute the augmented outcome Y_a
+    X_bar <- colMeans(X)
+    X_dem <- sweep(as.matrix(X), 2, X_bar)
+    pi_hat_vec <- pi.hat.sreg(S, D, vector = TRUE)
+    pi_hat_0 <- pi.hat.sreg(S, D, vector = TRUE, inverse = TRUE)[1]
+    V <- numeric(max(D))
+    for (d in 1:max(D))
+    {
+      # beta_hat <- theta_hat_mult(Y, D, X, S)$beta.hat[d, ]
+      beta_hat <- fit$beta.hat[d, ]
+      # print(beta_hat)
+      # print(X_dem)
+      # Y_a     <- Y - beta_hat * X_dem
+      Y_a <- Y - X_dem %*% beta_hat # check carefully here and in the cluster function what is wrong with the transpose sign?
 
-    l <- sum(D == d) / n
-    q <- sum(D == 0) / n
+      l <- sum(D == d) / n
+      q <- sum(D == 0) / n
 
-    pi_hat <- pi_hat_vec[d]
-    # Compute Gamma_hat_1 and Gamma_hat_0
-    Gamma_hat_1 <- sum(Y_a[D == d]) * (1 / sum(D == d))
-    Gamma_hat_0 <- sum(Y_a[D == 0]) * (1 / sum(D == 0))
+      pi_hat <- pi_hat_vec[d]
+      # Compute Gamma_hat_1 and Gamma_hat_0
+      Gamma_hat_1 <- sum(Y_a[D == d]) * (1 / sum(D == d))
+      Gamma_hat_0 <- sum(Y_a[D == 0]) * (1 / sum(D == 0))
 
-    # Precompute sums of Y_a for treated & untreated in each block
-    sums_treated <- tapply(Y_a * (D == d), S, sum)
-    sums_untreated <- tapply(Y_a * (D == 0), S, sum)
+      # Precompute sums of Y_a for treated & untreated in each block
+      sums_treated <- tapply(Y_a * (D == d), S, sum)
+      sums_untreated <- tapply(Y_a * (D == 0), S, sum)
 
-    # print(head(sums_treated))
-    # print(head(sums_untreated))
+      # print(head(sums_treated))
+      # print(head(sums_untreated))
 
-    #----------------------------------------
-    # Compute rho_hat_00 and rho_hat_11
-    # We consider pairs of adjacent blocks: (1,2), (3,4), ...
-    #----------------------------------------
-    # Indices of pairs
-    idx1 <- seq(1, n, 2)
-    idx2 <- seq(2, n, 2)
+      #----------------------------------------
+      # Compute rho_hat_00 and rho_hat_11
+      # We consider pairs of adjacent blocks: (1,2), (3,4), ...
+      #----------------------------------------
+      # Indices of pairs
+      idx1 <- seq(1, n, 2)
+      idx2 <- seq(2, n, 2)
 
-    # zeta_0 = sum of products of untreated across pairs of blocks
-    zeta_0 <- sum(sums_untreated[idx1] * sums_untreated[idx2]) / (q^2)
-    # print(head(zeta_0))
+      # zeta_0 = sum of products of untreated across pairs of blocks
+      zeta_0 <- sum(sums_untreated[idx1] * sums_untreated[idx2]) / (q^2)
+      # print(head(zeta_0))
 
-    # zeta_1 = sum of products of treated across pairs of blocks
-    zeta_1 <- sum(sums_treated[idx1] * sums_treated[idx2]) / (l^2)
-    # print(head(zeta_1))
-    # Multiply each by (2/n) to get rho_00 and rho_11
-    rho_hat_00 <- zeta_0 * (2 / n)
-    rho_hat_11 <- zeta_1 * (2 / n)
-    # print(rho_hat_11)
+      # zeta_1 = sum of products of treated across pairs of blocks
+      zeta_1 <- sum(sums_treated[idx1] * sums_treated[idx2]) / (l^2)
+      # print(head(zeta_1))
+      # Multiply each by (2/n) to get rho_00 and rho_11
+      rho_hat_00 <- zeta_0 * (2 / n)
+      rho_hat_11 <- zeta_1 * (2 / n)
+      # print(rho_hat_11)
 
-    #----------------------------------------
-    # Compute rho_hat_10
-    # sum_rho_10 = sum over j of ( (sum of treated)*(sum of untreated) / (l*(k-l)) )
-    # Then divide by n
-    #----------------------------------------
-    sum_rho_10 <- sum((sums_treated * sums_untreated) / (l * q))
-    rho_hat_10 <- sum_rho_10 / n
-    # print(sum_rho_10)
-    # print(rho_hat_10)
+      #----------------------------------------
+      # Compute rho_hat_10
+      # sum_rho_10 = sum over j of ( (sum of treated)*(sum of untreated) / (l*(k-l)) )
+      # Then divide by n
+      #----------------------------------------
+      sum_rho_10 <- sum((sums_treated * sums_untreated) / (l * q))
+      rho_hat_10 <- sum_rho_10 / n
+      # print(sum_rho_10)
+      # print(rho_hat_10)
 
-    #----------------------------------------
-    # Compute sigma_hat_1 and sigma_hat_0
-    #----------------------------------------
-    sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (D == d)) * (1 / (n * l))
-    sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (D == 0)) * (1 / (n * q))
-    # print(s)
-    #----------------------------------------
-    # Compute the final variance components
-    #----------------------------------------
-    # v_hat_1_1 and v_hat_1_0
-    v_hat_1_1 <- sigma_hat_1 - (rho_hat_11 - Gamma_hat_1^2)
-    v_hat_1_0 <- sigma_hat_0 - (rho_hat_00 - Gamma_hat_0^2)
+      #----------------------------------------
+      # Compute sigma_hat_1 and sigma_hat_0
+      #----------------------------------------
+      sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (D == d)) * (1 / (n * l))
+      sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (D == 0)) * (1 / (n * q))
+      # print(s)
+      #----------------------------------------
+      # Compute the final variance components
+      #----------------------------------------
+      # v_hat_1_1 and v_hat_1_0
+      v_hat_1_1 <- sigma_hat_1 - (rho_hat_11 - Gamma_hat_1^2)
+      v_hat_1_0 <- sigma_hat_0 - (rho_hat_00 - Gamma_hat_0^2)
 
-    # v_hat_2_11, v_hat_2_00, v_hat_2_10
-    v_hat_2_11 <- rho_hat_11 - Gamma_hat_1 * Gamma_hat_1
+      # v_hat_2_11, v_hat_2_00, v_hat_2_10
+      v_hat_2_11 <- rho_hat_11 - Gamma_hat_1 * Gamma_hat_1
 
-    v_hat_2_00 <- rho_hat_00 - Gamma_hat_0 * Gamma_hat_0
+      v_hat_2_00 <- rho_hat_00 - Gamma_hat_0 * Gamma_hat_0
 
-    v_hat_2_10 <- rho_hat_10 - Gamma_hat_1 * Gamma_hat_0
+      v_hat_2_10 <- rho_hat_10 - Gamma_hat_1 * Gamma_hat_0
 
-    # Final V
-    V_d <- (1 / pi_hat) * v_hat_1_1 +
-      (1 / pi_hat_0) * v_hat_1_0 +
-      v_hat_2_11 + v_hat_2_00 -
-      2 * v_hat_2_10
-    V[d] <- V_d
+      # Final V
+      V_d <- (1 / pi_hat) * v_hat_1_1 +
+        (1 / pi_hat_0) * v_hat_1_0 +
+        v_hat_2_11 + v_hat_2_00 -
+        2 * v_hat_2_10
+      V[d] <- V_d
+    }
+  } else{
+    
   }
 
   return(V)
@@ -1052,3 +1042,215 @@ gen.rubin.formula.creg <- function(n.treat)
   }
   return(formula)
 }
+
+
+
+### Aggregate the functions to fit into the master functions res.sreg.ss, res.creg.ss ###
+# Now generalized for the cov/nocov case with X = NULL
+tau.hat.sreg.ss <- function(Y, D, X = NULL, S) {
+  if (!is.null(X)) {
+    tau.hat <- numeric(max(D))
+    beta.hat <- numeric(max(D))
+    beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
+    data_full <- data.frame(Y, D, X, S)
+    for (d in 1:max(D))
+    {
+      agg_data <- data_full %>%
+        group_split(S) %>%
+        map_dfr(~ {
+          df <- .
+          list(
+            S = df$S[1],
+            Y_treated = mean(df$Y[df$D == d], na.rm = TRUE),
+            Y_control = mean(df$Y[df$D == 0], na.rm = TRUE),
+            X_treated = list(colMeans(df[df$D == d, grep("^x_", names(df)), drop = FALSE])), # mean value among treated in each stratum
+            X_control = list(colMeans(df[df$D == 0, grep("^x_", names(df)), drop = FALSE])), # mean value among control in each stratum
+            k = nrow(df),
+            l = sum(df$D == d),
+            q = sum(df$D == 0)
+          )
+        })
+
+      # Create Y_diff vector
+      Y_diff <- with(agg_data, Y_treated - Y_control)
+      # Compute differences correctly: row-wise for each pair of treated/control vectors
+      X_diff_mat <- map2(
+        agg_data$X_treated, agg_data$X_control,
+        ~ .x - .y
+      ) %>%
+        do.call(rbind, .)
+      # print(X_diff_mat)
+      # print(Y_diff)
+
+
+
+      data_decomp <- as.data.frame(agg_data)
+      X_treated_mat <- do.call(rbind, data_decomp$X_treated)
+      X_control_mat <- do.call(rbind, data_decomp$X_control)
+
+
+      lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
+
+      # print(summary(lm_model))
+      beta_hat <- unname(lm_model$coefficients[-1])
+
+      X_mat <- as.matrix(data_full[, grepl("^x_", names(data_full))])
+      X_bar <- colMeans(X_mat)
+      X_dem <- sweep(X_mat, 2, X_bar)
+
+      # adjusted estimator:
+      theta_hat_adj <- sum((data_full$Y * (data_full$D == d))) / sum((data_full$D == d)) -
+        sum((data_full$Y) * (data_full$D == 0)) / sum(data_full$D == 0) -
+        as.numeric(t(colMeans(X_dem[data_full$D == d, , drop = FALSE]) -
+          colMeans(X_dem[data_full$D == 0, , drop = FALSE])) %*% beta_hat)
+      tau.hat[d] <- theta_hat_adj
+      beta.hat[d, ] <- beta_hat
+    }
+  } else {
+    tau.hat <- numeric(max(D))
+    # beta.hat <- numeric(max(D))
+    # beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
+    data_full <- data.frame(Y, D, S)
+    for (d in 1:max(D))
+    {
+      agg_data <- data_full %>%
+        group_split(S) %>%
+        map_dfr(~ {
+          df <- .
+          list(
+            S = df$S[1],
+            Y_treated = mean(df$Y[df$D == d], na.rm = TRUE),
+            Y_control = mean(df$Y[df$D == 0], na.rm = TRUE),
+            k = nrow(df),
+            l = sum(df$D == d),
+            q = sum(df$D == 0)
+          )
+        })
+
+      # Create Y_diff vector
+      Y_diff <- with(agg_data, Y_treated - Y_control)
+
+      data_decomp <- as.data.frame(agg_data)
+
+      # adjusted estimator:
+      theta_hat <- sum((data_full$Y * (data_full$D == d))) / sum((data_full$D == d)) -
+        sum((data_full$Y) * (data_full$D == 0)) / sum(data_full$D == 0)
+
+      tau.hat[d] <- theta_hat
+      beta.hat <- NULL
+    }
+  }
+
+  ret_list <- list(
+    tau.hat = tau.hat,
+    beta.hat = beta.hat
+  )
+  return(ret_list)
+}
+as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL) {
+  # n = number of blocks
+  n <- max(S)
+
+  pi_hat_vec <- pi.hat.sreg(S, D, vector = TRUE)
+  pi_hat_0 <- pi.hat.sreg(S, D, vector = TRUE, inverse = TRUE)[1]
+  V <- numeric(max(D))
+
+  if(!is.null(X))
+  {
+  # Center X and compute the augmented outcome Y_a
+  X_bar <- colMeans(X)
+  X_dem <- sweep(as.matrix(X), 2, X_bar)
+  }else{
+    X_dem <- 0
+  }
+  for (d in 1:max(D))
+  {
+    if(!is.null(X))
+    {
+      beta_hat <- fit$beta.hat[d, ]
+      Y_a <- Y - X_dem %*% beta_hat # check carefully here and in the cluster function what is wrong with the transpose sign?
+    }else{
+      beta_hat <- 0
+      Y_a <- Y
+    }
+    # print(beta_hat)
+    # print(X_dem)
+    # Y_a     <- Y - beta_hat * X_dem
+    #Y_a <- Y - X_dem %*% beta_hat # check carefully here and in the cluster function what is wrong with the transpose sign?
+
+    l <- sum(D == d) / n
+    q <- sum(D == 0) / n
+
+    pi_hat <- pi_hat_vec[d]
+    # Compute Gamma_hat_1 and Gamma_hat_0
+    Gamma_hat_1 <- sum(Y_a[D == d]) * (1 / sum(D == d))
+    Gamma_hat_0 <- sum(Y_a[D == 0]) * (1 / sum(D == 0))
+
+    # Precompute sums of Y_a for treated & untreated in each block
+    sums_treated <- tapply(Y_a * (D == d), S, sum)
+    sums_untreated <- tapply(Y_a * (D == 0), S, sum)
+
+    # print(head(sums_treated))
+    # print(head(sums_untreated))
+
+    #----------------------------------------
+    # Compute rho_hat_00 and rho_hat_11
+    # We consider pairs of adjacent blocks: (1,2), (3,4), ...
+    #----------------------------------------
+    # Indices of pairs
+    idx1 <- seq(1, n, 2)
+    idx2 <- seq(2, n, 2)
+
+    # zeta_0 = sum of products of untreated across pairs of blocks
+    zeta_0 <- sum(sums_untreated[idx1] * sums_untreated[idx2]) / (q^2)
+    # print(head(zeta_0))
+
+    # zeta_1 = sum of products of treated across pairs of blocks
+    zeta_1 <- sum(sums_treated[idx1] * sums_treated[idx2]) / (l^2)
+    # print(head(zeta_1))
+    # Multiply each by (2/n) to get rho_00 and rho_11
+    rho_hat_00 <- zeta_0 * (2 / n)
+    rho_hat_11 <- zeta_1 * (2 / n)
+    # print(rho_hat_11)
+
+    #----------------------------------------
+    # Compute rho_hat_10
+    # sum_rho_10 = sum over j of ( (sum of treated)*(sum of untreated) / (l*(k-l)) )
+    # Then divide by n
+    #----------------------------------------
+    sum_rho_10 <- sum((sums_treated * sums_untreated) / (l * q))
+    rho_hat_10 <- sum_rho_10 / n
+    # print(sum_rho_10)
+    # print(rho_hat_10)
+
+    #----------------------------------------
+    # Compute sigma_hat_1 and sigma_hat_0
+    #----------------------------------------
+    sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (D == d)) * (1 / (n * l))
+    sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (D == 0)) * (1 / (n * q))
+    # print(s)
+    #----------------------------------------
+    # Compute the final variance components
+    #----------------------------------------
+    # v_hat_1_1 and v_hat_1_0
+    v_hat_1_1 <- sigma_hat_1 - (rho_hat_11 - Gamma_hat_1^2)
+    v_hat_1_0 <- sigma_hat_0 - (rho_hat_00 - Gamma_hat_0^2)
+
+    # v_hat_2_11, v_hat_2_00, v_hat_2_10
+    v_hat_2_11 <- rho_hat_11 - Gamma_hat_1 * Gamma_hat_1
+
+    v_hat_2_00 <- rho_hat_00 - Gamma_hat_0 * Gamma_hat_0
+
+    v_hat_2_10 <- rho_hat_10 - Gamma_hat_1 * Gamma_hat_0
+
+    # Final V
+    V_d <- (1 / pi_hat) * v_hat_1_1 +
+      (1 / pi_hat_0) * v_hat_1_0 +
+      v_hat_2_11 + v_hat_2_00 -
+      2 * v_hat_2_10
+    V[d] <- V_d
+  }
+
+  return(V)
+}
+

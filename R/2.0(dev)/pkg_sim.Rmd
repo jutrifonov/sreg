@@ -34,6 +34,7 @@ for (s in 1:nsim)
   data_raw <- dgp_po(n = n, theta.vec = tau_vec, n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1)) # Checked that now it returns several X's
   data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes) # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
   data_full <- data.frame("Y" = data_df$y, "D" = data_df$A, "X" = data_df$X, "S" = data_df$block)
+  #data_full <- data.frame("Y" = data_df$y, "D" = data_df$A, "X" = data.frame(data_df$X, "S" = data_df$block)
   N <- nrow(data_full)
   theta_hat_vec <- theta_hat_mult(data_full$Y, data_full$D, data_full$X, data_full$S)$tau.hat
   v_hat_vec <- var_hat_mult(data_full) / N
@@ -115,9 +116,16 @@ S <- data_df$block
 data_full <- data.frame(Y, D, X, S)
 N <- nrow(data_full)
 
-theta_hat_vec <- theta_hat_mult(Y, D, X, S)$tau.hat
+theta_hat_vec <- theta_hat_mult(Y, D, X, S)#$tau.hat
+var_hat_vec   <- var_hat_mult(Y, D, X, S, theta_hat_vec) / N
 
-theta_hat_vec
+# Using the aggregated master functions to test:
+tau_hat <- tau.hat.sreg.ss(Y, D, X, S)
+var_hat <- as.var.sreg.ss(Y, D, X, S, fit = tau_hat) / N
+
+tau_hat <- tau.hat.sreg.ss(Y, D, X = NULL, S)
+var_hat <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL) / N
+
 
 nsim <- 1000
 n <- 1200
