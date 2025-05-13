@@ -98,7 +98,7 @@
 #' X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 #' result <- sreg(Y, S, D, G.id = NULL, X = X)
 #' print(result)
-sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
+sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = FALSE) {
   check.data.types(Y, S, D, G.id, Ng, X)
   check.integers(S, D, G.id, Ng)
   boolean.check(HC1)
@@ -132,12 +132,13 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
     S <- clean.df$S
     D <- clean.df$D
     G.id <- clean.df$G.id
-    Ng <- clean.df$Ng})
-    if ((x.ind + 1) > ncol(clean.df)) {
-      X <- NULL
-    } else {
-      X <- clean.df[, (x.ind + 1):ncol(clean.df)]
-    }
+    Ng <- clean.df$Ng
+  })
+  if ((x.ind + 1) > ncol(clean.df)) {
+    X <- NULL
+  } else {
+    X <- clean.df[, (x.ind + 1):ncol(clean.df)]
+  }
 
   if ("Ng_1" %in% names(X)) {
     names(X)[names(X) == "Ng_1"] <- "Ng"
@@ -155,48 +156,56 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE) {
   }
 
   if (is.null(G.id)) {
-      if (!is.null(X)){
-          if (!is.null(S)){
-        dta.temp <- data.frame(S, D, X)
-        if (!check.within.strata.variation(dta.temp)) {
-          warning("Warning: One or more covariates do not vary within one or more strata. Proceeding with unadjusted estimator.")
-          X <- NULL
-        } 
-        if (!check.within.stratatreatment.variation(dta.temp)) {
-          warning("Warning: One or more covariates do not vary within one or more strata-treatment combinations. Proceeding with unadjusted estimator.")
-          X <- NULL
+    if (small.strata == FALSE) {
+      if (!is.null(X)) {
+        if (!is.null(S)) {
+          dta.temp <- data.frame(S, D, X)
+          if (!check.within.strata.variation(dta.temp)) {
+            warning("Warning: One or more covariates do not vary within one or more strata. Proceeding with unadjusted estimator.")
+            X <- NULL
+          }
+          if (!check.within.stratatreatment.variation(dta.temp)) {
+            warning("Warning: One or more covariates do not vary within one or more strata-treatment combinations. Proceeding with unadjusted estimator.")
+            X <- NULL
+          }
         }
-      } 
-      if (is.null(S)){
-        S.temp <- rep(1, length(D))
-        dta.temp <- data.frame("S" = S.temp, D, X)
-        if (!check.within.strata.variation(dta.temp)) {
-          warning("Warning: One or more covariates do not vary within one or more strata. Proceeding with unadjusted estimator.")
-          X <- NULL
-        } 
-        if (!check.within.stratatreatment.variation(dta.temp)) {
-          warning("Warning: One or more covariates do not vary within one or more strata-treatment combinations. Proceeding with unadjusted estimator.")
-          X <- NULL
+        if (is.null(S)) {
+          S.temp <- rep(1, length(D))
+          dta.temp <- data.frame("S" = S.temp, D, X)
+          if (!check.within.strata.variation(dta.temp)) {
+            warning("Warning: One or more covariates do not vary within one or more strata. Proceeding with unadjusted estimator.")
+            X <- NULL
+          }
+          if (!check.within.stratatreatment.variation(dta.temp)) {
+            warning("Warning: One or more covariates do not vary within one or more strata-treatment combinations. Proceeding with unadjusted estimator.")
+            X <- NULL
+          }
         }
       }
+      result <- res.sreg(Y, S, D, X, HC1)
+      if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
+        stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
       }
-    result <- res.sreg(Y, S, D, X, HC1)
-    if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
-      stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+    } else {
+      result <- res.sreg.ss(Y, S, D, X, HC1)
     }
   } else {
     check.cluster.lvl(G.id, S, D, Ng)
-    result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
-    if (is.null(result$data$Ng)) {
-      warning("Warning: Cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
-    }
-    if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
-      stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
-    }
-    if (!is.null(result$lin.adj)) {
-      if (!check.cluster(data.frame("G.id" = result$data$G.id, result$lin.adj))) {
-        warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
+    if (small.strata == FALSE) {
+      result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
+      if (is.null(result$data$Ng)) {
+        warning("Warning: Cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
       }
+      if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
+        stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+      }
+      if (!is.null(result$lin.adj)) {
+        if (!check.cluster(data.frame("G.id" = result$data$G.id, result$lin.adj))) {
+          warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
+        }
+      }
+    } else {
+      result <- res.creg.ss(Y, S, D, G.id, Ng, X, HC1)
     }
   }
   return(result)

@@ -440,8 +440,8 @@ var_hat_mult <- function(Y, D, X, S, fit) {
         2 * v_hat_2_10
       V[d] <- V_d
     }
-  } else{
-    
+  } else {
+
   }
 
   return(V)
@@ -1157,28 +1157,26 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) {
   pi_hat_0 <- pi.hat.sreg(S, D, vector = TRUE, inverse = TRUE)[1]
   V <- numeric(max(D))
 
-  if(!is.null(X))
-  {
-  # Center X and compute the augmented outcome Y_a
-  X_bar <- colMeans(X)
-  X_dem <- sweep(as.matrix(X), 2, X_bar)
-  }else{
+  if (!is.null(X)) {
+    # Center X and compute the augmented outcome Y_a
+    X_bar <- colMeans(X)
+    X_dem <- sweep(as.matrix(X), 2, X_bar)
+  } else {
     X_dem <- 0
   }
   for (d in 1:max(D))
   {
-    if(!is.null(X))
-    {
+    if (!is.null(X)) {
       beta_hat <- fit$beta.hat[d, ]
       Y_a <- Y - X_dem %*% beta_hat # check carefully here and in the cluster function what is wrong with the transpose sign?
-    }else{
+    } else {
       beta_hat <- 0
       Y_a <- Y
     }
     # print(beta_hat)
     # print(X_dem)
     # Y_a     <- Y - beta_hat * X_dem
-    #Y_a <- Y - X_dem %*% beta_hat # check carefully here and in the cluster function what is wrong with the transpose sign?
+    # Y_a <- Y - X_dem %*% beta_hat # check carefully here and in the cluster function what is wrong with the transpose sign?
 
     l <- sum(D == d) / n
     q <- sum(D == 0) / n
@@ -1246,26 +1244,25 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) {
     v_hat_2_10 <- rho_hat_10 - Gamma_hat_1 * Gamma_hat_0
 
     # Final V
-    if(!is.null(X))
-    {
-      if(HC1 == TRUE){
+    if (!is.null(X)) {
+      if (HC1 == TRUE) {
         beta_hat <- fit$beta.hat[d, ]
-        K = length(beta_hat) + 1
-            V_d <- (1 / pi_hat) * (n / (n - K)) * v_hat_1_1 +
-      (1 / pi_hat_0) * (n / (n - K)) * v_hat_1_0 +
-      v_hat_2_11 + v_hat_2_00 -
-      2 * v_hat_2_10
-      }else{
-          V_d <- (1 / pi_hat) * v_hat_1_1 +
-      (1 / pi_hat_0) * v_hat_1_0 +
-      v_hat_2_11 + v_hat_2_00 -
-      2 * v_hat_2_10
+        K <- length(beta_hat) + 1
+        V_d <- (1 / pi_hat) * (n / (n - K)) * v_hat_1_1 +
+          (1 / pi_hat_0) * (n / (n - K)) * v_hat_1_0 +
+          v_hat_2_11 + v_hat_2_00 -
+          2 * v_hat_2_10
+      } else {
+        V_d <- (1 / pi_hat) * v_hat_1_1 +
+          (1 / pi_hat_0) * v_hat_1_0 +
+          v_hat_2_11 + v_hat_2_00 -
+          2 * v_hat_2_10
       }
-    }else{
-       V_d <- (1 / pi_hat) * v_hat_1_1 +
-      (1 / pi_hat_0) * v_hat_1_0 +
-      v_hat_2_11 + v_hat_2_00 -
-      2 * v_hat_2_10
+    } else {
+      V_d <- (1 / pi_hat) * v_hat_1_1 +
+        (1 / pi_hat_0) * v_hat_1_0 +
+        v_hat_2_11 + v_hat_2_00 -
+        2 * v_hat_2_10
     }
     V[d] <- V_d
   }
@@ -1273,86 +1270,85 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) {
   return(V)
 }
 tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
-  if(!is.null(X))
-  {
-  tau.hat <- numeric(max(D))
-  beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
+  if (!is.null(X)) {
+    tau.hat <- numeric(max(D))
+    beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
 
-  working.df <- data.frame(Y, S, D, G.id, Ng, X)
-  Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
+    working.df <- data.frame(Y, S, D, G.id, Ng, X)
+    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
 
-  cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", names(working.df)[6:ncol(working.df)])])
-  cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
-  # print(cl.lvl.data)
-  data <- cl.lvl.data
-  N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", names(working.df)[6:ncol(working.df)])])
+    cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
+    # print(cl.lvl.data)
+    data <- cl.lvl.data
+    N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
 
-  for (d in 1:max(D))
-  {
-    # Compute averages for treated and control within each stratum
-    agg_data <- data %>%
-      group_split(S) %>%
-      map_dfr(~ {
-        df <- .
-        list(
-          S = df$S[1],
-          Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
-          Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
-          X_treated = list(colMeans(df[df$D == d, grep("^x_", names(df)), drop = FALSE])), # mean value among treated in each stratum
-          X_control = list(colMeans(df[df$D == 0, grep("^x_", names(df)), drop = FALSE])), # mean value among control in each stratum
-          k = nrow(df), # Total units in stratum (should be 2)
-          l = sum(df$D == d),
-          q = sum(df$D == 0)
-        )
-      })
+    for (d in 1:max(D))
+    {
+      # Compute averages for treated and control within each stratum
+      agg_data <- data %>%
+        group_split(S) %>%
+        map_dfr(~ {
+          df <- .
+          list(
+            S = df$S[1],
+            Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
+            Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
+            X_treated = list(colMeans(df[df$D == d, grep("^x_", names(df)), drop = FALSE])), # mean value among treated in each stratum
+            X_control = list(colMeans(df[df$D == 0, grep("^x_", names(df)), drop = FALSE])), # mean value among control in each stratum
+            k = nrow(df), # Total units in stratum (should be 2)
+            l = sum(df$D == d),
+            q = sum(df$D == 0)
+          )
+        })
 
-    # Create Y_diff vector
-    Y_diff <- with(agg_data, Y_treated - Y_control)
+      # Create Y_diff vector
+      Y_diff <- with(agg_data, Y_treated - Y_control)
 
-    # Compute differences correctly: row-wise for each pair of treated/control vectors
-    X_diff_mat <- map2(
-      agg_data$X_treated, agg_data$X_control,
-      ~ .x - .y
-    ) %>%
-      do.call(rbind, .)
+      # Compute differences correctly: row-wise for each pair of treated/control vectors
+      X_diff_mat <- map2(
+        agg_data$X_treated, agg_data$X_control,
+        ~ .x - .y
+      ) %>%
+        do.call(rbind, .)
 
-    # print(Y_diff)
-    # print(X_diff_mat)
-    data_decomp <- as.data.frame(agg_data)
-    X_treated_mat <- do.call(rbind, data_decomp$X_treated)
-    X_control_mat <- do.call(rbind, data_decomp$X_control)
+      # print(Y_diff)
+      # print(X_diff_mat)
+      data_decomp <- as.data.frame(agg_data)
+      X_treated_mat <- do.call(rbind, data_decomp$X_treated)
+      X_control_mat <- do.call(rbind, data_decomp$X_control)
 
-    # run the linear model for covariate adjustments
-    lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
-    # print(summary(lm_model))
-    beta_hat <- unname(lm_model$coefficients[-1])
+      # run the linear model for covariate adjustments
+      lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
+      # print(summary(lm_model))
+      beta_hat <- unname(lm_model$coefficients[-1])
 
-    X_mat <- as.matrix(data[, grepl("^x_", names(data))])
+      X_mat <- as.matrix(data[, grepl("^x_", names(data))])
 
-    X_bar <- colMeans(X_mat)
-    X_dem <- sweep(X_mat, 2, X_bar)
+      X_bar <- colMeans(X_mat)
+      X_dem <- sweep(X_mat, 2, X_bar)
 
-    # X_bar <- mean(data$X)
-    # X_dem <- data$X - X_bar
-    # adjusted estimator:
-    G_1 <- sum((data$D == d) * data$Ng)
-    G_0 <- sum((data$D == 0) * data$Ng)
-    # print(X_dem)
-    # print(beta_hat)
-    # print(as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
-    #                             colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0)))
-    theta_hat_adj <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
-      sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng) -
-      as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
-        colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0) %*% beta_hat)
+      # X_bar <- mean(data$X)
+      # X_dem <- data$X - X_bar
+      # adjusted estimator:
+      G_1 <- sum((data$D == d) * data$Ng)
+      G_0 <- sum((data$D == 0) * data$Ng)
+      # print(X_dem)
+      # print(beta_hat)
+      # print(as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
+      #                             colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0)))
+      theta_hat_adj <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
+        sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng) -
+        as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
+          colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0) %*% beta_hat)
 
 
-    # (sum(X_dem * (data$D == d)) / sum((data$D == d) * data$Ng) -
-    # sum(X_dem * (data$D == 0)) / sum((data$D == 0) * data$Ng)) * beta_hat
-    tau.hat[d] <- theta_hat_adj
-    beta.hat[d, ] <- beta_hat
-  }
-  }else{
+      # (sum(X_dem * (data$D == d)) / sum((data$D == d) * data$Ng) -
+      # sum(X_dem * (data$D == 0)) / sum((data$D == 0) * data$Ng)) * beta_hat
+      tau.hat[d] <- theta_hat_adj
+      beta.hat[d, ] <- beta_hat
+    }
+  } else {
     tau.hat <- numeric(max(D))
     working.df <- data.frame(Y, S, D, G.id, Ng)
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
@@ -1363,66 +1359,66 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
     data <- cl.lvl.data
     N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
 
-  for (d in 1:max(D))
-  {
-    # Compute averages for treated and control within each stratum
-    agg_data <- data %>%
-      group_split(S) %>%
-      map_dfr(~ {
-        df <- .
-        list(
-          S = df$S[1],
-          Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
-          Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
-          k = nrow(df), # Total units in stratum (should be 2)
-          l = sum(df$D == d),
-          q = sum(df$D == 0)
-        )
-      })
+    for (d in 1:max(D))
+    {
+      # Compute averages for treated and control within each stratum
+      agg_data <- data %>%
+        group_split(S) %>%
+        map_dfr(~ {
+          df <- .
+          list(
+            S = df$S[1],
+            Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
+            Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
+            k = nrow(df), # Total units in stratum (should be 2)
+            l = sum(df$D == d),
+            q = sum(df$D == 0)
+          )
+        })
 
-    # Create Y_diff vector
-    Y_diff <- with(agg_data, Y_treated - Y_control)
+      # Create Y_diff vector
+      Y_diff <- with(agg_data, Y_treated - Y_control)
 
-    # print(Y_diff)
-    # print(X_diff_mat)
-    data_decomp <- as.data.frame(agg_data)
-  
+      # print(Y_diff)
+      # print(X_diff_mat)
+      data_decomp <- as.data.frame(agg_data)
 
-    # run the linear model for covariate adjustments
-    # print(summary(lm_model))
-    # print(summary(lm_model))
-    beta_hat <- 0
 
-    # X_bar <- mean(data$X)
-    # X_dem <- data$X - X_bar
-    # adjusted estimator:
-    G_1 <- sum((data$D == d) * data$Ng)
-    G_0 <- sum((data$D == 0) * data$Ng)
-    # print(X_dem)
-    # print(beta_hat)
-    # print(as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
-    #                             colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0)))
-    theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
-      sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng)
+      # run the linear model for covariate adjustments
+      # print(summary(lm_model))
+      # print(summary(lm_model))
+      beta_hat <- 0
 
-    tau.hat[d] <- theta_hat
-    beta.hat   <- NULL
+      # X_bar <- mean(data$X)
+      # X_dem <- data$X - X_bar
+      # adjusted estimator:
+      G_1 <- sum((data$D == d) * data$Ng)
+      G_0 <- sum((data$D == 0) * data$Ng)
+      # print(X_dem)
+      # print(beta_hat)
+      # print(as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
+      #                             colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0)))
+      theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
+        sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng)
+
+      tau.hat[d] <- theta_hat
+      beta.hat <- NULL
+    }
   }
-  }
-    ret_list <- list(
+  ret_list <- list(
     tau.hat = tau.hat,
     beta.hat = beta.hat
   )
-  
+
   return(ret_list)
 }
-as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE) {
+as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE) {
   n <- max(S)
-  if(!is.null(X)){
+  if (!is.null(X)) {
     working.df <- data.frame(Y, S, D, G.id, Ng, X)
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
     cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", names(working.df)[6:ncol(working.df)])])
-  }else{
+  } else {
     working.df <- data.frame(Y, S, D, G.id, Ng)
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
     cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")])
@@ -1431,7 +1427,7 @@ as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
   data <- cl.lvl.data
   N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
   # n = number of blocks
-  if(!is.null(X)){
+  if (!is.null(X)) {
     X_mat <- as.matrix(data[, grepl("^x_", names(data))])
     X_bar <- colMeans(X_mat)
     X_dem <- sweep(X_mat, 2, X_bar)
@@ -1442,13 +1438,13 @@ as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
 
   for (d in 1:max(data$D))
   {
-  if(!is.null(X)){
-    beta_hat <- fit$beta.hat[d, ]
-    Y_a <- (data$Ng / mean(data$Ng)) * data$Y.bar - X_dem %*% beta_hat * (1 / N.bar.G)
-  }else{
-    beta_hat <- 0
-    Y_a <- (data$Ng / mean(data$Ng)) * data$Y.bar
-  }
+    if (!is.null(X)) {
+      beta_hat <- fit$beta.hat[d, ]
+      Y_a <- (data$Ng / mean(data$Ng)) * data$Y.bar - X_dem %*% beta_hat * (1 / N.bar.G)
+    } else {
+      beta_hat <- 0
+      Y_a <- (data$Ng / mean(data$Ng)) * data$Y.bar
+    }
     l <- sum(data$D == d) / n
     q <- sum(data$D == 0) / n
     # print(l)
@@ -1459,7 +1455,7 @@ as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
     Gamma_hat_0 <- sum(Y_a[data$D == 0]) * (1 / sum(data$D == 0))
 
     # Precompute sums of Y_a for treated & untreated in each block
-    sums_treated   <- tapply(Y_a * (data$D == d), data$S, sum)
+    sums_treated <- tapply(Y_a * (data$D == d), data$S, sum)
     sums_untreated <- tapply(Y_a * (data$D == 0), data$S, sum)
 
 
@@ -1509,44 +1505,41 @@ as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
 
     v_hat_2_10 <- rho_hat_10 - Gamma_hat_1 * Gamma_hat_0
 
-        # Final V
-    if(!is.null(X))
-    {
-      if(HC1 == TRUE){
+    # Final V
+    if (!is.null(X)) {
+      if (HC1 == TRUE) {
         beta_hat <- fit$beta.hat[d, ]
-        K = length(beta_hat) + 1
-            V_d <- (1 / pi_hat) * (n / (n - K)) * v_hat_1_1 +
-      (1 / pi_hat_0) * (n / (n - K)) * v_hat_1_0 +
-      v_hat_2_11 + v_hat_2_00 -
-      2 * v_hat_2_10
-      }else{
-          V_d <- (1 / pi_hat) * v_hat_1_1 +
-      (1 / pi_hat_0) * v_hat_1_0 +
-      v_hat_2_11 + v_hat_2_00 -
-      2 * v_hat_2_10
+        K <- length(beta_hat) + 1
+        V_d <- (1 / pi_hat) * (n / (n - K)) * v_hat_1_1 +
+          (1 / pi_hat_0) * (n / (n - K)) * v_hat_1_0 +
+          v_hat_2_11 + v_hat_2_00 -
+          2 * v_hat_2_10
+      } else {
+        V_d <- (1 / pi_hat) * v_hat_1_1 +
+          (1 / pi_hat_0) * v_hat_1_0 +
+          v_hat_2_11 + v_hat_2_00 -
+          2 * v_hat_2_10
       }
-    }else{
-       V_d <- (1 / pi_hat) * v_hat_1_1 +
-      (1 / pi_hat_0) * v_hat_1_0 +
-      v_hat_2_11 + v_hat_2_00 -
-      2 * v_hat_2_10
+    } else {
+      V_d <- (1 / pi_hat) * v_hat_1_1 +
+        (1 / pi_hat_0) * v_hat_1_0 +
+        v_hat_2_11 + v_hat_2_00 -
+        2 * v_hat_2_10
     }
-      V[d] <- V_d
-
-    }
-    return(V)    
+    V[d] <- V_d
+  }
+  return(V)
 }
 
 ### Build the master functions res.sreg.ss and res.creg.ss ###
-res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE)
-{
-  N = length(Y)
-  if(!is.null(X)) {
-    model   <- tau.hat.sreg.ss(Y, D, X, S)
+res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE) {
+  N <- length(Y)
+  if (!is.null(X)) {
+    model <- tau.hat.sreg.ss(Y, D, X, S)
     tau.est <- model$tau.hat
     var.est <- as.var.sreg.ss(Y, D, X, S, fit = model, HC1) / N
-    se.rob  <- sqrt(var.est)
-    t.stat  <- tau.est / se.rob
+    se.rob <- sqrt(var.est)
+    t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
@@ -1562,12 +1555,12 @@ res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE)
       "data"     = data.frame(Y, S, D, X),
       "lin.adj"  = data.frame(X)
     )
-  }else {
-    model   <- tau.hat.sreg.ss(Y, D, X = NULL, S)
+  } else {
+    model <- tau.hat.sreg.ss(Y, D, X = NULL, S)
     tau.est <- model$tau.hat
     var.est <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL, HC1) / N
-    se.rob  <- sqrt(var.est)
-    t.stat  <- tau.est / se.rob
+    se.rob <- sqrt(var.est)
+    t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
@@ -1587,15 +1580,14 @@ res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE)
   class(res.list) <- "sreg"
   return(res.list)
 }
-res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE)
-{
+res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE) {
   N <- length(unique(G.id))
-  if(!is.null(X)) {
-    model   <- tau.hat.creg.ss(Y, D, X, S, G.id, Ng)
+  if (!is.null(X)) {
+    model <- tau.hat.creg.ss(Y, D, X, S, G.id, Ng)
     tau.est <- model$tau.hat
     var.est <- as.var.creg.ss(Y, D, X, S, G.id, Ng, model, HC1) / N
-    se.rob  <- sqrt(var.est)
-    t.stat  <- tau.est / se.rob
+    se.rob <- sqrt(var.est)
+    t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
@@ -1612,12 +1604,12 @@ res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE)
       "data"     = data.frame(Y, S, D, G.id, Ng, X),
       "lin.adj"  = data.frame(X)
     )
-  }else{
-    model   <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)
+  } else {
+    model <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)
     tau.est <- model$tau.hat
     var.est <- as.var.creg.ss(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1) / N
-    se.rob  <- sqrt(var.est)
-    t.stat  <- tau.est / se.rob
+    se.rob <- sqrt(var.est)
+    t.stat <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob

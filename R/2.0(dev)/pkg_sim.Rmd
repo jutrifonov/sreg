@@ -111,7 +111,7 @@ data_raw <- dgp_po(n = n, theta.vec = tau_vec, n.treat = n.treat, gamma.vec = c(
 data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes) # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
 Y <- data_df$y
 D <- data_df$A
-X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2)
+X <- data.frame("x_1" = data_df$x_1)#, "x_2" = data_df$x_2)
 S <- data_df$block
 data_full <- data.frame(Y, D, X, S)
 N <- nrow(data_full)
@@ -127,8 +127,10 @@ sqrt(var_hat)
 tau_hat <- tau.hat.sreg.ss(Y, D, X = NULL, S)
 var_hat <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) / N
 
-agg_result <- res.sreg.ss(Y, S, D, X = X, HC1 = TRUE)
+agg_result <- res.sreg.ss(Y, S, D, X = NULL, HC1 = TRUE)
 agg_result
+
+sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X, HC1 = TRUE, small.strata = TRUE)
 
 
 nsim <- 1000
@@ -278,8 +280,9 @@ for (s in 1:nsim)
   tau_hat_1 <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)
   var_hat_1 <- as.var.creg.ss(Y, D, X = NULL, S, G.id, Ng) / G
 
-  agg_result <- res.creg.ss(Y, S, D, G.id, Ng, X = X, HC1 = FALSE)
+  agg_result <- res.creg.ss(Y, S, D, G.id, Ng, X = X, HC1 = TRUE)
   agg_result
+  sreg(Y, S, D, G.id, Ng, X, HC1 = FALSE, small.strata = TRUE)
   # tau_hat_old           <- theta_hat_mult_cl_old(Y, D, X, S, G.id, Ng)
   # var_hat_old           <- var_hat_mult_cl_old(Y, D, X, S, G.id, Ng, tau.hat = tau_hat_old) / G
   tau_hat_mtrx[s, ] <- tau_hat$tau.hat
