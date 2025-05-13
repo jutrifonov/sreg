@@ -1538,13 +1538,13 @@ as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
 }
 
 ### Build the master functions res.sreg.ss and res.creg.ss ###
-res.sreg.ss <- function(Y, S, D, X)
+res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE)
 {
   N = length(Y)
   if(!is.null(X)) {
     model   <- tau.hat.sreg.ss(Y, D, X, S)
     tau.est <- model$tau.hat
-    var.est <- as.var.sreg.ss(Y, D, X, S, fit = model) / N
+    var.est <- as.var.sreg.ss(Y, D, X, S, fit = model, HC1) / N
     se.rob  <- sqrt(var.est)
     t.stat  <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
@@ -1565,7 +1565,7 @@ res.sreg.ss <- function(Y, S, D, X)
   }else {
     model   <- tau.hat.sreg.ss(Y, D, X = NULL, S)
     tau.est <- model$tau.hat
-    var.est <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL) / N
+    var.est <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL, HC1) / N
     se.rob  <- sqrt(var.est)
     t.stat  <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
@@ -1587,13 +1587,13 @@ res.sreg.ss <- function(Y, S, D, X)
   class(res.list) <- "sreg"
   return(res.list)
 }
-res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL)
+res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE)
 {
   N <- length(unique(G.id))
   if(!is.null(X)) {
     model   <- tau.hat.creg.ss(Y, D, X, S, G.id, Ng)
     tau.est <- model$tau.hat
-    var.est <- as.var.creg.ss(Y, D, X, S, G.id, Ng, model) / N
+    var.est <- as.var.creg.ss(Y, D, X, S, G.id, Ng, model, HC1) / N
     se.rob  <- sqrt(var.est)
     t.stat  <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
@@ -1615,7 +1615,7 @@ res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL)
   }else{
     model   <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)
     tau.est <- model$tau.hat
-    var.est <- as.var.creg.ss(Y, D, X = NULL, S, G.id, Ng, fit = NULL) / N
+    var.est <- as.var.creg.ss(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1) / N
     se.rob  <- sqrt(var.est)
     t.stat  <- tau.est / se.rob
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))

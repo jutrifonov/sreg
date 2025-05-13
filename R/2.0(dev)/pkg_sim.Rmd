@@ -127,7 +127,7 @@ sqrt(var_hat)
 tau_hat <- tau.hat.sreg.ss(Y, D, X = NULL, S)
 var_hat <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) / N
 
-agg_result <- res.sreg.ss(Y, S, D, X = NULL)
+agg_result <- res.sreg.ss(Y, S, D, X = X, HC1 = TRUE)
 agg_result
 
 
@@ -264,7 +264,7 @@ for (s in 1:nsim)
   data_cl <- data.frame("Y" = proba$Y, "D" = proba$D, proba$X, "S" = proba$S, "Ng" = proba$Ng, "G.id" = proba$G.id)
   Y <- data_cl$Y
   D <- data_cl$D
-  X <- data.frame("x_1" = data_cl$x_1)#, 'x_2' = data_cl$x_2)
+  X <- data.frame("x_1" = data_cl$x_1, 'x_2' = data_cl$x_2)
   S <- data_cl$S
   G.id <- data_cl$G.id
   Ng <- data_cl$Ng
@@ -278,7 +278,7 @@ for (s in 1:nsim)
   tau_hat_1 <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)
   var_hat_1 <- as.var.creg.ss(Y, D, X = NULL, S, G.id, Ng) / G
 
-  agg_result <- res.creg.ss(Y, S, D, G.id, Ng, X)
+  agg_result <- res.creg.ss(Y, S, D, G.id, Ng, X = X, HC1 = FALSE)
   agg_result
   # tau_hat_old           <- theta_hat_mult_cl_old(Y, D, X, S, G.id, Ng)
   # var_hat_old           <- var_hat_mult_cl_old(Y, D, X, S, G.id, Ng, tau.hat = tau_hat_old) / G
