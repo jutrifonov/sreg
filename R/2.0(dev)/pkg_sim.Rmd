@@ -122,9 +122,10 @@ var_hat_vec   <- var_hat_mult(Y, D, X, S, theta_hat_vec) / N
 # Using the aggregated master functions to test:
 tau_hat <- tau.hat.sreg.ss(Y, D, X, S)
 var_hat <- as.var.sreg.ss(Y, D, X, S, fit = tau_hat) / N
+var_hat <- as.var.sreg.ss(Y, D, X, S, fit = tau_hat, HC1 = TRUE) / N
 sqrt(var_hat)
 tau_hat <- tau.hat.sreg.ss(Y, D, X = NULL, S)
-var_hat <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL) / N
+var_hat <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) / N
 
 agg_result <- res.sreg.ss(Y, S, D, X = NULL)
 agg_result
@@ -235,7 +236,7 @@ agg_data <- agg_data %>%
 ```
 
 ```{r}
-n_treat <- 3
+n_treat <- 3 
 nsim <- 10000
 tau_vec <- c(0.2, 1.2, 0.7)
 gamma_vec <- c(0.4, 0.2, 1)
@@ -273,7 +274,7 @@ for (s in 1:nsim)
   var_hat <- var_hat_mult_cl(Y, D, X, S, G.id, Ng, fit = tau_hat) / G
   
   tau_hat_1 <- tau.hat.creg.ss(Y, D, X, S, G.id, Ng)
-  var_hat_1 <- as.var.creg.ss(Y, D, X, S, G.id, Ng, tau_hat_1) / G
+  var_hat_1 <- as.var.creg.ss(Y, D, X, S, G.id, Ng, tau_hat_1, HC1 = FALSE) / G
   tau_hat_1 <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)
   var_hat_1 <- as.var.creg.ss(Y, D, X = NULL, S, G.id, Ng) / G
 

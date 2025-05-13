@@ -1147,9 +1147,11 @@ tau.hat.sreg.ss <- function(Y, D, X = NULL, S) {
   )
   return(ret_list)
 }
-as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL) {
+as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) {
   # n = number of blocks
   n <- max(S)
+  # N = number of observations
+  N <- length(Y)
 
   pi_hat_vec <- pi.hat.sreg(S, D, vector = TRUE)
   pi_hat_0 <- pi.hat.sreg(S, D, vector = TRUE, inverse = TRUE)[1]
@@ -1244,10 +1246,27 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL) {
     v_hat_2_10 <- rho_hat_10 - Gamma_hat_1 * Gamma_hat_0
 
     # Final V
-    V_d <- (1 / pi_hat) * v_hat_1_1 +
+    if(!is.null(X))
+    {
+      if(HC1 == TRUE){
+        beta_hat <- fit$beta.hat[d, ]
+        K = length(beta_hat) + 1
+            V_d <- (1 / pi_hat) * (n / (n - K)) * v_hat_1_1 +
+      (1 / pi_hat_0) * (n / (n - K)) * v_hat_1_0 +
+      v_hat_2_11 + v_hat_2_00 -
+      2 * v_hat_2_10
+      }else{
+          V_d <- (1 / pi_hat) * v_hat_1_1 +
       (1 / pi_hat_0) * v_hat_1_0 +
       v_hat_2_11 + v_hat_2_00 -
       2 * v_hat_2_10
+      }
+    }else{
+       V_d <- (1 / pi_hat) * v_hat_1_1 +
+      (1 / pi_hat_0) * v_hat_1_0 +
+      v_hat_2_11 + v_hat_2_00 -
+      2 * v_hat_2_10
+    }
     V[d] <- V_d
   }
 
@@ -1305,7 +1324,6 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
 
     # run the linear model for covariate adjustments
     lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
-    # print(summary(lm_model))
     # print(summary(lm_model))
     beta_hat <- unname(lm_model$coefficients[-1])
 
@@ -1398,7 +1416,7 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
   
   return(ret_list)
 }
-as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL) {
+as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE) {
   n <- max(S)
   if(!is.null(X)){
     working.df <- data.frame(Y, S, D, G.id, Ng, X)
@@ -1491,13 +1509,30 @@ as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL) {
 
     v_hat_2_10 <- rho_hat_10 - Gamma_hat_1 * Gamma_hat_0
 
+        # Final V
+    if(!is.null(X))
+    {
+      if(HC1 == TRUE){
+        beta_hat <- fit$beta.hat[d, ]
+        K = length(beta_hat) + 1
+            V_d <- (1 / pi_hat) * (n / (n - K)) * v_hat_1_1 +
+      (1 / pi_hat_0) * (n / (n - K)) * v_hat_1_0 +
+      v_hat_2_11 + v_hat_2_00 -
+      2 * v_hat_2_10
+      }else{
+          V_d <- (1 / pi_hat) * v_hat_1_1 +
+      (1 / pi_hat_0) * v_hat_1_0 +
+      v_hat_2_11 + v_hat_2_00 -
+      2 * v_hat_2_10
+      }
+    }else{
+       V_d <- (1 / pi_hat) * v_hat_1_1 +
+      (1 / pi_hat_0) * v_hat_1_0 +
+      v_hat_2_11 + v_hat_2_00 -
+      2 * v_hat_2_10
+    }
+      V[d] <- V_d
 
-    # Final V
-    V_d <- (1 / pi_hat) * v_hat_1_1 +
-        (1 / pi_hat_0) * v_hat_1_0 +
-        v_hat_2_11 + v_hat_2_00 -
-        2 * v_hat_2_10
-    V[d] <- V_d
     }
     return(V)    
 }
