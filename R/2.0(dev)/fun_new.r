@@ -1502,110 +1502,104 @@ as.var.creg.ss  <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL) {
     return(V)    
 }
 
-var_hat_mult_cl <- function(Y, D, X, S, G.id, Ng, fit) {
-  n <- max(S)
-
-  working.df <- data.frame(Y, S, D, G.id, Ng, X)
-  Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-  # print(Y.bar.g)
-  cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", names(working.df)[6:ncol(working.df)])])
-  cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
-  data <- cl.lvl.data
-  N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
-  # n = number of blocks
-
-  # print(n)
-
-  # Center X and compute the augmented outcome Y_a
-  # X_bar   <- mean(data$X)
-  # X_dem   <- data$X - X_bar
-
-  X_mat <- as.matrix(data[, grepl("^x_", names(data))])
-  X_bar <- colMeans(X_mat)
-  X_dem <- sweep(X_mat, 2, X_bar)
-
-  pi_hat_vec <- pi.hat.creg(data$S, data$D, vector = TRUE)
-  pi_hat_0 <- pi.hat.creg(data$S, data$D, vector = TRUE, inverse = TRUE)[1]
-
-
-  V <- numeric(max(data$D))
-
-  for (d in 1:max(data$D))
-  {
-    beta_hat <- fit$beta.hat[d, ]
-    # print(X_dem)
-    # print(beta_hat)
-    Y_a <- (data$Ng / mean(data$Ng)) * data$Y.bar - X_dem %*% beta_hat * (1 / N.bar.G)
-    # Y_a <- data$Y.bar - (X_dem %*% beta_hat) / data$Ng
-    l <- sum(data$D == d) / n
-    q <- sum(data$D == 0) / n
-    # print(l)
-    # print(q)
-    pi_hat <- pi_hat_vec[d]
-    # Compute Gamma_hat_1 and Gamma_hat_0
-    Gamma_hat_1 <- sum(Y_a[data$D == d]) * (1 / sum(data$D == d))
-    Gamma_hat_0 <- sum(Y_a[data$D == 0]) * (1 / sum(data$D == 0))
-
-    # Precompute sums of Y_a for treated & untreated in each block
-    sums_treated <- tapply(Y_a * (data$D == d), data$S, sum)
-    sums_untreated <- tapply(Y_a * (data$D == 0), data$S, sum)
-
-
-    #----------------------------------------
-    # Compute rho_hat_00 and rho_hat_11
-    # We consider pairs of adjacent blocks: (1,2), (3,4), ...
-    #----------------------------------------
-    # Indices of pairs
-    idx1 <- seq(1, n, 2)
-    idx2 <- seq(2, n, 2)
-
-    # zeta_0 = sum of products of untreated across pairs of blocks
-    zeta_0 <- sum(sums_untreated[idx1] * sums_untreated[idx2]) / (q^2)
-
-    # zeta_1 = sum of products of treated across pairs of blocks
-    zeta_1 <- sum(sums_treated[idx1] * sums_treated[idx2]) / (l^2)
-
-    # Multiply each by (2/n) to get rho_00 and rho_11
-    rho_hat_00 <- zeta_0 * (2 / n)
-    rho_hat_11 <- zeta_1 * (2 / n)
-
-    #----------------------------------------
-    # Compute rho_hat_10
-    # sum_rho_10 = sum over j of ( (sum of treated)*(sum of untreated) / (l*(k-l)) )
-    # Then divide by n
-    #----------------------------------------
-    sum_rho_10 <- sum((sums_treated * sums_untreated) / (l * q))
-    rho_hat_10 <- sum_rho_10 / n
-
-    #----------------------------------------
-    # Compute sigma_hat_1 and sigma_hat_0
-    #----------------------------------------
-    sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (data$D == d)) * (1 / (n * l))
-    sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (data$D == 0)) * (1 / (n * q))
-
-    #----------------------------------------
-    # Compute the final variance components
-    #----------------------------------------
-    # v_hat_1_1 and v_hat_1_0
-    v_hat_1_1 <- sigma_hat_1 - (rho_hat_11 - Gamma_hat_1^2)
-    v_hat_1_0 <- sigma_hat_0 - (rho_hat_00 - Gamma_hat_0^2)
-
-    # v_hat_2_11, v_hat_2_00, v_hat_2_10
-    v_hat_2_11 <- rho_hat_11 - Gamma_hat_1 * Gamma_hat_1
-
-    v_hat_2_00 <- rho_hat_00 - Gamma_hat_0 * Gamma_hat_0
-
-    v_hat_2_10 <- rho_hat_10 - Gamma_hat_1 * Gamma_hat_0
-
-
-    # Final V
-    V_d <- (1 / pi_hat) * v_hat_1_1 +
-      (1 / pi_hat_0) * v_hat_1_0 +
-      v_hat_2_11 + v_hat_2_00 -
-      2 * v_hat_2_10
-    V[d] <- V_d
+### Build the master functions res.sreg.ss and res.creg.ss ###
+res.sreg.ss <- function(Y, S, D, X)
+{
+  N = length(Y)
+  if(!is.null(X)) {
+    model   <- tau.hat.sreg.ss(Y, D, X, S)
+    tau.est <- model$tau.hat
+    var.est <- as.var.sreg.ss(Y, D, X, S, fit = model) / N
+    se.rob  <- sqrt(var.est)
+    t.stat  <- tau.est / se.rob
+    p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
+    CI.left <- tau.est - qnorm(0.975) * se.rob
+    CI.right <- tau.est + qnorm(0.975) * se.rob
+    res.list <- list(
+      "tau.hat"  = tau.est,
+      "se.rob"   = se.rob,
+      "t.stat"   = t.stat,
+      "p.value"  = p.value,
+      "as.CI"    = c(CI.left, CI.right),
+      "beta.hat" = model$beta.hat,
+      "CI.left"  = CI.left,
+      "CI.right" = CI.right,
+      "data"     = data.frame(Y, S, D, X),
+      "lin.adj"  = data.frame(X)
+    )
+  }else {
+    model   <- tau.hat.sreg.ss(Y, D, X = NULL, S)
+    tau.est <- model$tau.hat
+    var.est <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL) / N
+    se.rob  <- sqrt(var.est)
+    t.stat  <- tau.est / se.rob
+    p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
+    CI.left <- tau.est - qnorm(0.975) * se.rob
+    CI.right <- tau.est + qnorm(0.975) * se.rob
+    res.list <- list(
+      "tau.hat"  = tau.est,
+      "se.rob"   = se.rob,
+      "t.stat"   = t.stat,
+      "p.value"  = p.value,
+      "as.CI"    = c(CI.left, CI.right),
+      "beta.hat" = NULL,
+      "CI.left"  = CI.left,
+      "CI.right" = CI.right,
+      "data"     = data.frame(Y, S, D),
+      "lin.adj"  = NULL
+    )
   }
-
-  return(V)
+  class(res.list) <- "sreg"
+  return(res.list)
 }
+res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL)
+{
+  N <- length(unique(G.id))
+  if(!is.null(X)) {
+    model   <- tau.hat.creg.ss(Y, D, X, S, G.id, Ng)
+    tau.est <- model$tau.hat
+    var.est <- as.var.creg.ss(Y, D, X, S, G.id, Ng, model) / N
+    se.rob  <- sqrt(var.est)
+    t.stat  <- tau.est / se.rob
+    p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
+    CI.left <- tau.est - qnorm(0.975) * se.rob
+    CI.right <- tau.est + qnorm(0.975) * se.rob
 
+    res.list <- list(
+      "tau.hat"  = tau.est,
+      "se.rob"   = se.rob,
+      "t.stat"   = t.stat,
+      "p.value"  = p.value,
+      "as.CI"    = c(CI.left, CI.right),
+      "beta.hat" = model$beta.hat,
+      "CI.left"  = CI.left,
+      "CI.right" = CI.right,
+      "data"     = data.frame(Y, S, D, G.id, Ng, X),
+      "lin.adj"  = data.frame(X)
+    )
+  }else{
+    model   <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)
+    tau.est <- model$tau.hat
+    var.est <- as.var.creg.ss(Y, D, X = NULL, S, G.id, Ng, fit = NULL) / N
+    se.rob  <- sqrt(var.est)
+    t.stat  <- tau.est / se.rob
+    p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
+    CI.left <- tau.est - qnorm(0.975) * se.rob
+    CI.right <- tau.est + qnorm(0.975) * se.rob
+
+    res.list <- list(
+      "tau.hat"  = tau.est,
+      "se.rob"   = se.rob,
+      "t.stat"   = t.stat,
+      "p.value"  = p.value,
+      "as.CI"    = c(CI.left, CI.right),
+      "beta.hat" = NULL,
+      "CI.left"  = CI.left,
+      "CI.right" = CI.right,
+      "data"     = data.frame(Y, S, D, G.id, Ng),
+      "lin.adj"  = NULL
+    )
+  }
+  class(res.list) <- "sreg"
+  return(res.list)
+}
