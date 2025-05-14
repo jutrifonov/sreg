@@ -285,7 +285,7 @@ for (s in 1:nsim)
   agg_result <- res.creg.ss(Y, S, D, G.id, Ng, X = X, HC1 = TRUE)
   head(agg_result$lin.adj)
   !check.cluster(data.frame("G.id" = agg_result$data$G.id, agg_result$lin.adj))
-  sreg(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE, small.strata = TRUE)
+  sreg(Y, S, D, G.id, Ng, X = X, HC1 = TRUE, small.strata = TRUE)
   # tau_hat_old           <- theta_hat_mult_cl_old(Y, D, X, S, G.id, Ng)
   # var_hat_old           <- var_hat_mult_cl_old(Y, D, X, S, G.id, Ng, tau.hat = tau_hat_old) / G
   tau_hat_mtrx[s, ] <- tau_hat$tau.hat

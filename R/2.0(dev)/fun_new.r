@@ -1060,12 +1060,13 @@ tau.hat.sreg.ss <- function(Y, D, X = NULL, S) {
         group_split(S) %>%
         map_dfr(~ {
           df <- .
+          covariate_cols <- setdiff(names(df), c("Y", "D", "S"))
           list(
             S = df$S[1],
             Y_treated = mean(df$Y[df$D == d], na.rm = TRUE),
             Y_control = mean(df$Y[df$D == 0], na.rm = TRUE),
-            X_treated = list(colMeans(df[df$D == d, grep("^x_", names(df)), drop = FALSE])), # mean value among treated in each stratum
-            X_control = list(colMeans(df[df$D == 0, grep("^x_", names(df)), drop = FALSE])), # mean value among control in each stratum
+            X_treated = list(colMeans(df[df$D == d, covariate_cols, drop = FALSE], na.rm = TRUE)),
+            X_control = list(colMeans(df[df$D == 0, covariate_cols, drop = FALSE], na.rm = TRUE)),
             k = nrow(df),
             l = sum(df$D == d),
             q = sum(df$D == 0)
@@ -1095,7 +1096,8 @@ tau.hat.sreg.ss <- function(Y, D, X = NULL, S) {
       # print(summary(lm_model))
       beta_hat <- unname(lm_model$coefficients[-1])
 
-      X_mat <- as.matrix(data_full[, grepl("^x_", names(data_full))])
+      covariate_cols <- setdiff(names(data_full), c("Y", "D", "S"))
+      X_mat <- as.matrix(data_full[, covariate_cols, drop = FALSE])
       X_bar <- colMeans(X_mat)
       X_dem <- sweep(X_mat, 2, X_bar)
 
