@@ -267,10 +267,12 @@ for (s in 1:nsim)
   Y <- data_cl$Y
   D <- data_cl$D
   X <- data.frame("x_1" = data_cl$x_1, 'x_2' = data_cl$x_2)
+
   S <- data_cl$S
   G.id <- data_cl$G.id
   Ng <- data_cl$Ng
   data_full <- data.frame(Y, D, X, S, G.id, Ng)
+  #X <- data.frame("x_1" = data_full$x_1, 'x_2' = data_full$x_2)
 
   tau_hat <- theta_hat_mult_cl(Y, D, X, S, G.id, Ng)
   var_hat <- var_hat_mult_cl(Y, D, X, S, G.id, Ng, fit = tau_hat) / G
@@ -281,8 +283,9 @@ for (s in 1:nsim)
   var_hat_1 <- as.var.creg.ss(Y, D, X = NULL, S, G.id, Ng) / G
 
   agg_result <- res.creg.ss(Y, S, D, G.id, Ng, X = X, HC1 = TRUE)
-  agg_result
-  sreg(Y, S, D, G.id, Ng, X, HC1 = FALSE, small.strata = TRUE)
+  head(agg_result$lin.adj)
+  !check.cluster(data.frame("G.id" = agg_result$data$G.id, agg_result$lin.adj))
+  sreg(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE, small.strata = TRUE)
   # tau_hat_old           <- theta_hat_mult_cl_old(Y, D, X, S, G.id, Ng)
   # var_hat_old           <- var_hat_mult_cl_old(Y, D, X, S, G.id, Ng, tau.hat = tau_hat_old) / G
   tau_hat_mtrx[s, ] <- tau_hat$tau.hat

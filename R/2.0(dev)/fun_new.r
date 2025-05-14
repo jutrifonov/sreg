@@ -228,12 +228,13 @@ theta_hat_mult <- function(Y, D, X = NULL, S) {
         group_split(S) %>%
         map_dfr(~ {
           df <- .
+          covariate_cols <- setdiff(names(df), c("Y", "D", "S"))
           list(
             S = df$S[1],
             Y_treated = mean(df$Y[df$D == d], na.rm = TRUE),
             Y_control = mean(df$Y[df$D == 0], na.rm = TRUE),
-            X_treated = list(colMeans(df[df$D == d, grep("^x_", names(df)), drop = FALSE])), # mean value among treated in each stratum
-            X_control = list(colMeans(df[df$D == 0, grep("^x_", names(df)), drop = FALSE])), # mean value among control in each stratum
+            X_treated = list(colMeans(df[df$D == d, covariate_cols, drop = FALSE], na.rm = TRUE)),
+            X_control = list(colMeans(df[df$D == 0, covariate_cols, drop = FALSE], na.rm = TRUE)),
             k = nrow(df),
             l = sum(df$D == d),
             q = sum(df$D == 0)
@@ -1272,6 +1273,7 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) {
 tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
   if (!is.null(X)) {
     tau.hat <- numeric(max(D))
+  
     beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
 
     working.df <- data.frame(Y, S, D, G.id, Ng, X)
@@ -1290,12 +1292,13 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
         group_split(S) %>%
         map_dfr(~ {
           df <- .
+          covariate_cols <- setdiff(names(df), c("Y.bar", "G.id", "D", "S", "Ng"))
           list(
             S = df$S[1],
             Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
             Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
-            X_treated = list(colMeans(df[df$D == d, grep("^x_", names(df)), drop = FALSE])), # mean value among treated in each stratum
-            X_control = list(colMeans(df[df$D == 0, grep("^x_", names(df)), drop = FALSE])), # mean value among control in each stratum
+            X_treated = list(colMeans(df[df$D == d, covariate_cols, drop = FALSE], na.rm = TRUE)),
+            X_control = list(colMeans(df[df$D == 0, covariate_cols, drop = FALSE], na.rm = TRUE)),
             k = nrow(df), # Total units in stratum (should be 2)
             l = sum(df$D == d),
             q = sum(df$D == 0)
@@ -1323,7 +1326,8 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
       # print(summary(lm_model))
       beta_hat <- unname(lm_model$coefficients[-1])
 
-      X_mat <- as.matrix(data[, grepl("^x_", names(data))])
+      covariate_cols <- setdiff(names(data), c("Y.bar", "G.id", "D", "S", "Ng"))
+      X_mat <- as.matrix(data[, covariate_cols, drop = FALSE])
 
       X_bar <- colMeans(X_mat)
       X_dem <- sweep(X_mat, 2, X_bar)
@@ -1428,7 +1432,9 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE) 
   N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
   # n = number of blocks
   if (!is.null(X)) {
-    X_mat <- as.matrix(data[, grepl("^x_", names(data))])
+    #X_mat <- as.matrix(data[, grepl("^x_", names(data))])
+    covariate_cols <- setdiff(names(data), c("Y.bar", "G.id", "D", "S", "Ng"))
+    X_mat <- as.matrix(data[, covariate_cols, drop = FALSE])
     X_bar <- colMeans(X_mat)
     X_dem <- sweep(X_mat, 2, X_bar)
   }
@@ -1583,6 +1589,18 @@ res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE) {
 res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE) {
   N <- length(unique(G.id))
   if (!is.null(X)) {
+    df <- data.frame(G.id, X)
+    if (!check.cluster(df)) {
+      X.0 <- X
+      df.mod <- as.data.frame(df %>%
+        group_by(G.id) %>%
+        mutate(across(everything(), ~ if (is.numeric(.)) mean(.x, na.rm = TRUE) else .x)) %>%
+        ungroup())
+      X <- df.mod[, 2:ncol(df.mod)]
+    } else {
+      X.0 <- X
+    }
+    X <- data.frame(X)
     model <- tau.hat.creg.ss(Y, D, X, S, G.id, Ng)
     tau.est <- model$tau.hat
     var.est <- as.var.creg.ss(Y, D, X, S, G.id, Ng, model, HC1) / N
@@ -1601,8 +1619,8 @@ res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE) {
       "beta.hat" = model$beta.hat,
       "CI.left"  = CI.left,
       "CI.right" = CI.right,
-      "data"     = data.frame(Y, S, D, G.id, Ng, X),
-      "lin.adj"  = data.frame(X)
+      "data"     = data.frame(Y, S, D, G.id, Ng, X.0),
+      "lin.adj"  = data.frame(X.0)
     )
   } else {
     model <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)

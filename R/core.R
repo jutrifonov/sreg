@@ -206,6 +206,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
       }
     } else {
       result <- res.creg.ss(Y, S, D, G.id, Ng, X, HC1)
+      if (!is.null(result$lin.adj)) {
+        if (!check.cluster(data.frame("G.id" = result$data$G.id, result$lin.adj))) {
+          warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
+        }
+      }
     }
   }
   return(result)
