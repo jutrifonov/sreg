@@ -104,14 +104,14 @@ print(result_table)
 tau_vec <- c(0.5, 1.5)
 n.treat <- 2
 k <- 3
-n <- 1200
+n <- 24
 treat_sizes <- c(1, 1, 1)
 
 data_raw <- dgp_po(n = n, theta.vec = tau_vec, n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1)) # Checked that now it returns several X's
 data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes) # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
 Y <- data_df$y
 D <- data_df$A
-X <- data.frame("x_1" = data_df$x_1)#, "x_2" = data_df$x_2)
+X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2, 'bor' = rnorm(24, 2, 1), 'god' = rnorm(24, 3, 1), 'bro'= rnorm(24, 3, 1), 'bro1'= rnorm(24, 3, 1), 'bro2'= rnorm(24, 3, 1))
 S <- data_df$block
 data_full <- data.frame(Y, D, X, S)
 N <- nrow(data_full)
@@ -126,11 +126,12 @@ var_hat <- as.var.sreg.ss(Y, D, X, S, fit = tau_hat, HC1 = TRUE) / N
 sqrt(var_hat)
 tau_hat <- tau.hat.sreg.ss(Y, D, X = NULL, S)
 var_hat <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) / N
-
-agg_result <- res.sreg.ss(Y, S, D, X = NULL, HC1 = TRUE)
-agg_result
-
-sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X, HC1 = TRUE, small.strata = TRUE)
+X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2, 'bor' = rnorm(24, 2, 1), 'god' = rnorm(24, 3, 1), 'bro'= rnorm(24, 3, 1), 'bro1'= rnorm(24, 3, 1), 'bro2'= rnorm(24, 3, 1), 'bro3' = rnorm(24, 5, 2))
+agg_result <- res.sreg.ss(Y, S, D, X, HC1 = TRUE)
+agg_result$se.rob
+any(sapply(agg_result$beta.hat, function(x) any(is.na(x))))
+any(sapply(agg_result$se.rob, function(x) any(is.infinite(x))))
+sreg(Y, S, D, G.id = NULL, Ng = NULL, X, HC1 = TRUE, small.strata = TRUE)
 
 
 nsim <- 1000

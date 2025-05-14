@@ -183,11 +183,23 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         }
       }
       result <- res.sreg(Y, S, D, X, HC1)
-      if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
-        stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+      if (!is.null(result$lin.adj)) {
+        if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
+          stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+        }
+        if (any(sapply(result$se.rob, function(x) any(is.infinite(x))))) {
+          stop("Error: Variance estimate is not finite. This may be due to too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)), remove covariate adjustments, or try setting HC1 = FALSE.")        }
+         }
       }
-    } else {
+     else {
       result <- res.sreg.ss(Y, S, D, X, HC1)
+      if (!is.null(result$lin.adj)) {
+        if (any(sapply(result$beta.hat, function(x) any(is.na(x))))) {
+          stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+        }
+        if (any(sapply(result$se.rob, function(x) any(is.infinite(x))))) {
+          stop("Error: Variance estimate is not finite. This may be due to too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)), remove covariate adjustments, or try setting HC1 = FALSE.")        }
+      }
     }
   } else {
     check.cluster.lvl(G.id, S, D, Ng)
@@ -210,6 +222,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         if (!check.cluster(data.frame("G.id" = result$data$G.id, result$lin.adj))) {
           warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
         }
+        if (any(sapply(result$beta.hat, function(x) any(is.na(x))))) {
+          stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+        }
+        if (any(sapply(result$se.rob, function(x) any(is.infinite(x))))) {
+          stop("Error: Variance estimate is not finite. This may be due to too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)), remove covariate adjustments, or try setting HC1 = FALSE.")        }
       }
     }
   }
