@@ -101,17 +101,17 @@ print(result_table)
 ``` 
 
 ```{r}
-tau_vec <- c(0.5, 1.5)
+tau_vec <- c(0.5, 1.5) 
 n.treat <- 2
 k <- 3
-n <- 24
+n <- 900
 treat_sizes <- c(1, 1, 1)
 
 data_raw <- dgp_po(n = n, theta.vec = tau_vec, n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1)) # Checked that now it returns several X's
 data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes) # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
 Y <- data_df$y
 D <- data_df$A
-X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2, 'bor' = rnorm(24, 2, 1), 'god' = rnorm(24, 3, 1), 'bro'= rnorm(24, 3, 1), 'bro1'= rnorm(24, 3, 1), 'bro2'= rnorm(24, 3, 1))
+X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2)#, 'bor' = rnorm(24, 2, 1), 'god' = rnorm(24, 3, 1), 'bro'= rnorm(24, 3, 1), 'bro1'= rnorm(24, 3, 1), 'bro2'= rnorm(24, 3, 1))
 S <- data_df$block
 data_full <- data.frame(Y, D, X, S)
 N <- nrow(data_full)
@@ -126,13 +126,13 @@ var_hat <- as.var.sreg.ss(Y, D, X, S, fit = tau_hat, HC1 = TRUE) / N
 sqrt(var_hat)
 tau_hat <- tau.hat.sreg.ss(Y, D, X = NULL, S)
 var_hat <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) / N
-X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2, 'bor' = rnorm(24, 2, 1), 'god' = rnorm(24, 3, 1), 'bro'= rnorm(24, 3, 1), 'bro1'= rnorm(24, 3, 1), 'bro2'= rnorm(24, 3, 1), 'bro3' = rnorm(24, 5, 2))
+X <- data.frame("age" = data_df$x_1)#, "x_2" = data_df$x_2)#, 'bor' = rnorm(24, 2, 1), 'god' = rnorm(24, 3, 1), 'bro'= rnorm(24, 3, 1), 'bro1'= rnorm(24, 3, 1), 'bro2'= rnorm(24, 3, 1), 'bro3' = rnorm(24, 5, 2))
 agg_result <- res.sreg.ss(Y, S, D, X, HC1 = TRUE)
 agg_result$data
 any(sapply(agg_result$beta.hat, function(x) any(is.na(x))))
 any(sapply(agg_result$se.rob, function(x) any(is.infinite(x))))
-sreg(Y, S, D, G.id = NULL, Ng = NULL, X, HC1 = TRUE, small.strata = TRUE)
-
+abju <- sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = TRUE)
+abju$lin.adj
 
 nsim <- 1000
 n <- 1200
@@ -288,8 +288,10 @@ for (s in 1:nsim)
   as.var.creg.ss(Y, D, X, S, G.id, Ng = NULL, tau_hat_1, HC1 = FALSE) / G
   head(agg_result$lin.adj)
   !check.cluster(data.frame("G.id" = agg_result$data$G.id, agg_result$lin.adj))
-  X <- data.frame('Ng' = data_cl$Ng, 'x_1' = data_cl$x_1, 'x_2' = data_cl$x_2)
-sreg(Y, S, D, G.id, Ng = Ng, X = X, HC1 = TRUE, small.strata = TRUE)
+  X <- data.frame('Ng' = data_cl$Ng, 'x_2' = data_cl$x_2)
+  result <- sreg(Y, S = S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = TRUE)
+  result
+  result$small.strata
   # tau_hat_old           <- theta_hat_mult_cl_old(Y, D, X, S, G.id, Ng)
   # var_hat_old           <- var_hat_mult_cl_old(Y, D, X, S, G.id, Ng, tau.hat = tau_hat_old) / G
   tau_hat_mtrx[s, ] <- tau_hat$tau.hat
@@ -599,11 +601,12 @@ library("haven")
 #' ### Example 1. Simulated Data.
 data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
 Y <- data$Y
+
 S <- data$S
 D <- data$D
-X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+X <- data.frame("age" = data$x_1, "sex" = data$x_2)
 G.id <- data$G.id
 Ng <- data$Ng
 result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X)
-sreg(Y, S, D, G.id = G.id, Ng = NULL, X = X)
+sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X)
 print(result)

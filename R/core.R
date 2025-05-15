@@ -192,6 +192,9 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         }
       }
     } else {
+      if (is.null(S)) {
+        stop("Error: Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification.")
+      }
       result <- res.sreg.ss(Y, S, D, X, HC1)
       if (!is.null(result$lin.adj)) {
         if (any(sapply(result$beta.hat, function(x) any(is.na(x))))) {
@@ -218,6 +221,9 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         }
       }
     } else {
+      if (is.null(S)) {
+        stop("Error: Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification.")
+      }
       result <- res.creg.ss(Y, S, D, G.id, Ng, X, HC1)
       if (is.null(Ng)) {
         warning("Warning: Cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
@@ -235,6 +241,8 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
       }
     }
   }
+  result$small.strata <- small.strata
+  result$HC1 <- HC1
   return(result)
 }
 
