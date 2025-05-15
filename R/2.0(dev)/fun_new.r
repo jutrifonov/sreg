@@ -1275,17 +1275,30 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) {
 tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
   if (!is.null(X)) {
     tau.hat <- numeric(max(D))
-  
+
     beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
 
-    working.df <- data.frame(Y, S, D, G.id, Ng, X)
+    if (!is.null(Ng)) {
+      working.df <- data.frame(Y, S, D, G.id, Ng, X)
+    } else {
+      working.df <- data.frame(Y, S, D, G.id, X)
+      working.df <- working.df %>%
+        group_by(G.id) %>%
+        mutate(Ng = n()) %>%
+        ungroup() %>%
+        select(Y, S, D, G.id, Ng, all_of(names(X)))
+      working.df <- as.data.frame(working.df)
+    }
+
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
 
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", names(working.df)[6:ncol(working.df)])])
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng"))) ])
     cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
     # print(cl.lvl.data)
     data <- cl.lvl.data
     N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
+
+    covariate_cols <- names(X)
 
     for (d in 1:max(D))
     {
@@ -1294,7 +1307,7 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
         group_split(S) %>%
         map_dfr(~ {
           df <- .
-          covariate_cols <- setdiff(names(df), c("Y.bar", "G.id", "D", "S", "Ng"))
+          covariate_cols <- names(X)
           list(
             S = df$S[1],
             Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
@@ -1325,10 +1338,10 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
 
       # run the linear model for covariate adjustments
       lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
-      # print(summary(lm_model))
+      
       beta_hat <- unname(lm_model$coefficients[-1])
 
-      covariate_cols <- setdiff(names(data), c("Y.bar", "G.id", "D", "S", "Ng"))
+      covariate_cols <- names(X)
       X_mat <- as.matrix(data[, covariate_cols, drop = FALSE])
 
       X_bar <- colMeans(X_mat)
@@ -1356,7 +1369,19 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
     }
   } else {
     tau.hat <- numeric(max(D))
-    working.df <- data.frame(Y, S, D, G.id, Ng)
+
+    if (!is.null(Ng)) {
+      working.df <- data.frame(Y, S, D, G.id, Ng)
+    } else {
+      working.df <- data.frame(Y, S, D, G.id)
+      working.df <- working.df %>%
+        group_by(G.id) %>%
+        mutate(Ng = n()) %>%
+        ungroup() %>%
+        select(Y, S, D, G.id, Ng)
+      working.df <- as.data.frame(working.df)
+    }
+
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
 
     cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")])
@@ -1421,11 +1446,31 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
 as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE) {
   n <- max(S)
   if (!is.null(X)) {
-    working.df <- data.frame(Y, S, D, G.id, Ng, X)
+    if (!is.null(Ng)) {
+      working.df <- data.frame(Y, S, D, G.id, Ng, X)
+    } else {
+      working.df <- data.frame(Y, S, D, G.id, X)
+      working.df <- working.df %>%
+        group_by(G.id) %>%
+        mutate(Ng = n()) %>%
+        ungroup() %>%
+        select(Y, S, D, G.id, Ng, all_of(names(X)))
+      working.df <- as.data.frame(working.df)
+    }
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", names(working.df)[6:ncol(working.df)])])
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng"))) ])
   } else {
-    working.df <- data.frame(Y, S, D, G.id, Ng)
+    if (!is.null(Ng)) {
+      working.df <- data.frame(Y, S, D, G.id, Ng)
+    } else {
+      working.df <- data.frame(Y, S, D, G.id)
+      working.df <- working.df %>%
+        group_by(G.id) %>%
+        mutate(Ng = n()) %>%
+        ungroup() %>%
+        select(Y, S, D, G.id, Ng)
+      working.df <- as.data.frame(working.df)
+    }
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
     cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")])
   }
@@ -1434,8 +1479,8 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE) 
   N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
   # n = number of blocks
   if (!is.null(X)) {
-    #X_mat <- as.matrix(data[, grepl("^x_", names(data))])
-    covariate_cols <- setdiff(names(data), c("Y.bar", "G.id", "D", "S", "Ng"))
+    # X_mat <- as.matrix(data[, grepl("^x_", names(data))])
+    covariate_cols <- names(X)
     X_mat <- as.matrix(data[, covariate_cols, drop = FALSE])
     X_bar <- colMeans(X_mat)
     X_dem <- sweep(X_mat, 2, X_bar)
@@ -1611,19 +1656,33 @@ res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE) {
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
-
-    res.list <- list(
-      "tau.hat"  = tau.est,
-      "se.rob"   = se.rob,
-      "t.stat"   = t.stat,
-      "p.value"  = p.value,
-      "as.CI"    = c(CI.left, CI.right),
-      "beta.hat" = model$beta.hat,
-      "CI.left"  = CI.left,
-      "CI.right" = CI.right,
-      "data"     = data.frame(Y, S, D, G.id, Ng, X.0),
-      "lin.adj"  = data.frame(X.0)
-    )
+    if (!is.null(Ng)) {
+      res.list <- list(
+        "tau.hat"  = tau.est,
+        "se.rob"   = se.rob,
+        "t.stat"   = t.stat,
+        "p.value"  = p.value,
+        "as.CI"    = c(CI.left, CI.right),
+        "beta.hat" = model$beta.hat,
+        "CI.left"  = CI.left,
+        "CI.right" = CI.right,
+        "data"     = data.frame(Y, S, D, G.id, Ng, X.0),
+        "lin.adj"  = data.frame(X.0)
+      )
+    } else {
+      res.list <- list(
+        "tau.hat"  = tau.est,
+        "se.rob"   = se.rob,
+        "t.stat"   = t.stat,
+        "p.value"  = p.value,
+        "as.CI"    = c(CI.left, CI.right),
+        "beta.hat" = model$beta.hat,
+        "CI.left"  = CI.left,
+        "CI.right" = CI.right,
+        "data"     = data.frame(Y, S, D, G.id, X.0),
+        "lin.adj"  = data.frame(X.0)
+      )
+    }
   } else {
     model <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)
     tau.est <- model$tau.hat
@@ -1633,19 +1692,33 @@ res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE) {
     p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
     CI.left <- tau.est - qnorm(0.975) * se.rob
     CI.right <- tau.est + qnorm(0.975) * se.rob
-
-    res.list <- list(
-      "tau.hat"  = tau.est,
-      "se.rob"   = se.rob,
-      "t.stat"   = t.stat,
-      "p.value"  = p.value,
-      "as.CI"    = c(CI.left, CI.right),
-      "beta.hat" = NULL,
-      "CI.left"  = CI.left,
-      "CI.right" = CI.right,
-      "data"     = data.frame(Y, S, D, G.id, Ng),
-      "lin.adj"  = NULL
-    )
+    if (!is.null(Ng)) {
+      res.list <- list(
+        "tau.hat"  = tau.est,
+        "se.rob"   = se.rob,
+        "t.stat"   = t.stat,
+        "p.value"  = p.value,
+        "as.CI"    = c(CI.left, CI.right),
+        "beta.hat" = NULL,
+        "CI.left"  = CI.left,
+        "CI.right" = CI.right,
+        "data"     = data.frame(Y, S, D, G.id, Ng),
+        "lin.adj"  = NULL
+      )
+    } else {
+      res.list <- list(
+        "tau.hat"  = tau.est,
+        "se.rob"   = se.rob,
+        "t.stat"   = t.stat,
+        "p.value"  = p.value,
+        "as.CI"    = c(CI.left, CI.right),
+        "beta.hat" = NULL,
+        "CI.left"  = CI.left,
+        "CI.right" = CI.right,
+        "data"     = data.frame(Y, S, D, G.id),
+        "lin.adj"  = NULL
+      )
+    }
   }
   class(res.list) <- "sreg"
   return(res.list)

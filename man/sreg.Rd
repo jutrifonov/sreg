@@ -4,7 +4,16 @@
 \alias{sreg}
 \title{Estimate Average Treatment Effects (ATEs) and Corresponding Standard Errors}
 \usage{
-sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
+sreg(
+  Y,
+  S = NULL,
+  D,
+  G.id = NULL,
+  Ng = NULL,
+  X = NULL,
+  HC1 = TRUE,
+  small.strata = FALSE
+)
 }
 \arguments{
 \item{Y}{a numeric \eqn{n \times 1} \code{vector/matrix/data.frame/tibble} of the observed outcomes}
