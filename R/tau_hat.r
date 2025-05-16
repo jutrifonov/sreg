@@ -135,3 +135,282 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL)
   }
   return(rtrn.list)
 }
+#-------------------------------------------------------------------
+tau.hat.sreg.ss <- function(Y, D, X = NULL, S) 
+#-------------------------------------------------------------------
+{
+  if (!is.null(X)) {
+    tau.hat <- numeric(max(D))
+    beta.hat <- numeric(max(D))
+    beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
+    data_full <- data.frame(Y, D, X, S)
+    for (d in 1:max(D))
+    {
+      agg_data <- data_full %>%
+        group_split(S) %>%
+        map_dfr(~ {
+          df <- .
+          covariate_cols <- setdiff(names(df), c("Y", "D", "S"))
+          list(
+            S = df$S[1],
+            Y_treated = mean(df$Y[df$D == d], na.rm = TRUE),
+            Y_control = mean(df$Y[df$D == 0], na.rm = TRUE),
+            X_treated = list(colMeans(df[df$D == d, covariate_cols, drop = FALSE], na.rm = TRUE)),
+            X_control = list(colMeans(df[df$D == 0, covariate_cols, drop = FALSE], na.rm = TRUE)),
+            k = nrow(df),
+            l = sum(df$D == d),
+            q = sum(df$D == 0)
+          )
+        })
+
+      # Create Y_diff vector
+      Y_diff <- with(agg_data, Y_treated - Y_control)
+      # Compute differences correctly: row-wise for each pair of treated/control vectors
+      X_diff_mat <- map2(
+        agg_data$X_treated, agg_data$X_control,
+        ~ .x - .y
+      ) %>%
+        do.call(rbind, .)
+      # print(X_diff_mat)
+      # print(Y_diff)
+
+
+
+      data_decomp <- as.data.frame(agg_data)
+      X_treated_mat <- do.call(rbind, data_decomp$X_treated)
+      X_control_mat <- do.call(rbind, data_decomp$X_control)
+
+
+      lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
+
+      # print(summary(lm_model))
+      beta_hat <- unname(lm_model$coefficients[-1])
+
+      covariate_cols <- setdiff(names(data_full), c("Y", "D", "S"))
+      X_mat <- as.matrix(data_full[, covariate_cols, drop = FALSE])
+      X_bar <- colMeans(X_mat)
+      X_dem <- sweep(X_mat, 2, X_bar)
+
+      # adjusted estimator:
+      theta_hat_adj <- sum((data_full$Y * (data_full$D == d))) / sum((data_full$D == d)) -
+        sum((data_full$Y) * (data_full$D == 0)) / sum(data_full$D == 0) -
+        as.numeric(t(colMeans(X_dem[data_full$D == d, , drop = FALSE]) -
+          colMeans(X_dem[data_full$D == 0, , drop = FALSE])) %*% beta_hat)
+      tau.hat[d] <- theta_hat_adj
+      beta.hat[d, ] <- beta_hat
+    }
+  } else {
+    tau.hat <- numeric(max(D))
+    # beta.hat <- numeric(max(D))
+    # beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
+    data_full <- data.frame(Y, D, S)
+    for (d in 1:max(D))
+    {
+      agg_data <- data_full %>%
+        group_split(S) %>%
+        map_dfr(~ {
+          df <- .
+          list(
+            S = df$S[1],
+            Y_treated = mean(df$Y[df$D == d], na.rm = TRUE),
+            Y_control = mean(df$Y[df$D == 0], na.rm = TRUE),
+            k = nrow(df),
+            l = sum(df$D == d),
+            q = sum(df$D == 0)
+          )
+        })
+
+      # Create Y_diff vector
+      Y_diff <- with(agg_data, Y_treated - Y_control)
+
+      data_decomp <- as.data.frame(agg_data)
+
+      # adjusted estimator:
+      theta_hat <- sum((data_full$Y * (data_full$D == d))) / sum((data_full$D == d)) -
+        sum((data_full$Y) * (data_full$D == 0)) / sum(data_full$D == 0)
+
+      tau.hat[d] <- theta_hat
+      beta.hat <- NULL
+    }
+  }
+
+  ret_list <- list(
+    tau.hat = tau.hat,
+    beta.hat = beta.hat
+  )
+  return(ret_list)
+}
+#-------------------------------------------------------------------
+tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) 
+#-------------------------------------------------------------------
+{
+  if (!is.null(X)) {
+    tau.hat <- numeric(max(D))
+
+    beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
+
+    if (!is.null(Ng)) {
+      working.df <- data.frame(Y, S, D, G.id, Ng, X)
+    } else {
+      working.df <- data.frame(Y, S, D, G.id, X)
+      working.df <- working.df %>%
+        group_by(G.id) %>%
+        mutate(Ng = n()) %>%
+        ungroup() %>%
+        select(Y, S, D, G.id, Ng, all_of(names(X)))
+      working.df <- as.data.frame(working.df)
+    }
+
+    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
+
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng"))) ])
+    cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
+    # print(cl.lvl.data)
+    data <- cl.lvl.data
+    N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
+
+    covariate_cols <- names(X)
+
+    for (d in 1:max(D))
+    {
+      # Compute averages for treated and control within each stratum
+      agg_data <- data %>%
+        group_split(S) %>%
+        map_dfr(~ {
+          df <- .
+          covariate_cols <- names(X)
+          list(
+            S = df$S[1],
+            Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
+            Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
+            X_treated = list(colMeans(df[df$D == d, covariate_cols, drop = FALSE], na.rm = TRUE)),
+            X_control = list(colMeans(df[df$D == 0, covariate_cols, drop = FALSE], na.rm = TRUE)),
+            k = nrow(df), # Total units in stratum (should be 2)
+            l = sum(df$D == d),
+            q = sum(df$D == 0)
+          )
+        })
+
+      # Create Y_diff vector
+      Y_diff <- with(agg_data, Y_treated - Y_control)
+
+      # Compute differences correctly: row-wise for each pair of treated/control vectors
+      X_diff_mat <- map2(
+        agg_data$X_treated, agg_data$X_control,
+        ~ .x - .y
+      ) %>%
+        do.call(rbind, .)
+
+      # print(Y_diff)
+      # print(X_diff_mat)
+      data_decomp <- as.data.frame(agg_data)
+      X_treated_mat <- do.call(rbind, data_decomp$X_treated)
+      X_control_mat <- do.call(rbind, data_decomp$X_control)
+
+      # run the linear model for covariate adjustments
+      lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
+      
+      beta_hat <- unname(lm_model$coefficients[-1])
+
+      covariate_cols <- names(X)
+      X_mat <- as.matrix(data[, covariate_cols, drop = FALSE])
+
+      X_bar <- colMeans(X_mat)
+      X_dem <- sweep(X_mat, 2, X_bar)
+
+      # X_bar <- mean(data$X)
+      # X_dem <- data$X - X_bar
+      # adjusted estimator:
+      G_1 <- sum((data$D == d) * data$Ng)
+      G_0 <- sum((data$D == 0) * data$Ng)
+      # print(X_dem)
+      # print(beta_hat)
+      # print(as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
+      #                             colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0)))
+      theta_hat_adj <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
+        sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng) -
+        as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
+          colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0) %*% beta_hat)
+
+
+      # (sum(X_dem * (data$D == d)) / sum((data$D == d) * data$Ng) -
+      # sum(X_dem * (data$D == 0)) / sum((data$D == 0) * data$Ng)) * beta_hat
+      tau.hat[d] <- theta_hat_adj
+      beta.hat[d, ] <- beta_hat
+    }
+  } else {
+    tau.hat <- numeric(max(D))
+
+    if (!is.null(Ng)) {
+      working.df <- data.frame(Y, S, D, G.id, Ng)
+    } else {
+      working.df <- data.frame(Y, S, D, G.id)
+      working.df <- working.df %>%
+        group_by(G.id) %>%
+        mutate(Ng = n()) %>%
+        ungroup() %>%
+        select(Y, S, D, G.id, Ng)
+      working.df <- as.data.frame(working.df)
+    }
+
+    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
+
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")])
+    cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
+    # print(cl.lvl.data)
+    data <- cl.lvl.data
+    N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
+
+    for (d in 1:max(D))
+    {
+      # Compute averages for treated and control within each stratum
+      agg_data <- data %>%
+        group_split(S) %>%
+        map_dfr(~ {
+          df <- .
+          list(
+            S = df$S[1],
+            Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
+            Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
+            k = nrow(df), # Total units in stratum (should be 2)
+            l = sum(df$D == d),
+            q = sum(df$D == 0)
+          )
+        })
+
+      # Create Y_diff vector
+      Y_diff <- with(agg_data, Y_treated - Y_control)
+
+      # print(Y_diff)
+      # print(X_diff_mat)
+      data_decomp <- as.data.frame(agg_data)
+
+
+      # run the linear model for covariate adjustments
+      # print(summary(lm_model))
+      # print(summary(lm_model))
+      beta_hat <- 0
+
+      # X_bar <- mean(data$X)
+      # X_dem <- data$X - X_bar
+      # adjusted estimator:
+      G_1 <- sum((data$D == d) * data$Ng)
+      G_0 <- sum((data$D == 0) * data$Ng)
+      # print(X_dem)
+      # print(beta_hat)
+      # print(as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
+      #                             colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0)))
+      theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
+        sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng)
+
+      tau.hat[d] <- theta_hat
+      beta.hat <- NULL
+    }
+  }
+  ret_list <- list(
+    tau.hat = tau.hat,
+    beta.hat = beta.hat
+  )
+
+  return(ret_list)
+}

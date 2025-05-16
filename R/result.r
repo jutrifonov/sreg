@@ -147,3 +147,148 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
   class(res.list) <- "sreg"
   return(res.list)
 }
+#-------------------------------------------------------------------
+res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE) 
+#-------------------------------------------------------------------
+{
+  N <- length(Y)
+  if (!is.null(X)) {
+    model <- tau.hat.sreg.ss(Y, D, X, S)
+    tau.est <- model$tau.hat
+    var.est <- as.var.sreg.ss(Y, D, X, S, fit = model, HC1) / N
+    se.rob <- sqrt(var.est)
+    t.stat <- tau.est / se.rob
+    p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
+    CI.left <- tau.est - qnorm(0.975) * se.rob
+    CI.right <- tau.est + qnorm(0.975) * se.rob
+    res.list <- list(
+      "tau.hat"  = tau.est,
+      "se.rob"   = se.rob,
+      "t.stat"   = t.stat,
+      "p.value"  = p.value,
+      "as.CI"    = c(CI.left, CI.right),
+      "beta.hat" = model$beta.hat,
+      "CI.left"  = CI.left,
+      "CI.right" = CI.right,
+      "data"     = data.frame(Y, S, D, X),
+      "lin.adj"  = data.frame(X)
+    )
+  } else {
+    model <- tau.hat.sreg.ss(Y, D, X = NULL, S)
+    tau.est <- model$tau.hat
+    var.est <- as.var.sreg.ss(Y, D, X = NULL, S, fit = NULL, HC1) / N
+    se.rob <- sqrt(var.est)
+    t.stat <- tau.est / se.rob
+    p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
+    CI.left <- tau.est - qnorm(0.975) * se.rob
+    CI.right <- tau.est + qnorm(0.975) * se.rob
+    res.list <- list(
+      "tau.hat"  = tau.est,
+      "se.rob"   = se.rob,
+      "t.stat"   = t.stat,
+      "p.value"  = p.value,
+      "as.CI"    = c(CI.left, CI.right),
+      "beta.hat" = NULL,
+      "CI.left"  = CI.left,
+      "CI.right" = CI.right,
+      "data"     = data.frame(Y, S, D),
+      "lin.adj"  = NULL
+    )
+  }
+  class(res.list) <- "sreg"
+  return(res.list)
+}
+#-------------------------------------------------------------------
+res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE) 
+#-------------------------------------------------------------------
+{
+  N <- length(unique(G.id))
+  if (!is.null(X)) {
+    df <- data.frame(G.id, X)
+    if (!check.cluster(df)) {
+      X.0 <- X
+      df.mod <- as.data.frame(df %>%
+        group_by(G.id) %>%
+        mutate(across(everything(), ~ if (is.numeric(.)) mean(.x, na.rm = TRUE) else .x)) %>%
+        ungroup())
+      X <- df.mod[, 2:ncol(df.mod)]
+    } else {
+      X.0 <- X
+    }
+    X <- data.frame(X)
+    model <- tau.hat.creg.ss(Y, D, X, S, G.id, Ng)
+    tau.est <- model$tau.hat
+    var.est <- as.var.creg.ss(Y, D, X, S, G.id, Ng, model, HC1) / N
+    se.rob <- sqrt(var.est)
+    t.stat <- tau.est / se.rob
+    p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
+    CI.left <- tau.est - qnorm(0.975) * se.rob
+    CI.right <- tau.est + qnorm(0.975) * se.rob
+    if (!is.null(Ng)) {
+      res.list <- list(
+        "tau.hat"  = tau.est,
+        "se.rob"   = se.rob,
+        "t.stat"   = t.stat,
+        "p.value"  = p.value,
+        "as.CI"    = c(CI.left, CI.right),
+        "beta.hat" = model$beta.hat,
+        "CI.left"  = CI.left,
+        "CI.right" = CI.right,
+        "data"     = data.frame(Y, S, D, G.id, Ng, X.0),
+        "lin.adj"  = data.frame(X.0)
+      )
+    } else {
+      res.list <- list(
+        "tau.hat"  = tau.est,
+        "se.rob"   = se.rob,
+        "t.stat"   = t.stat,
+        "p.value"  = p.value,
+        "as.CI"    = c(CI.left, CI.right),
+        "beta.hat" = model$beta.hat,
+        "CI.left"  = CI.left,
+        "CI.right" = CI.right,
+        "data"     = data.frame(Y, S, D, G.id, X.0),
+        "lin.adj"  = data.frame(X.0)
+      )
+    }
+  } else {
+    model <- tau.hat.creg.ss(Y, D, X = NULL, S, G.id, Ng)
+    tau.est <- model$tau.hat
+    var.est <- as.var.creg.ss(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1) / N
+    se.rob <- sqrt(var.est)
+    t.stat <- tau.est / se.rob
+    p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
+    CI.left <- tau.est - qnorm(0.975) * se.rob
+    CI.right <- tau.est + qnorm(0.975) * se.rob
+    if (!is.null(Ng)) {
+      res.list <- list(
+        "tau.hat"  = tau.est,
+        "se.rob"   = se.rob,
+        "t.stat"   = t.stat,
+        "p.value"  = p.value,
+        "as.CI"    = c(CI.left, CI.right),
+        "beta.hat" = NULL,
+        "CI.left"  = CI.left,
+        "CI.right" = CI.right,
+        "data"     = data.frame(Y, S, D, G.id, Ng),
+        "lin.adj"  = NULL
+      )
+    } else {
+      res.list <- list(
+        "tau.hat"  = tau.est,
+        "se.rob"   = se.rob,
+        "t.stat"   = t.stat,
+        "p.value"  = p.value,
+        "as.CI"    = c(CI.left, CI.right),
+        "beta.hat" = NULL,
+        "CI.left"  = CI.left,
+        "CI.right" = CI.right,
+        "data"     = data.frame(Y, S, D, G.id),
+        "lin.adj"  = NULL
+      )
+    }
+  }
+  class(res.list) <- "sreg"
+  return(res.list)
+}
+

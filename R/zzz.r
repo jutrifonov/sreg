@@ -1,3 +1,4 @@
+utils::globalVariables(".")
 startupMessage <- function() {
   version <- packageVersion("sreg")
   msg <- c(
