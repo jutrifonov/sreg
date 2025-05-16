@@ -1,3 +1,5 @@
+# sreg 2.0.0
+
 # sreg 1.0.1.9000 (development version)
 * Ongoing development version.
 # sreg 1.0.1
