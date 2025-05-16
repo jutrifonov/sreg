@@ -29,6 +29,8 @@ sreg(
 \item{X}{a \code{matrix/data.frame/tibble} with columns representing the covariate values for every observation; if \code{NULL} then the estimator without linear adjustments is applied. (Note: \code{sreg} cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages)}
 
 \item{HC1}{a \code{TRUE/FALSE} logical argument indicating whether the small sample correction should be applied to the variance estimator}
+
+\item{small.strata}{a \code{TRUE/FALSE} logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used.}
 }
 \value{
 An object of class \code{sreg} that is a list containing the following elements:
@@ -41,6 +43,8 @@ An object of class \code{sreg} that is a list containing the following elements:
 \item \code{CI.right}: a \eqn{1 \times |\mathcal A|} \code{vector} of the right bounds of the 95\% as. confidence interval
 \item \code{data}: an original data of the form \code{data.frame(Y, S, D, G.id, Ng, X)}
 \item \code{lin.adj}: a \code{data.frame} representing the covariates that were used in implementing linear adjustments
+\item \code{small.strata}: a \code{TRUE/FALSE} logical argument indicating whether the estimators for small strata (e.g., matched pairs or n-tuples) were used
+\item \code{HC1}: a \code{TRUE/FALSE} logical argument indicating whether the small sample correction (HC1) was applied to the variance estimator
 }
 }
 \description{
