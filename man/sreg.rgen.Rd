@@ -7,11 +7,14 @@
 sreg.rgen(
   n,
   Nmax = 50,
-  n.strata,
+  n.strata = 10,
   tau.vec = c(0),
   gamma.vec = c(0.4, 0.2, 1),
   cluster = TRUE,
-  is.cov = TRUE
+  is.cov = TRUE,
+  small.strata = FALSE,
+  k = 3,
+  treat.sizes = c(1, 1, 1)
 )
 }
 \arguments{
@@ -28,6 +31,12 @@ sreg.rgen(
 \item{cluster}{a \code{TRUE/FALSE} argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level}
 
 \item{is.cov}{a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not}
+
+\item{small.strata}{a \code{TRUE/FALSE} argument indicating whether the data-generating process should use a small-strata design (e.g., matched pairs, n-tuples)}
+
+\item{k}{an integer specifying the number of units per stratum when \code{small.strata = TRUE}}
+
+\item{treat.sizes}{a numeric \eqn{1 \times (|\mathcal A| + 1)} \code{vector} specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units (\eqn{D = 0}), the second to the first treatment (\eqn{D = 1}), and so on}
 }
 \value{
 An object that is a `data.frame` with \eqn{n} observations containing the generated values of the following variables:

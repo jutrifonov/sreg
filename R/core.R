@@ -257,7 +257,9 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
 #' @param gamma.vec a numeric \eqn{1 \times 3} \code{vector} of parameters corresponding to covariates
 #' @param cluster a \code{TRUE/FALSE} argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level
 #' @param is.cov a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not
-#'
+#' @param small.strata a \code{TRUE/FALSE} argument indicating whether the data-generating process should use a small-strata design (e.g., matched pairs, n-tuples)
+#' @param k an integer specifying the number of units per stratum when \code{small.strata = TRUE}
+#' @param treat.sizes a numeric \eqn{1 \times (|\mathcal A| + 1)} \code{vector} specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units (\eqn{D = 0}), the second to the first treatment (\eqn{D = 1}), and so on
 #' @return An object that is a `data.frame` with \eqn{n} observations containing the generated values of the following variables:
 #' \itemize{
 #' \item \code{Y}: a numeric \eqn{n \times 1} \code{vector} of observed outcomes
@@ -270,10 +272,32 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
 #'
 #' @examples
 #' data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
-sreg.rgen <- function(n, Nmax = 50, n.strata,
+sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
                       tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
-                      cluster = TRUE, is.cov = TRUE) {
+                      cluster = TRUE, is.cov = TRUE, small.strata = FALSE, k = 3, treat.sizes = c(1, 1, 1)) {
   if (cluster == T) {
+    if(small.strata == TRUE){
+      G <- n
+      Nmax <- Nmax
+      n.treat <- length(tau.vec)
+      max.support <- Nmax / 10 - 1
+      Ng <- gen.cluster.sizes(G, max.support)
+      data_pot <- dgp.po.creg(Ng = Ng, tau.vec = tau.vec, G = G, gamma.vec = gamma.vec, n.treat = n.treat)
+      data_obs <- dgp.obs.creg.ss(baseline = data_pot, n.treat = n.treat, k = k, treat_sizes = treat.sizes)
+      data_cl <- data.frame("Y" = data_obs$Y, "D" = data_obs$D, data_obs$X, "S" = data_obs$S, "Ng" = data_obs$Ng, "G.id" = data_obs$G.id)
+      Y <- data_cl$Y
+      D <- data_cl$D
+      X <- data.frame("x_1" = data_cl$x_1, 'x_2' = data_cl$x_2, 'Ng' = data_cl$Ng)
+      S <- data_cl$S
+      G.id <- data_cl$G.id
+      Ng <- data_cl$Ng
+      if(is.cov)
+      {
+        data.sim <- data.frame(Y, S, D, G.id, Ng, X)
+      }else{
+        data.sim <- data.frame(Y, S, D, G.id, Ng)
+      }
+    }else{
     G <- n
     Nmax <- Nmax
     n.treat <- length(tau.vec)
@@ -296,7 +320,26 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
     Ng <- data.sim$Ng
     G.id <- data.sim$G.id
     data.sim <- data.frame(Y, S, D, G.id, Ng, X)
+    }
   } else {
+      if(small.strata)
+    {
+      data_raw <- dgp.po.sreg(
+        n = n, tau.vec, gamma.vec = gamma.vec,
+        n.treat = n.treat, is.cov = is.cov
+      )
+      data_df <- dgp.obs.sreg.ss(data_raw, n.treat = n.treat, k = k, treat_sizes = treat.sizes)
+      Y <- data_df$y
+      D <- data_df$A
+      X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2)
+      S <- data_df$block
+      if(is.cov)
+      {
+        data.sim <- data.frame(Y, S, D, X)
+      } else{
+        data.sim <- data.frame(Y, S, D)
+      }
+    }else{
     n.treat <- length(tau.vec)
     pot.outcomes <- dgp.po.sreg(
       n = n, tau.vec, gamma.vec = gamma.vec,
@@ -318,6 +361,7 @@ sreg.rgen <- function(n, Nmax = 50, n.strata,
       data.sim <- data.frame(Y, S, D, X)
     } else {
       data.sim <- data.frame(Y, S, D)
+    }
     }
   }
   return(data.sim)
