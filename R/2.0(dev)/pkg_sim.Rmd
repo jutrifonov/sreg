@@ -108,7 +108,9 @@ n <- 900
 treat_sizes <- c(1, 1, 1)
 
 
-datim <- sreg.rgen(n = 1000, cluster = TRUE, small.strata = TRUE, tau.vec = c(1.2, 0.8))
+datim <- sreg.rgen(n = 1200, cluster = TRUE, small.strata = TRUE, tau.vec = c(1.2, 0.8))
+X <- data.frame(datim$x_1, datim$x_2, datim$Ng)
+sreg(Y = datim$Y, S = datim$S, D = datim$D, G.id = datim$G.id, Ng = datim$Ng, X = X, HC1 = TRUE, small.strata = TRUE)
 
 data_raw <- dgp_po(n = n, theta.vec = tau_vec, n.treat = n.treat, gamma.vec = c(0.4, 0.2, 1)) # Checked that now it returns several X's
 data_df <- run_experiment_multi(data_raw, n.treat = n.treat, k = k, treat_sizes = treat_sizes) # 1 gets treatment 0, 1 gets treatment 1, 1 gets treatment 2 in each triplet
