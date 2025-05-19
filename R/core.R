@@ -99,6 +99,14 @@
 #' X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 #' result <- sreg(Y, S, D, G.id = NULL, X = X)
 #' print(result)
+#' ### Example 3. Matched Pairs (small strata).
+#' data <- sreg.rgen(n = 1000, tau.vec = c(1.2), cluster = FALSE, small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
+#' Y <- data$Y
+#' S <- data$S
+#' D <- data$D
+#' X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+#' result <- sreg(Y = Y, S = S, D = D, X = X, small.strata = TRUE)
+#' print(result)
 sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = FALSE) {
   check.data.types(Y, S, D, G.id, Ng, X)
   check.integers(S, D, G.id, Ng)
@@ -116,6 +124,20 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
   if (!is.null(S)) {
     check.range(S)
   }
+
+  if (small.strata == TRUE && !is.null(S)) {
+  strata_sizes <- table(S)
+  if (length(unique(strata_sizes)) > 1) {
+    stop("Error: One or more strata contain a different number of observations while small.strata = TRUE. Consider estimating the model with small.strata = FALSE or providing data with equal-sized strata.")
+  }
+}
+  if (small.strata == FALSE && !is.null(S)) {
+  strata_sizes <- table(S)
+  unique_sizes <- unique(strata_sizes)
+  if (length(unique_sizes) == 1 && unique_sizes[1] <= 5) {
+    warning("Warning: All strata have the same small size (e.g., pairs or triplets), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
+  }
+}
 
   if ("Ng" %in% names(X)) {
     names(X)[names(X) == "Ng"] <- "Ng_1"

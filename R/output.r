@@ -37,6 +37,10 @@ print.sreg <- function(x, ...) {
   cat(paste(col_blue("Number of treatments:"), max(x$data$D), "\n"))
   cat(paste(col_blue("Number of strata:"), max(x$data$S), "\n"))
   cat(paste(col_blue("Setup:"), ifelse(!is.null(x$small.strata) && x$small.strata, "small strata", "big strata"), "\n"))
+  if (x$small.strata) {
+    k <- length(x$data$Y) / max(x$data$S)
+    cat(paste(col_blue("Strata size (k):"), k, "\n"))
+  }
   cat(paste(col_blue("Standard errors:"), ifelse(!is.null(x$HC1) && x$HC1, "adjusted (HC1)", "unadjusted"), "\n"))
   cat(paste(col_blue("Treatment assignment:"), ifelse(is.null(x$data$G.id), "individual level", "cluster level"), "\n"))
 
