@@ -604,7 +604,7 @@ library("sreg")
 library("dplyr")
 library("haven")
 #' ### Example 1. Simulated Data.
-data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
+data <- sreg.rgen(n = 1200, tau.vec = c(1.2), n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1), k = 2)
 Y <- data$Y
 
 S <- data$S

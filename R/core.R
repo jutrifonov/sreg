@@ -275,6 +275,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
 sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
                       tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
                       cluster = TRUE, is.cov = TRUE, small.strata = FALSE, k = 3, treat.sizes = c(1, 1, 1)) {
+  n.treat <- length(tau.vec)
   if (cluster == T) {
     if(small.strata == TRUE){
       G <- n
@@ -325,7 +326,7 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
       if(small.strata)
     {
       data_raw <- dgp.po.sreg(
-        n = n, tau.vec, gamma.vec = gamma.vec,
+        n = n, theta.vec = tau.vec, gamma.vec = gamma.vec,
         n.treat = n.treat, is.cov = is.cov
       )
       data_df <- dgp.obs.sreg.ss(data_raw, n.treat = n.treat, k = k, treat_sizes = treat.sizes)
