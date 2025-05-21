@@ -252,13 +252,17 @@ Saturated Model Estimation Results under CAR
 Observations: 215 
 Number of treatments: 2 
 Number of strata: 5 
+Setup: big strata 
+Standard errors: adjusted (HC1) 
+Treatment assignment: individual level 
+Covariates used in linear adjustments: 
 ---
 Coefficients:
        Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
 1 -0.05113 0.20645 -0.24766 0.80440     -0.45577       0.35351             
 2  0.40903 0.20651  1.98065 0.04763      0.00427       0.81379            *
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
 Besides that, `sreg` allows adding linear adjustments (covariates) to the estimation procedure: 
 ``` r
