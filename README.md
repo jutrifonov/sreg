@@ -39,10 +39,10 @@ Install the official CRAN release using:
 install.packages("sreg")
 ```
 ``` r
-trying URL 'https://mirror.las.iastate.edu/CRAN/src/contrib/sreg_1.0.1.tar.gz'
-Content type 'application/x-gzip' length 42789 bytes (41 KB)
+trying URL 'https://ftp.osuosl.org/pub/cran/src/contrib/sreg_1.0.1.tar.gz'
+Content type 'application/x-gzip' length 43389 bytes (42 KB)
 ==================================================
-downloaded 41 KB
+downloaded 42 KB
 
 * installing *source* package ‘sreg’ ...
 ** package ‘sreg’ successfully unpacked and MD5 sums checked
@@ -62,7 +62,7 @@ downloaded 41 KB
 * DONE (sreg)
 
 The downloaded source packages are in
-        ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq/T/RtmpHqU4e9/downloaded_packages’
+        ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq/T/RtmpVk96vN/downloaded_packages’
 ```
 ``` r
 library(sreg)
