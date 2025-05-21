@@ -616,8 +616,8 @@ result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X)
 sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X)
 print(result)
 
-dtapm <- sreg.rgen(n = 1000, tau.vec = c(1.2), cluster = FALSE, small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
-result <- sreg(Y = dtapm$Y, S = dtapm$S, D = dtapm$D, X = dtapm$X, small.strata = TRUE)
+dtapm <- sreg.rgen(n = 100, tau.vec = c(1.2, 0.8), cluster = TRUE, small.strata = FALSE, k = 2, treat.sizes = c(1, 1))
+result <- sreg(Y = dtapm$Y, S = dtapm$S, D = dtapm$D, X = dtapm$X, small.strata = FALSE, G.id = dtapm$G.id, Ng = dtapm$Ng)
 result
 max(result$data$S)
 
