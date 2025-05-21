@@ -300,7 +300,8 @@ Generates the observed outcomes, treatment assignments, strata indicators, clust
 ``` r
 sreg.rgen(n, Nmax = 50, n.strata,
          tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
-         cluster = TRUE, is.cov = TRUE)
+         cluster = TRUE, is.cov = TRUE, small.strata = FALSE,
+         k = 3, treat.sizes = c(1, 1, 1))
 ```
 ### Arguments
 - **`n` -** a total number of observations in a sample;
@@ -309,7 +310,10 @@ sreg.rgen(n, Nmax = 50, n.strata,
 - **`tau.vec` -** a numeric $1 \times |\mathcal A|$ `vector` of treatment effects, where $|\mathcal A|$ represents the number of treatments;
 - **`gamma.vec` -** a numeric $1 \times 3$ `vector` of parameters corresponding to covariates;
 - **`cluster` -** a `TRUE/FALSE` argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level;
-- **`is.cov` -** a `TRUE/FALSE` argument indicating whether the dgp should include covariates or not.
+- **`is.cov` -** a `TRUE/FALSE` argument indicating whether the dgp should include covariates or not;
+- **`small.strata` -** a `TRUE/FALSE` argument indicating whether the data-generating process should use a small-strata design (e.g., matched pairs, $n$-tuples);
+- **`k` -** an integer specifying the number of units per stratum when `small.strata = TRUE`;
+- **`treat.sizes` -** a numeric $1 \times (|\mathcal A| + 1)$ `vector` specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units ($D = 0$), the second to the first treatment ($D = 1$), and so on.
 
 ### Return Value
 - **`Y` -** a numeric $n \times 1$ `vector` of the observed outcomes;
