@@ -133,7 +133,7 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, small.strata 
 - **`G.id` -** a numeric `vector/matrix/data.frame/tibble` of cluster indicators; if `NULL` then estimation is performed assuming treatment is assigned at the individual level;
 - **`Ng` -** a numeric `vector/matrix/data.frame/tibble` of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
 - **`X` -** a `matrix/data.frame/tibble` with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
-- **`HC1` -** a `TRUE/FALSE` logical argument indicating whether the small sample correction should be applied to the variance estimator.
+- **`HC1` -** a `TRUE/FALSE` logical argument indicating whether the small sample correction should be applied to the variance estimator;
 - **`small.strata` -** a `TRUE/FALSE` logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used.
 [^*]: *Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages.*
 
@@ -337,6 +337,6 @@ Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariat
 
 Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. doi:10.48550/arXiv.2301.09016.
 
-Jiang, L., Linton, O., Tang, X., and Zhang, Y. (2024). Covariate Adjustment in Stratified Experiments. Quantitative Economics, 15(4), 971–998, doi:10.3982/QE2475
+Cytrynbaum, M. (2024). Covariate Adjustment in Stratified Experiments. Quantitative Economics, 15(4), 971–998, doi:10.3982/QE2475
 
 
