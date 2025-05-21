@@ -616,9 +616,47 @@ result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X)
 sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X)
 print(result)
 
-dtapm <- sreg.rgen(n = 100, tau.vec = c(1.2, 0.8), cluster = TRUE, small.strata = FALSE, k = 2, treat.sizes = c(1, 1))
+dtapm <- sreg.rgen(n = 100, tau.vec = c(1.2), cluster = FALSE, small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
 result <- sreg(Y = dtapm$Y, S = dtapm$S, D = dtapm$D, X = dtapm$X, small.strata = FALSE, G.id = dtapm$G.id, Ng = dtapm$Ng)
 result
+
+data <- sreg.rgen(n = 300, tau.vec = c(1.2, 0.8), cluster = FALSE, small.strata = TRUE, k = 3, treat.sizes = c(1, 1, 1))
+head(data)
+
+result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame('x_1' = data$x_1, 'x_2' = data$x_2), small.strata = TRUE)
+print(result)
+
 max(result$data$S)
 
 length(result$data$Y) / max(result$data$S)
+
+
+data("AEJapp")
+data <- AEJapp
+Y <- data$gradesq34
+D <- data$treatment
+S <- data$class_level
+data.clean <- data.frame(Y, D, S)
+data.clean <- data.clean %>%
+  mutate(D = ifelse(D == 3, 0, D))
+Y <- data.clean$Y
+D <- data.clean$D
+S <- data.clean$S
+head(data.clean)
+
+result <- sreg::sreg(Y = Y, S = S, D = D)
+print(result)
+
+pills <- data$pills_taken
+age <- data$age_months
+data.clean <- data.frame(Y, D, S, pills, age)
+data.clean <- data.clean %>%
+  mutate(D = ifelse(D == 3, 0, D))
+Y <- data.clean$Y
+D <- data.clean$D
+S <- data.clean$S
+X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
+result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
+print(result)
+
+
