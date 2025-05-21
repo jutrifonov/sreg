@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/github/jutrifonov/sreg/graph/badge.svg?token=KAUXB0ETCA)](https://app.codecov.io/github/jutrifonov/sreg)
 
-The `sreg` package for `R`, offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. The package is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018); Bugni, Canay, Shaikh, Tabord-Meehan (2023); and Jiang, Linton, Tang, Zhang (2023).
+The `sreg` package for `R`, offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. It supports a wide range of stratification designs, including matched pairs, k-tuple designs, and larger strata with many units — possibly of unequal size across strata. The package is designed to accommodate scenarios with multiple treatments,  and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018); Bugni, Canay, Shaikh, Tabord-Meehan (2023); Jiang, Linton, Tang, Zhang (2023); Bai, Jiang, Romano, Shaikh, Zhang (2024), Liu (2024); and Cytrynbaum (2024).
 
 **Dependencies:** `dplyr`, `tidyr`, `extraDistr`, `rlang`
 
@@ -324,3 +324,9 @@ Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-
 Bugni, F., Canay, I., Shaikh, A., and Tabord-Meehan, M. (2024+). Inference for Cluster Randomized Experiments with Non-ignorable Cluster Sizes. *Forthcoming in the Journal of Political Economy: Microeconomics*, doi:10.48550/arXiv.2204.08356.
 
 Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. *Forthcoming in Review of Economics and Statistics*, doi:10.48550/arXiv.2204.08356.
+
+Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariate adjustment in experiments with matched pairs. Journal of Econometrics, 241(1), doi:10.1016/j.jeconom.2024.105740. 
+
+Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. doi:10.48550/arXiv.2301.09016.
+
+
