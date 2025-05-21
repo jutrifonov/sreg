@@ -329,4 +329,6 @@ Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariat
 
 Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. doi:10.48550/arXiv.2301.09016.
 
+Jiang, L., Linton, O., Tang, X., and Zhang, Y. (2024). Covariate Adjustment in Stratified Experiments. Quantitative Economics, 15(4), 971–998, doi:10.3982/QE2475
+
 
