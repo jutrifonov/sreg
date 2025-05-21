@@ -277,10 +277,13 @@ S <- data.clean$S
 X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
 print(result)
-Saturated Model Estimation Results under CAR
+Saturated Model Estimation Results under CAR with linear adjustments
 Observations: 215 
 Number of treatments: 2 
 Number of strata: 5 
+Setup: big strata 
+Standard errors: adjusted (HC1) 
+Treatment assignment: individual level 
 Covariates used in linear adjustments: pills, age
 ---
 Coefficients:
