@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/github/jutrifonov/sreg/graph/badge.svg?token=KAUXB0ETCA)](https://app.codecov.io/github/jutrifonov/sreg)
 
-The `sreg` package for `R`, offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. It supports a wide range of stratification designs, including matched pairs, k-tuple designs, and larger strata with many units — possibly of unequal size across strata. The package is designed to accommodate scenarios with multiple treatments,  and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018); Bugni, Canay, Shaikh, Tabord-Meehan (2023); Jiang, Linton, Tang, Zhang (2023); Bai, Jiang, Romano, Shaikh, Zhang (2024), Liu (2024); and Cytrynbaum (2024).
+The `sreg` package for `R`, offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. It supports a wide range of stratification designs, including matched pairs, $k$-tuple designs, and larger strata with many units — possibly of unequal size across strata. The package is designed to accommodate scenarios with multiple treatments,  and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018); Bugni, Canay, Shaikh, Tabord-Meehan (2023); Jiang, Linton, Tang, Zhang (2023); Bai, Jiang, Romano, Shaikh, Zhang (2024), Liu (2024); and Cytrynbaum (2024).
 
 **Dependencies:** `dplyr`, `tidyr`, `extraDistr`, `rlang`
 
@@ -124,7 +124,7 @@ Estimates the ATE(s) and the corresponding standard error(s) for a (collection o
 
 ### Syntax
 ``` r
-sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
+sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = FALSE)
 ```
 ### Arguments
 - **`Y` -** a numeric `vector/matrix/data.frame/tibble` of the observed outcomes;
@@ -134,6 +134,7 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
 - **`Ng` -** a numeric `vector/matrix/data.frame/tibble` of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
 - **`X` -** a `matrix/data.frame/tibble` with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
 - **`HC1` -** a `TRUE/FALSE` logical argument indicating whether the small sample correction should be applied to the variance estimator.
+- **`small.strata` -** a `TRUE/FALSE` logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used.
 [^*]: *Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages.*
 
 ### Data Structure
@@ -155,17 +156,20 @@ Here we provide an example of a data frame that can be used with `sreg`.
 
 `sreg` prints a *"Stata-style"* table containing the ATE estimates, corresponding standard errors, $t$-statistics, $p$-values, $95$% asymptotic confidence intervals, and significance indicators for different levels $\alpha$. The example of the printed output is provided below.
 ``` r
-Saturated Model Estimation Results under CAR with clusters and linear adjustments
-Observations: 30000 
-Clusters: 1000 
+Saturated Model Estimation Results under CAR
+Observations: 2710 
+Clusters: 100 
 Number of treatments: 2 
-Number of strata: 4 
-Covariates used in linear adjustments: x_1, x_2
+Number of strata: 10 
+Setup: big strata 
+Standard errors: adjusted (HC1) 
+Treatment assignment: cluster level 
+Covariates used in linear adjustments: 
 ---
 Coefficients:
-      Tau   As.se   T-stat P-value CI.left(95%) CI.right(95%) Significance
-1 0.01614 0.04513  0.35753 0.72069     -0.07232        0.1046             
-2 0.78642 0.04642 16.94263 0.00000      0.69545        0.8774          ***
+      Tau   As.se  T-stat P-value CI.left(95%) CI.right(95%) Significance
+1 1.13687 0.31181 3.64608 0.00027      0.52574       1.74799          ***
+2 0.66447 0.30263 2.19565 0.02812      0.07133       1.25761            *
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
@@ -187,7 +191,11 @@ The function returns an object of class `sreg` that is a list containing the fol
   
 - **`data` -** an original data of the form `data.frame(Y, S, D, G.id, Ng, X)`;
   
-- **`lin.adj` -** a `data.frame` representing the covariates that were used in implementing linear adjustments.
+- **`lin.adj` -** a `data.frame` representing the covariates that were used in implementing linear adjustments;
+  
+- **`small.strata` -** a `TRUE/FALSE` logical argument indicating whether the estimators for small strata (e.g., matched pairs or n-tuples) were used;
+
+- **`HC1` -** a `TRUE/FALSE` logical argument indicating whether the small sample correction (HC1) was applied to the variance estimator.
 
 ### Empirical Example
 
