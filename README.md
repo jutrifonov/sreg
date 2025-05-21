@@ -83,23 +83,27 @@ install_github("jutrifonov/sreg")
 ```
 ``` r
 Downloading GitHub repo jutrifonov/sreg@HEAD
-── R CMD build ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-✔  checking for file ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq...
+── R CMD build ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+✔  checking for file ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq/T/RtmpVk96vN/remotes1026130d7f9b4/jutrifonov-sreg-53c1377/DESCRIPTION’ ...
 ─  preparing ‘sreg’:
-✔  checking DESCRIPTION meta-information
+✔  checking DESCRIPTION meta-information ...
 ─  checking for LF line-endings in source and make files and shell scripts
 ─  checking for empty or unneeded directories
-─  building ‘sreg_1.0.1.9000.tar.gz’
+─  building ‘sreg_2.0.0.9000.tar.gz’
    
+Installing package into ‘/opt/homebrew/lib/R/4.4/site-library’
+(as ‘lib’ is unspecified)
 * installing *source* package ‘sreg’ ...
 ** using staged installation
 ** R
 ** data
 *** moving datasets to lazyload DB
+** inst
 ** byte-compile and prepare package for lazy loading
 ** help
 *** installing help indices
 ** building package indices
+** installing vignettes
 ** testing if installed package can be loaded from temporary location
 ** testing if installed package can be loaded from final location
 ** testing if installed package keeps a record of temporary installation path
@@ -109,14 +113,15 @@ Downloading GitHub repo jutrifonov/sreg@HEAD
 library(sreg)
 ```
 ``` r
+ℹ Loading sreg
+  ____  ____  _____ ____      Stratified Randomized
+ / ___||  _ \| ____/ ___|     Experiments
+ \___ \| |_) |  _|| |  _  
+  ___) |  _ <| |__| |_| |  
+ |____/|_| \_\_____\____| version 2.0.0.9000
+                           
 
-#>  ____  ____  _____ ____      Stratified Randomized
-#> / ___||  _ \| ____/ ___|     Experiments
-#> \___ \| |_) |  _|| |  _  
-#>  ___) |  _ <| |__| |_| |  
-#> |____/|_| \_\_____\____| version 1.0.1.9000
-
-#> Type 'citation("sreg")' for citing this R package in publications.                    
+Type 'citation("sreg")' for citing this R package in publications.                
 ```
 
 ## The function `sreg()`
