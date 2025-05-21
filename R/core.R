@@ -100,7 +100,8 @@
 #' result <- sreg(Y, S, D, G.id = NULL, X = X)
 #' print(result)
 #' ### Example 3. Matched Pairs (small strata).
-#' data <- sreg.rgen(n = 1000, tau.vec = c(1.2), cluster = FALSE, small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
+#' data <- sreg.rgen(n = 1000, tau.vec = c(1.2), cluster = FALSE,
+#'                   small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
 #' Y <- data$Y
 #' S <- data$S
 #' D <- data$D

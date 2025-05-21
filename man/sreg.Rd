@@ -90,6 +90,15 @@ S <- data.clean$S
 X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 result <- sreg(Y, S, D, G.id = NULL, X = X)
 print(result)
+### Example 3. Matched Pairs (small strata).
+data <- sreg.rgen(n = 1000, tau.vec = c(1.2), cluster = FALSE,
+                  small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
+Y <- data$Y
+S <- data$S
+D <- data$D
+X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+result <- sreg(Y = Y, S = S, D = D, X = X, small.strata = TRUE)
+print(result)
 }
 \references{
 Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. \emph{Journal of the American Statistical Association}, 113(524), 1784–1796, \doi{10.1080/01621459.2017.1375934}.
