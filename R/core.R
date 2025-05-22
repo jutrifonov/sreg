@@ -6,6 +6,8 @@
 #' @import dplyr
 #' @import rlang
 #' @import cli
+#' @import ggplot2
+#' @import viridis
 #' @importFrom purrr map_dfr map2 map_dbl
 #' @importFrom stats aggregate coef lm pnorm qnorm rbeta rnorm na.omit
 #' @importFrom utils packageVersion

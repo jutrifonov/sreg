@@ -90,3 +90,61 @@ print.sreg <- function(x, ...) {
     }
   }
 }
+
+#' Plot Method for `sreg` Objects
+#'
+#' Visualize estimated ATEs and confidence intervals for objects of class \code{sreg}.
+#'
+#' @param x An object of class \code{sreg}.
+#' @param treatment_labels Optional vector of treatment labels.
+#' @param ... Additional arguments (not used).
+#'
+#' @method plot sreg
+#' @export
+#' @return A ggplot object (invisible).
+plot.sreg <- function(x, treatment_labels = NULL, ...) {
+  library(ggplot2)
+  library(viridis)
+
+  df <- data.frame(
+    treatment = seq_along(x$tau.hat),
+    tau = x$tau.hat,
+    CI.lower = x$CI.left,
+    CI.upper = x$CI.right,
+    SE = x$se.rob
+  )
+
+  if (!is.null(treatment_labels)) {
+    df$label <- factor(treatment_labels, levels = rev(treatment_labels))
+  } else {
+    df$label <- factor(paste("Treatment", df$treatment), levels = rev(paste("Treatment", df$treatment)))
+  }
+
+  p <- ggplot(df, aes(y = label)) +
+    geom_rect(aes(
+      xmin = CI.lower,
+      xmax = CI.upper,
+      ymin = as.numeric(label) - 0.01,
+      ymax = as.numeric(label) + 0.01,
+      fill = tau
+    ), alpha = 0.8) +
+    geom_point(aes(x = tau), shape = 23, size = 3, fill = "white", stroke = 1.2, color = "black") +
+    geom_text(aes(x = tau, label = sprintf("%.2f (%.2f)", tau, SE)),
+              vjust = -1.5, color = "black", size = 4) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
+    scale_fill_viridis_c(option = "viridis", name = "Effect Size") +
+    labs(
+      x = "Treatment Effect",
+      y = NULL,
+      title = "Estimated ATEs with Confidence Intervals"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      axis.text.y = element_text(hjust = 1),
+      axis.title.x = element_text(face = "bold"),
+      legend.position = "right"
+    )
+
+  print(p)
+  invisible(p)
+}

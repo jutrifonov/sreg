@@ -604,8 +604,9 @@ library("sreg")
 library("dplyr")
 library("haven")
 #' ### Example 1. Simulated Data.
-data <- sreg.rgen(n = 1200, tau.vec = c(1.2), n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1), k = 2)
+data <- sreg.rgen(n = 1200, tau.vec = c(0.2, 0.5, 0.8), n.strata = 4, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
 Y <- data$Y
+
 
 S <- data$S
 D <- data$D
@@ -615,6 +616,9 @@ Ng <- data$Ng
 result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X)
 sreg(Y, S = S, D, G.id = NULL, Ng = NULL, X = X)
 print(result)
+plot(result)
+
+
 
 dtapm <- sreg.rgen(n = 100, tau.vec = c(1.2), cluster = FALSE, small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
 result <- sreg(Y = dtapm$Y, S = dtapm$S, D = dtapm$D, X = dtapm$X, small.strata = FALSE, G.id = dtapm$G.id, Ng = dtapm$Ng)
@@ -660,3 +664,170 @@ result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
 print(result)
 
 
+result
+
+
+
+
+
+plot_sreg_results <- function(result) {
+  # Load ggplot2
+  library(ggplot2)
+
+  # Construct a data frame from result
+  df <- data.frame(
+    treatment = factor(seq_along(result$tau.hat)),  # factor for x-axis
+    tau = result$tau.hat,
+    CI.lower = result$CI.left,
+    CI.upper = result$CI.right
+  )
+
+  # Create the plot
+  ggplot(df, aes(x = treatment, y = tau)) +
+    geom_point(size = 3) +
+    geom_errorbar(aes(ymin = CI.lower, ymax = CI.upper), width = 0.1) +
+    labs(
+      x = "Treatment Group",
+      y = "Estimated ATE",
+      title = "Point Estimates and Confidence Intervals for ATE"
+    ) +
+    theme_minimal()
+}
+
+plot_sreg_results_fancy <- function(result) {
+  library(ggplot2)
+
+  df <- data.frame(
+    treatment = factor(seq_along(result$tau.hat)),
+    tau = result$tau.hat,
+    CI.lower = result$CI.left,
+    CI.upper = result$CI.right
+  )
+
+  # Add numeric version of treatment for proper ribbon plotting
+  df$treatment_num <- as.numeric(df$treatment)
+
+  ggplot(df, aes(x = treatment_num, y = tau)) +
+    # Confidence interval ribbon with transparency
+    geom_ribbon(aes(ymin = CI.lower, ymax = CI.upper), fill = "#1f78b4", alpha = 0.2) +
+    # ATE point estimates
+    geom_point(size = 4, color = "#1f78b4") +
+    # Optional dashed line connecting points
+    geom_line(color = "#1f78b4", linetype = "dashed") +
+    # Horizontal line at 0
+    geom_hline(yintercept = 0, linetype = "dotted", color = "gray40") +
+    # Set treatment labels on x-axis
+    scale_x_continuous(
+      breaks = df$treatment_num,
+      labels = df$treatment
+    ) +
+    labs(
+      x = "Treatment Group",
+      y = "Estimated ATE",
+      title = "Estimated ATEs with Confidence Intervals"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      axis.title = element_text(face = "bold"),
+      panel.grid.major.y = element_line(color = "gray90")
+    )
+}
+plot_sreg_results(result)
+plot_sreg_results_fancy(result)
+plot_sreg_horizontal(result)
+plot_sreg_horizontal <- function(result, treatment_labels = NULL) {
+  library(ggplot2)
+
+  df <- data.frame(
+    treatment = seq_along(result$tau.hat),
+    tau = result$tau.hat,
+    CI.lower = result$CI.left,
+    CI.upper = result$CI.right,
+    SE = round((result$CI.right - result$tau.hat) / 1.96, 2)
+  )
+
+  if (!is.null(treatment_labels)) {
+    df$label <- factor(treatment_labels, levels = rev(treatment_labels))
+  } else {
+    df$label <- factor(paste("Treatment", df$treatment), levels = rev(paste("Treatment", df$treatment)))
+  }
+
+  ggplot(df, aes(y = label)) +
+    # Horizontal CI bar
+    geom_rect(aes(xmin = CI.lower, xmax = CI.upper, ymin = as.numeric(label) - 0.01, ymax = as.numeric(label) + 0.01),
+              fill = "#2c3e50", alpha = 0.8) +
+    # Diamond-shaped point
+    geom_point(aes(x = tau), shape = 23, size = 3, fill = "white", stroke = 1.2, color = "black") +
+    # Text label with tau (SE)
+    geom_text(aes(x = tau, label = sprintf("%.2f (%.2f)", tau, SE)),
+              vjust = -1.5, color = "black", size = 4) +
+    # Vertical line at 0
+    geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
+    labs(
+      x = "Treatment Effect",
+      y = NULL,
+      title = "Estimated ATEs with Confidence Intervals"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      axis.text.y = element_text(hjust = 1),
+      axis.title.x = element_text(face = "bold")
+    )
+}
+
+result
+
+plot_sreg_horizontal <- function(result, treatment_labels = NULL) {
+  library(ggplot2)
+
+  df <- data.frame(
+    treatment = seq_along(result$tau.hat),
+    tau = result$tau.hat,
+    CI.lower = result$CI.left,
+    CI.upper = result$CI.right,
+    SE = result$se.rob
+  )
+
+  if (!is.null(treatment_labels)) {
+    df$label <- factor(treatment_labels, levels = rev(treatment_labels))
+  } else {
+    df$label <- factor(paste("Treatment", df$treatment), levels = rev(paste("Treatment", df$treatment)))
+  }
+
+  ggplot(df, aes(y = label)) +
+    geom_rect(aes(
+      xmin = CI.lower,
+      xmax = CI.upper,
+      ymin = as.numeric(label) - 0.01,
+      ymax = as.numeric(label) + 0.01,
+      fill = tau
+    ), alpha = 0.8) +
+    geom_point(aes(x = tau), shape = 23, size = 3, fill = "white", stroke = 1.2, color = "black") +
+    geom_text(aes(x = tau, label = sprintf("%.2f (%.2f)", tau, SE)),
+              vjust = -1.5, color = "black", size = 4) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
+    scale_fill_viridis_c(option = "viridis", name = "Effect Size") +
+    #scale_fill_gradient(low = "#bdd7e7", high = "#08519c", name = "Effect Size") +
+    labs(
+      x = "Treatment Effect",
+      y = NULL,
+      title = "Estimated ATEs with Confidence Intervals"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      axis.text.y = element_text(hjust = 1),
+      axis.title.x = element_text(face = "bold"),
+      legend.position = "right"
+    )
+}
+
+
+library(viridis)
+plot_sreg_horizontal(result)
+
+
+
+result
+plot(result)
+
+class(result)
