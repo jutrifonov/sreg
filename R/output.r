@@ -1,3 +1,4 @@
+utils::globalVariables(c("CI.lower", "CI.upper", "SE", "label", "tau"))
 #' Print \code{sreg} Objects
 #'
 #' Print the summary table of estimation results for \code{sreg} objects.
@@ -103,8 +104,6 @@ print.sreg <- function(x, ...) {
 #' @export
 #' @return A ggplot object (invisible).
 plot.sreg <- function(x, treatment_labels = NULL, ...) {
-  library(ggplot2)
-  library(viridis)
 
   df <- data.frame(
     treatment = seq_along(x$tau.hat),

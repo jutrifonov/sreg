@@ -18,7 +18,9 @@ Imports:
     purrr,
     extraDistr,
     rlang,
-    cli
+    cli,
+    ggplot2,
+    viridis
 Suggests:
     haven,
     knitr,
