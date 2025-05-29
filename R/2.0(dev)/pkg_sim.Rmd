@@ -831,3 +831,184 @@ result
 plot(result)
 
 class(result)
+
+
+
+design.classifier <- function(data, S) {
+  S_sym <- rlang::ensym(S)
+
+  # Step 1: Compute stratum sizes
+  strata_sizes <- data %>%
+    group_by(!!S_sym) %>%
+    summarise(size = n(), .groups = "drop")
+
+  unique_sizes <- unique(strata_sizes$size)
+
+  if (length(unique_sizes) == 1) {
+    # All strata are the same size — no mixed design
+    return(data)
+  }
+
+  # Step 2: Find modal stratum size (the "small strata" size)
+  modal_size <- strata_sizes %>%
+    count(size) %>%
+    arrange(desc(n)) %>%
+    slice(1) %>%
+    pull(size)
+
+  # Step 3: Classify each stratum
+  strata_sizes <- strata_sizes %>%
+    mutate(stratum_type = ifelse(size == modal_size, "small", "big"))
+
+  # Step 4: Join classification back to full dataset
+  data_classified <- data %>%
+    left_join(strata_sizes, by = rlang::as_string(S_sym))
+
+  # Step 5: Issue warning
+  warning("Mixed design detected: strata of varying sizes found. Weighted estimators will be used.")
+
+  return(data_classified)
+}
+
+
+data_s <- sreg.rgen(n = 6000, tau.vec = c(0.2), n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1), k = 2)
+Y <- data$Y
+S <- data$S
+
+data_b <- sreg.rgen(n = 51, tau.vec = c(0.2), n.strata = 2, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+# Step 1: Get the max stratum ID in data_s
+max_id <- max(data_s$S)
+
+# Step 2: Get unique strata in data_b and assign new IDs
+unique_b_strata <- sort(unique(data_b$S))
+num_b_strata <- length(unique_b_strata)
+
+# Create a named mapping from old to new stratum IDs
+new_ids <- seq(max_id + 1, max_id + num_b_strata)
+stratum_map <- setNames(new_ids, unique_b_strata)
+
+# Step 3: Relabel data_b$S
+data_b$S <- stratum_map[as.character(data_b$S)]
+
+
+data <- rbind(data_s, data_b)
+S <- data$S
+
+design.classifier(data, S)
+
+## ----- ## ----- ## ----- ## ---- ## ----- #
+
+# Step 1: Classify strata
+data_all <- design.classifier(data, S)
+
+# Step 2: Split the data
+data_small <- dplyr::filter(data_all, stratum_type == "small")
+data_big   <- dplyr::filter(data_all, stratum_type == "big")
+
+# Step 3: Run the estimators
+res_small <- res.sreg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = data_small[, grep("^x_", names(data_small)), drop = FALSE], HC1 = TRUE)
+res_small$tau.hat
+
+res_small$se.rob
+
+res_big <- res.sreg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = data_big[, grep("^x_", names(data_big)), drop = FALSE], HC1 = TRUE)
+res_big$tau.hat
+res_big$se.rob
+
+# Step 4: Combine estimates
+N_small <- nrow(data_small)
+N_big   <- nrow(data_big)
+N_total <- N_small + N_big
+
+tau_hat <- (N_small / N_total) * res_small$tau.hat + (N_big / N_total) * res_big$tau.hat
+
+se_combined <- sqrt((N_small / N_total)^2 * res_small$se.rob^2 +
+                    (N_big   / N_total)^2 * res_big$se.rob^2)
+
+
+```
+
+
+## Simulations for the combined estimator
+```{r}
+nsim = 1000
+tau.vec = c(0.2, 0.8)
+n.treat = length(tau.vec)
+n_1 = 3000
+n_2 = 80
+
+theta_hat_mtrx <- matrix(ncol = n.treat, nrow = nsim)
+
+se_hat_mtrx <- matrix(ncol = n.treat, nrow = nsim)
+hit <- matrix(ncol = n.treat, nrow = nsim)
+
+for (s in 1:nsim)
+{
+data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+Y <- data$Y
+S <- data$S
+
+data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+# Step 1: Get the max stratum ID in data_s
+max_id <- max(data_s$S)
+
+# Step 2: Get unique strata in data_b and assign new IDs
+unique_b_strata <- sort(unique(data_b$S))
+num_b_strata <- length(unique_b_strata)
+
+# Create a named mapping from old to new stratum IDs
+new_ids <- seq(max_id + 1, max_id + num_b_strata)
+stratum_map <- setNames(new_ids, unique_b_strata)
+
+# Step 3: Relabel data_b$S
+data_b$S <- stratum_map[as.character(data_b$S)]
+
+
+data <- rbind(data_s, data_b)
+
+## ----- ## ----- ## ----- ## ---- ## ----- #
+
+# Step 1: Classify strata
+data_all <- design.classifier(data, S)
+
+# Step 2: Split the data
+data_small <- dplyr::filter(data_all, stratum_type == "small")
+data_big   <- dplyr::filter(data_all, stratum_type == "big")
+
+# Step 3: Run the estimators
+res_small <- res.sreg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = data_small[, grep("^x_", names(data_small)), drop = FALSE], HC1 = TRUE)
+
+res_big <- res.sreg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = data_big[, grep("^x_", names(data_big)), drop = FALSE], HC1 = TRUE)
+
+
+# Step 4: Combine estimates
+N_small <- nrow(data_small)
+N_big   <- nrow(data_big)
+N_total <- N_small + N_big
+
+tau_hat <- (N_small / N_total) * res_small$tau.hat + (N_big / N_total) * res_big$tau.hat
+
+se_combined <- sqrt((N_small / N_total)^2 * res_small$se.rob^2 +
+                    (N_big   / N_total)^2 * res_big$se.rob^2)
+
+theta_hat_mtrx[s, ] <- tau_hat
+se_hat_mtrx[s, ] <- se_combined
+
+upper <- tau_hat + qnorm(0.975) * se_combined
+lower <- tau_hat - qnorm(0.975) * se_combined
+hit[s, ] <- (tau.vec < upper) & (tau.vec > lower)
+print(s)
+}
+
+result_table <- data.frame(
+  `True tau` = tau.vec,
+  `E[tau_n]` = round(colMeans(theta_hat_mtrx), 4),
+  `True Variance` = round(colMeans(se_hat_mtrx), 4),
+  `E[V_n]` = round(apply(theta_hat_mtrx, 2, sd), 4),
+  `Coverage` = round(colMeans(hit), 4),
+  check.names = FALSE
+)
+print(result_table)
+```
+
+

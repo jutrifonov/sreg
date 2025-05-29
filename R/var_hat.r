@@ -53,23 +53,30 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Y.tau.D.all <- j %>%
         select(c("S", "A", "Y.tau")) %>%
         spread(key = "A", value = "Y.tau")
-
+      #print(data.frame(Xi.tilde.1.all))
       Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
       Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all), -1))
+      #print(data.frame(Y.tau.D.all))
 
-      Xi.1.mean <- Xi.tilde.1.mean[S, 2]
-      Xi.0.mean <- Xi.tilde.0.mean[S, 1]
-      Y.tau.D.1.mean <- Y.tau.D.mean[S, 2]
-      Y.tau.D.0.mean <- Y.tau.D.mean[S, 1]
+      #Xi.1.mean <- Xi.tilde.1.mean[S, 2]
+      S_reset <- as.integer(factor(S, levels = Xi.tilde.1.all$S))
+      Xi.1.mean <- Xi.tilde.1.mean[S_reset, 2]
+      S_reset <- as.integer(factor(S, levels = Xi.tilde.0.all$S))
+      Xi.0.mean <- Xi.tilde.0.mean[S_reset, 1]
+      S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
+      Y.tau.D.1.mean <- Y.tau.D.mean[S_reset, 2]
+      Y.tau.D.0.mean <- Y.tau.D.mean[S_reset, 1]
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
       sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2)
+      
       if (HC1 == TRUE) {
-        var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S) + max(D) * max(S)))) +
+        S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
+        var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S_reset) + max(D) * max(S_reset)))) +
           mean(Xi.hat.2^2)
       } else {
         var.vec[d] <- sigma.hat.sq
