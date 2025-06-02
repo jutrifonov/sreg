@@ -37,9 +37,43 @@ print.sreg <- function(x, ...) {
   }
   cat(paste(col_blue("Number of treatments:"), max(x$data$D), "\n"))
   cat(paste(col_blue("Number of strata:"), max(x$data$S), "\n"))
-  cat(paste(col_blue("Setup:"), ifelse(!is.null(x$small.strata) && x$small.strata, "small strata", "big strata"), "\n"))
-  if (x$small.strata) {
-    k <- length(x$data$Y) / max(x$data$S)
+  cat(paste(
+  col_blue("Setup:"),
+  if (!is.null(x$mixed.design) && x$mixed.design) {
+    "mixed design (includes both small and large strata)"
+  } else if (!is.null(x$small.strata) && x$small.strata) {
+    "small strata"
+  } else {
+    "big strata"
+  },
+  "\n"
+))
+  if (!is.null(x$mixed.design) && x$mixed.design) {
+    data_small <- x$res.small$data
+    if (is.null(data_small$G.id)) {
+      k <- nrow(data_small) / max(data_small$S)
+    } else {
+      cluster_per_stratum <- unique(data.frame(S = data_small$S, G.id = data_small$G.id))
+      strata_sizes <- table(cluster_per_stratum$S)
+      if (length(unique(strata_sizes)) == 1) {
+        k <- unique(strata_sizes)
+      } else {
+        k <- paste0("varying (min=", min(strata_sizes), ", max=", max(strata_sizes), ")")
+      }
+    }
+    cat(paste(col_blue("Strata size (k, small strata only):"), k, "\n"))
+  } else if (!is.null(x$small.strata) && x$small.strata) {
+    if (is.null(x$data$G.id)) {
+      k <- length(x$data$Y) / max(x$data$S)
+    } else {
+      cluster_per_stratum <- unique(data.frame(S = x$data$S, G.id = x$data$G.id))
+      strata_sizes <- table(cluster_per_stratum$S)
+      if (length(unique(strata_sizes)) == 1) {
+        k <- unique(strata_sizes)
+      } else {
+        k <- paste0("varying (min=", min(strata_sizes), ", max=", max(strata_sizes), ")")
+      }
+    }
     cat(paste(col_blue("Strata size (k):"), k, "\n"))
   }
   cat(paste(col_blue("Standard errors:"), ifelse(!is.null(x$HC1) && x$HC1, "adjusted (HC1)", "unadjusted"), "\n"))
@@ -86,8 +120,13 @@ print.sreg <- function(x, ...) {
   }
 
   if (!is.null(x$lin.adj) && !is.null(x$data$G.id)) {
-    if (!check.cluster(data.frame("G.id" = x$data$G.id, x$lin.adj))) {
-      warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
+    if (!is.null(x$mixed.design) && x$mixed.design) {
+      gid_check <- x$res.small$data$G.id
+    } else {
+      gid_check <- x$data$G.id
+    }
+
+if (!check.cluster(data.frame("G.id" = gid_check, x$lin.adj))) {
     }
   }
 }

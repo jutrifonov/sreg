@@ -245,7 +245,7 @@ agg_data <- agg_data %>%
 
 ```{r}
 n_treat <- 3 
-nsim <- 10000
+nsim <- 10
 tau_vec <- c(0.2, 1.2, 0.7)
 gamma_vec <- c(0.4, 0.2, 1)
 # n.treat = 2
@@ -606,7 +606,7 @@ library("haven")
 #' ### Example 1. Simulated Data.
 data <- sreg.rgen(n = 1200, tau.vec = c(0.2, 0.5, 0.8), n.strata = 4, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
 Y <- data$Y
-
+head(data)
 
 S <- data$S
 D <- data$D
@@ -620,10 +620,10 @@ plot(result)
 
 
 
-dtapm <- sreg.rgen(n = 100, tau.vec = c(1.2), cluster = FALSE, small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
-result <- sreg(Y = dtapm$Y, S = dtapm$S, D = dtapm$D, X = dtapm$X, small.strata = FALSE, G.id = dtapm$G.id, Ng = dtapm$Ng)
+dtapm <- sreg.rgen(n = 100, tau.vec = c(1.2), cluster = TRUE, small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
+result <- sreg(Y = dtapm$Y, S = dtapm$S, D = dtapm$D, X = dtapm$X, small.strata = TRUE, G.id = dtapm$G.id, Ng = dtapm$Ng)
 result
-
+head(dtapm)
 data <- sreg.rgen(n = 300, tau.vec = c(1.2, 0.8), cluster = FALSE, small.strata = TRUE, k = 3, treat.sizes = c(1, 1, 1))
 head(data)
 
@@ -870,12 +870,66 @@ design.classifier <- function(data, S) {
   return(data_classified)
 }
 
+# ------------------------------------------------------------------
+#  Classify strata as "small" or "big" in a mixed design
+# ------------------------------------------------------------------
+design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TRUE) {
+  ## 1. Capture column names (works with bare names or strings)
+  S_name <- if (is.character(substitute(S))) substitute(S) else deparse(substitute(S))
+  G_name <- if (!missing(G.id)) {
+    if (is.character(substitute(G.id))) substitute(G.id) else deparse(substitute(G.id))
+  } else {
+    NULL
+  }
 
-data_s <- sreg.rgen(n = 6000, tau.vec = c(0.2), n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1), k = 2)
+  ## 2. Compute stratum sizes
+  if (!is.null(G_name)) {
+    # -- clustered: count *clusters* per stratum
+    cluster_strata <- dplyr::distinct(data, .data[[S_name]], .data[[G_name]])
+    strata_sizes   <- dplyr::count(cluster_strata, .data[[S_name]], name = "size")
+  } else {
+    # -- individual: count *units* per stratum
+    strata_sizes   <- dplyr::count(data, .data[[S_name]], name = "size")
+  }
+
+  ## 3. If every stratum has the same size, nothing to classify
+  if (length(unique(strata_sizes$size)) == 1) {
+    if (!keep.size) strata_sizes$size <- NULL  # cosmetic
+    return(dplyr::left_join(data, strata_sizes, by = S_name))
+  }
+
+  ## 4. Find the modal size and classify
+  modal_size <- strata_sizes %>%
+    dplyr::count(size) %>%
+    dplyr::arrange(dplyr::desc(n)) %>%
+    dplyr::pull(size) %>%
+    .[[1]]
+
+  strata_sizes <- strata_sizes %>%
+    dplyr::mutate(stratum_type = ifelse(size == modal_size, "small", "big"))
+
+  if (!keep.size) strata_sizes$size <- NULL
+
+  ## 5. Merge back and optionally warn
+  out <- dplyr::left_join(data, strata_sizes, by = S_name)
+
+  if (warn)
+    warning("Mixed design detected: strata of varying cluster/unit counts. ",
+            "Weighted estimators will be used.", call. = FALSE)
+
+  return(out)
+}
+
+
+data_s <- sreg.rgen(n = 3000, tau.vec = c(0.2, 0.8), n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
 Y <- data$Y
 S <- data$S
-
-data_b <- sreg.rgen(n = 51, tau.vec = c(0.2), n.strata = 2, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+#sreg(Y = data_s$Y, S = data_s$S, D = data_s$D, G.id = data_s$G.id, Ng = data_s$Ng, X = NULL, small.strata = TRUE)
+#pum <- res.creg.ss(Y = data_s$Y, D = data_s$D, S = data_s$S, G.id = data_s$G.id, Ng = data_s$Ng, X = data.frame(data_s$x_1, data_s$x_2), HC1 = FALSE)
+S <- data_s$S
+#pum$tau.hat
+#pum$se.rob
+data_b <- sreg.rgen(n = 50, tau.vec = c(0.2, 0.8), n.strata = 2, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
 # Step 1: Get the max stratum ID in data_s
 max_id <- max(data_s$S)
 
@@ -890,28 +944,39 @@ stratum_map <- setNames(new_ids, unique_b_strata)
 # Step 3: Relabel data_b$S
 data_b$S <- stratum_map[as.character(data_b$S)]
 
+# 🧠 Step 4: Make cluster IDs unique across the two datasets!!!!!
+max_gid <- max(data_s$G.id)
+data_b$G.id <- data_b$G.id + max_gid
+length(intersect(data_s$G.id, data_b$G.id)) == 0
 
-data <- rbind(data_s, data_b)
+data <- rbind(data_s[, -ncol(data_s)], data_b)
 S <- data$S
+G.id <- data$G.id
 
-design.classifier(data, S)
+design.classifier(data, S, G.id)
 
 ## ----- ## ----- ## ----- ## ---- ## ----- #
 
 # Step 1: Classify strata
-data_all <- design.classifier(data, S)
+data_all <- design.classifier(data, S, G.id)
 
 # Step 2: Split the data
 data_small <- dplyr::filter(data_all, stratum_type == "small")
 data_big   <- dplyr::filter(data_all, stratum_type == "big")
 
-# Step 3: Run the estimators
-res_small <- res.sreg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = data_small[, grep("^x_", names(data_small)), drop = FALSE], HC1 = TRUE)
-res_small$tau.hat
+#sreg(Y = data_small$Y, S = data_small$S, D = data_small$D, G.id = data_small$G.id, Ng = data_small$Ng, X = NULL, small.strata = TRUE)
 
+# Step 3: Run the estimators
+#res_small <- res.sreg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = data_small[, grep("^x_", names(data_small)), drop = FALSE], HC1 = TRUE)
+res_small <- res.sreg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = data.frame(data_small$x_1, data_small$x_2), HC1 = TRUE)
+res_small <- res.creg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, G.id = data_small$G.id, Ng = data_small$Ng, X = data.frame(data_small$x_1, data_small$x_2), HC1 = FALSE)
+res_small$tau.hat
 res_small$se.rob
 
-res_big <- res.sreg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = data_big[, grep("^x_", names(data_big)), drop = FALSE], HC1 = TRUE)
+
+#res_big <- res.sreg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = data_big[, grep("^x_", names(data_big)), drop = FALSE], HC1 = TRUE)
+res_big <- res.sreg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = NULL, HC1 = TRUE)
+res_big <- res.creg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = NULL, G.id = data_big$G.id, Ng = data_big$Ng, HC1 = FALSE)
 res_big$tau.hat
 res_big$se.rob
 
@@ -925,17 +990,16 @@ tau_hat <- (N_small / N_total) * res_small$tau.hat + (N_big / N_total) * res_big
 se_combined <- sqrt((N_small / N_total)^2 * res_small$se.rob^2 +
                     (N_big   / N_total)^2 * res_big$se.rob^2)
 
-
 ```
 
 
-## Simulations for the combined estimator
+## Simulations for the combined estimator (sreg)
 ```{r}
 nsim = 1000
 tau.vec = c(0.2, 0.8)
 n.treat = length(tau.vec)
 n_1 = 3000
-n_2 = 80
+n_2 = 50
 
 theta_hat_mtrx <- matrix(ncol = n.treat, nrow = nsim)
 
@@ -976,9 +1040,11 @@ data_small <- dplyr::filter(data_all, stratum_type == "small")
 data_big   <- dplyr::filter(data_all, stratum_type == "big")
 
 # Step 3: Run the estimators
-res_small <- res.sreg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = data_small[, grep("^x_", names(data_small)), drop = FALSE], HC1 = TRUE)
+#res_small <- res.sreg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = data_small[, grep("^x_", names(data_small)), drop = FALSE], HC1 = TRUE)
+res_small <- res.sreg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = NULL, HC1 = FALSE)
 
-res_big <- res.sreg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = data_big[, grep("^x_", names(data_big)), drop = FALSE], HC1 = TRUE)
+#res_big <- res.sreg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = data_big[, grep("^x_", names(data_big)), drop = FALSE], HC1 = TRUE)
+res_big <- res.sreg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = NULL, HC1 = FALSE)
 
 
 # Step 4: Combine estimates
@@ -1010,5 +1076,231 @@ result_table <- data.frame(
 )
 print(result_table)
 ```
+## Simulations for the combined estimator (creg)
+```{r}
+nsim = 1000
+tau.vec = c(0.2, 0.8)
+n.treat = length(tau.vec)
+n_1 = 3000
+n_2 = 50
+
+theta_hat_mtrx <- matrix(ncol = n.treat, nrow = nsim)
+
+se_hat_mtrx <- matrix(ncol = n.treat, nrow = nsim)
+hit <- matrix(ncol = n.treat, nrow = nsim)
+
+for (s in 1:nsim)
+{
+data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+Y <- data$Y
+S <- data$S
+
+data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+# Step 1: Get the max stratum ID in data_s
+max_id <- max(data_s$S)
+
+# Step 2: Get unique strata in data_b and assign new IDs
+unique_b_strata <- sort(unique(data_b$S))
+num_b_strata <- length(unique_b_strata)
+
+# Create a named mapping from old to new stratum IDs
+new_ids <- seq(max_id + 1, max_id + num_b_strata)
+stratum_map <- setNames(new_ids, unique_b_strata)
+
+# Step 3: Relabel data_b$S
+data_b$S <- stratum_map[as.character(data_b$S)]
+
+# 🧠 Step 4: Make cluster IDs unique across the two datasets!!!!!
+max_gid <- max(data_s$G.id)
+data_b$G.id <- data_b$G.id + max_gid
+length(intersect(data_s$G.id, data_b$G.id)) == 0
+
+data <- rbind(data_s[, -ncol(data_s)], data_b)
+
+## ----- ## ----- ## ----- ## ---- ## ----- #
+
+# Step 1: Classify strata
+data_all <- design.classifier(data, S, G.id)
+
+# Step 2: Split the data
+data_small <- dplyr::filter(data_all, stratum_type == "small")
+data_big   <- dplyr::filter(data_all, stratum_type == "big")
+
+# Step 3: Run the estimators
+#res_small <- res.sreg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = data_small[, grep("^x_", names(data_small)), drop = FALSE], HC1 = TRUE)
+res_small <- res.creg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S, X = data.frame(data_small$x_1, data_small$x_2), G.id = data_small$G.id, Ng = data_small$Ng, HC1 = TRUE)
+
+#res_big <- res.sreg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = data_big[, grep("^x_", names(data_big)), drop = FALSE], HC1 = TRUE)
+res_big <- res.creg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = NULL, G.id = data_big$G.id, Ng = data_big$Ng, HC1 = FALSE)
+#res_big <- res.creg(Y = data_big$Y, D = data_big$D, S = data_big$S, X = data.frame(data_big$x_1, data_big$x_2), G.id = data_big$G.id, Ng = data_big$Ng, HC1 = TRUE)
+res_big$tau.hat
+res_big$se.rob
+
+# Step 4: Combine estimates
+N_small <- nrow(data_small)
+N_big   <- nrow(data_big)
+N_total <- N_small + N_big
+
+tau_hat <- (N_small / N_total) * res_small$tau.hat + (N_big / N_total) * res_big$tau.hat
+
+se_combined <- sqrt((N_small / N_total)^2 * res_small$se.rob^2 +
+                    (N_big   / N_total)^2 * res_big$se.rob^2)
+
+theta_hat_mtrx[s, ] <- tau_hat
+se_hat_mtrx[s, ] <- se_combined
+
+upper <- tau_hat + qnorm(0.975) * se_combined
+lower <- tau_hat - qnorm(0.975) * se_combined
+hit[s, ] <- (tau.vec < upper) & (tau.vec > lower)
+print(s)
+}
+
+result_table <- data.frame(
+  `True tau` = tau.vec,
+  `E[tau_n]` = round(colMeans(theta_hat_mtrx), 4),
+  `True Variance` = round(colMeans(se_hat_mtrx), 4),
+  `E[V_n]` = round(apply(theta_hat_mtrx, 2, sd), 4),
+  `Coverage` = round(colMeans(hit), 4),
+  check.names = FALSE
+)
+print(result_table)
+```
+
+```{r}
+data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+Y <- data$Y
+S <- data$S
+
+data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+# Step 1: Get the max stratum ID in data_s
+max_id <- max(data_s$S)
+
+# Step 2: Get unique strata in data_b and assign new IDs
+unique_b_strata <- sort(unique(data_b$S))
+num_b_strata <- length(unique_b_strata)
+
+# Create a named mapping from old to new stratum IDs
+new_ids <- seq(max_id + 1, max_id + num_b_strata)
+stratum_map <- setNames(new_ids, unique_b_strata)
+
+# Step 3: Relabel data_b$S
+data_b$S <- stratum_map[as.character(data_b$S)]
+
+# 🧠 Step 4: Make cluster IDs unique across the two datasets!!!!!
+max_gid <- max(data_s$G.id)
+data_b$G.id <- data_b$G.id + max_gid
+length(intersect(data_s$G.id, data_b$G.id)) == 0
+
+data <- rbind(data_s[, -ncol(data_s)], data_b)
+resultim <- res.sreg.mixed(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), HC1 = TRUE)
+resultim$tau.hat
+resultim$se.rob
+
+##### no clusters #####
+data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+Y <- data$Y
+S <- data$S
+
+data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+# Step 1: Get the max stratum ID in data_s
+max_id <- max(data_s$S)
+
+# Step 2: Get unique strata in data_b and assign new IDs
+unique_b_strata <- sort(unique(data_b$S))
+num_b_strata <- length(unique_b_strata)
+
+# Create a named mapping from old to new stratum IDs
+new_ids <- seq(max_id + 1, max_id + num_b_strata)
+stratum_map <- setNames(new_ids, unique_b_strata)
+
+# Step 3: Relabel data_b$S
+data_b$S <- stratum_map[as.character(data_b$S)]
+
+# 🧠 Step 4: Make cluster IDs unique across the two datasets!!!!!
+max_gid <- max(data_s$G.id)
+data_b$G.id <- data_b$G.id + max_gid
+length(intersect(data_s$G.id, data_b$G.id)) == 0
+
+data <- rbind(data_s, data_b)
+resultim <- res.sreg.mixed(Y = data$Y, S = data$S, D = data$D,  X = NULL, HC1 = TRUE)
+resultim$tau.hat
+resultim$se.rob
 
 
+
+```
+
+# Testing the native sreg with the mixed design function
+```{r}
+##### no clusters #####
+data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+Y <- data$Y
+S <- data$S
+
+data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+# Step 1: Get the max stratum ID in data_s
+max_id <- max(data_s$S)
+
+# Step 2: Get unique strata in data_b and assign new IDs
+unique_b_strata <- sort(unique(data_b$S))
+num_b_strata <- length(unique_b_strata)
+
+# Create a named mapping from old to new stratum IDs
+new_ids <- seq(max_id + 1, max_id + num_b_strata)
+stratum_map <- setNames(new_ids, unique_b_strata)
+
+# Step 3: Relabel data_b$S
+data_b$S <- stratum_map[as.character(data_b$S)]
+
+data <- rbind(data_s, data_b)
+resultim <- res.sreg.mixed(Y = data$Y, S = data$S, D = data$D,  X = NULL, HC1 = TRUE)
+resultim$tau.hat
+resultim$se.rob
+
+
+res_sreg <- sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+print(res_sreg)
+res_sreg$tau.hat
+res_sreg$se.rob
+
+
+
+
+
+data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+Y <- data$Y
+S <- data$S
+
+data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+# Step 1: Get the max stratum ID in data_s
+max_id <- max(data_s$S)
+
+# Step 2: Get unique strata in data_b and assign new IDs
+unique_b_strata <- sort(unique(data_b$S))
+num_b_strata <- length(unique_b_strata)
+
+# Create a named mapping from old to new stratum IDs
+new_ids <- seq(max_id + 1, max_id + num_b_strata)
+stratum_map <- setNames(new_ids, unique_b_strata)
+
+# Step 3: Relabel data_b$S
+data_b$S <- stratum_map[as.character(data_b$S)]
+
+# 🧠 Step 4: Make cluster IDs unique across the two datasets!!!!!
+max_gid <- max(data_s$G.id)
+data_b$G.id <- data_b$G.id + max_gid
+length(intersect(data_s$G.id, data_b$G.id)) == 0
+
+data <- rbind(data_s[, -ncol(data_s)], data_b)
+resultim <- res.creg.mixed(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE)
+resultim$tau.hat
+resultim$se.rob
+
+result_creg <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = TRUE)
+promo <- res.creg.mixed(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE)
+promo$tau.hat
+promo$se.rob
+length(promo$lin.adj[,1])
+length(promo$data$G.id)
+print(result_creg)
+```

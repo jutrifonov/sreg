@@ -40,7 +40,7 @@
 #'
 #' Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. \emph{Forthcoming in Review of Economics and Statistics}, \doi{10.48550/arXiv.2204.08356}.
 #'
-#' Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariate adjustment in experiments with matched pairs. \emph{Journal of Econometrics}, 241(1), \doi{10.1016/j.jeconom.2024.105740}. 
+#' Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariate adjustment in experiments with matched pairs. \emph{Journal of Econometrics}, 241(1), \doi{10.1016/j.jeconom.2024.105740}.
 #'
 #' Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. \doi{10.48550/arXiv.2301.09016}.
 #'
@@ -107,8 +107,10 @@
 #' result <- sreg(Y, S, D, G.id = NULL, X = X)
 #' print(result)
 #' ### Example 3. Matched Pairs (small strata).
-#' data <- sreg.rgen(n = 1000, tau.vec = c(1.2), cluster = FALSE,
-#'                   small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
+#' data <- sreg.rgen(
+#'   n = 1000, tau.vec = c(1.2), cluster = FALSE,
+#'   small.strata = TRUE, k = 2, treat.sizes = c(1, 1)
+#' )
 #' Y <- data$Y
 #' S <- data$S
 #' D <- data$D
@@ -133,19 +135,29 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
     check.range(S)
   }
 
+  mixed_design <- FALSE
   if (small.strata == TRUE && !is.null(S)) {
-  strata_sizes <- table(S)
-  if (length(unique(strata_sizes)) > 1) {
-    stop("Error: One or more strata contain a different number of observations while small.strata = TRUE. Consider estimating the model with small.strata = FALSE or providing data with equal-sized strata.")
+    if (!is.null(G.id)) {
+      cluster_strata <- unique(data.frame(S = S, G.id = G.id))
+      strata_sizes <- table(cluster_strata$S)
+    } else {
+      strata_sizes <- table(S)
+    }
+    unique_sizes <- unique(strata_sizes)
+    mixed_design <- length(unique_sizes) > 1
+
+    #  if (length(unique(strata_sizes)) > 1) {
+    #    stop("Error: One or more strata contain a different number of units (or clusters) while small.strata = TRUE. Consider using small.strata = FALSE or providing balanced strata.")
+    #  }
   }
-}
   if (small.strata == FALSE && !is.null(S)) {
-  strata_sizes <- table(S)
-  unique_sizes <- unique(strata_sizes)
-  if (length(unique_sizes) == 1 && unique_sizes[1] <= 5) {
-    warning("Warning: All strata have the same small size (e.g., pairs or triplets), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
+    strata_sizes <- table(S)
+    unique_sizes <- unique(strata_sizes)
+    mixed_design <- length(unique_sizes) > 1
+    if (length(unique_sizes) == 1 && unique_sizes[1] <= 5) {
+      warning("Warning: All strata have the same small size (e.g., pairs or triplets), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
+    }
   }
-}
 
   if ("Ng" %in% names(X)) {
     names(X)[names(X) == "Ng"] <- "Ng_1"
@@ -213,7 +225,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
           }
         }
       }
+      # if (mixed_design){
+      # result <- res.sreg.mixed(Y, S, D, X, HC1)
+      # }else{
       result <- res.sreg(Y, S, D, X, HC1)
+      # }
       if (!is.null(result$lin.adj)) {
         if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
           stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
@@ -226,7 +242,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
       if (is.null(S)) {
         stop("Error: Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification.")
       }
-      result <- res.sreg.ss(Y, S, D, X, HC1)
+      if (mixed_design) {
+        result <- res.sreg.mixed(Y, S, D, X, HC1)
+      } else {
+        result <- res.sreg.ss(Y, S, D, X, HC1)
+      }
       if (!is.null(result$lin.adj)) {
         if (any(sapply(result$beta.hat, function(x) any(is.na(x))))) {
           stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
@@ -239,7 +259,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
   } else {
     check.cluster.lvl(G.id, S, D, Ng)
     if (small.strata == FALSE) {
+      # if(mixed_design){
+      #    result <- res.creg.mixed(Y, S, D, G.id, Ng, X, HC1)
+      # }else{
       result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
+      # }
       if (is.null(Ng)) {
         warning("Warning: Cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
       }
@@ -255,13 +279,26 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
       if (is.null(S)) {
         stop("Error: Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification.")
       }
-      result <- res.creg.ss(Y, S, D, G.id, Ng, X, HC1)
+      if (mixed_design) {
+        result <- res.creg.mixed(Y, S, D, G.id, Ng, X, HC1)
+      } else {
+        result <- res.creg.ss(Y, S, D, G.id, Ng, X, HC1)
+      }
       if (is.null(Ng)) {
         warning("Warning: Cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
       }
       if (!is.null(result$lin.adj)) {
-        if (!check.cluster(data.frame("G.id" = result$data$G.id, result$lin.adj))) {
-          warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
+        if (!is.null(result$lin.adj)) {
+          if (isTRUE(result$mixed.design)) {
+            # Use only small strata G.id for the check
+            gid_check <- result$res.small$data$G.id
+          } else {
+            # Use full data G.id
+            gid_check <- result$data$G.id
+          }
+          if (!check.cluster(data.frame("G.id" = gid_check, result$lin.adj))) {
+            warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
+          }
         }
         if (any(sapply(result$beta.hat, function(x) any(is.na(x))))) {
           stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
@@ -307,7 +344,7 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
                       cluster = TRUE, is.cov = TRUE, small.strata = FALSE, k = 3, treat.sizes = c(1, 1, 1)) {
   n.treat <- length(tau.vec)
   if (cluster == T) {
-    if(small.strata == TRUE){
+    if (small.strata == TRUE) {
       G <- n
       Nmax <- Nmax
       n.treat <- length(tau.vec)
@@ -318,43 +355,41 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
       data_cl <- data.frame("Y" = data_obs$Y, "D" = data_obs$D, data_obs$X, "S" = data_obs$S, "Ng" = data_obs$Ng, "G.id" = data_obs$G.id)
       Y <- data_cl$Y
       D <- data_cl$D
-      X <- data.frame("x_1" = data_cl$x_1, 'x_2' = data_cl$x_2, 'Ng' = data_cl$Ng)
+      X <- data.frame("x_1" = data_cl$x_1, "x_2" = data_cl$x_2, "Ng" = data_cl$Ng)
       S <- data_cl$S
       G.id <- data_cl$G.id
       Ng <- data_cl$Ng
-      if(is.cov)
-      {
+      if (is.cov) {
         data.sim <- data.frame(Y, S, D, G.id, Ng, X)
-      }else{
+      } else {
         data.sim <- data.frame(Y, S, D, G.id, Ng)
       }
-    }else{
-    G <- n
-    Nmax <- Nmax
-    n.treat <- length(tau.vec)
-    max.support <- Nmax / 10 - 1
-    Ng <- gen.cluster.sizes(G, max.support)
-    # Ng <- rep(Nmax, G)                                                            # uncomment and comment the previous line for a equal-size design
-    data.pot <- dgp.po.creg(
-      Ng = Ng, tau.vec = tau.vec, G = G,
-      gamma.vec = gamma.vec, n.treat = n.treat
-    )
-    strata <- form.strata.creg(data.pot, n.strata)
-    strata.set <- data.frame(strata)
-    strata.set$S <- max.col(strata.set)
-    pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)
-    data.sim <- dgp.obs.creg(data.pot, I.S = strata, pi.vec, n.treat)
-    Y <- data.sim$Y
-    D <- data.sim$D
-    S <- data.sim$S
-    X <- data.sim$X
-    Ng <- data.sim$Ng
-    G.id <- data.sim$G.id
-    data.sim <- data.frame(Y, S, D, G.id, Ng, X)
+    } else {
+      G <- n
+      Nmax <- Nmax
+      n.treat <- length(tau.vec)
+      max.support <- Nmax / 10 - 1
+      Ng <- gen.cluster.sizes(G, max.support)
+      # Ng <- rep(Nmax, G)                                                            # uncomment and comment the previous line for a equal-size design
+      data.pot <- dgp.po.creg(
+        Ng = Ng, tau.vec = tau.vec, G = G,
+        gamma.vec = gamma.vec, n.treat = n.treat
+      )
+      strata <- form.strata.creg(data.pot, n.strata)
+      strata.set <- data.frame(strata)
+      strata.set$S <- max.col(strata.set)
+      pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)
+      data.sim <- dgp.obs.creg(data.pot, I.S = strata, pi.vec, n.treat)
+      Y <- data.sim$Y
+      D <- data.sim$D
+      S <- data.sim$S
+      X <- data.sim$X
+      Ng <- data.sim$Ng
+      G.id <- data.sim$G.id
+      data.sim <- data.frame(Y, S, D, G.id, Ng, X)
     }
   } else {
-      if(small.strata)
-    {
+    if (small.strata) {
       data_raw <- dgp.po.sreg(
         n = n, theta.vec = tau.vec, gamma.vec = gamma.vec,
         n.treat = n.treat, is.cov = is.cov
@@ -364,35 +399,34 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
       D <- data_df$A
       X <- data.frame("x_1" = data_df$x_1, "x_2" = data_df$x_2)
       S <- data_df$block
-      if(is.cov)
-      {
+      if (is.cov) {
         data.sim <- data.frame(Y, S, D, X)
-      } else{
+      } else {
         data.sim <- data.frame(Y, S, D)
       }
-    }else{
-    n.treat <- length(tau.vec)
-    pot.outcomes <- dgp.po.sreg(
-      n = n, tau.vec, gamma.vec = gamma.vec,
-      n.treat = n.treat, is.cov = is.cov
-    )
-    strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata)
-    strata_set <- data.frame(strata)
-    strata_set$S <- max.col(strata_set)
-    pi.vec <- rep(c(1 / (n.treat + 1)), n.treat) # vector of target proportions (equal allocation)
-    data.test <- dgp.obs.sreg(pot.outcomes,
-      I.S = strata,
-      pi.vec = pi.vec, n.treat = n.treat, is.cov = is.cov
-    )
-    Y <- as.numeric(data.test$Y)
-    D <- as.numeric(data.test$D)
-    S <- strata_set$S
-    if (is.cov == TRUE) {
-      X <- data.test$X
-      data.sim <- data.frame(Y, S, D, X)
     } else {
-      data.sim <- data.frame(Y, S, D)
-    }
+      n.treat <- length(tau.vec)
+      pot.outcomes <- dgp.po.sreg(
+        n = n, tau.vec, gamma.vec = gamma.vec,
+        n.treat = n.treat, is.cov = is.cov
+      )
+      strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata)
+      strata_set <- data.frame(strata)
+      strata_set$S <- max.col(strata_set)
+      pi.vec <- rep(c(1 / (n.treat + 1)), n.treat) # vector of target proportions (equal allocation)
+      data.test <- dgp.obs.sreg(pot.outcomes,
+        I.S = strata,
+        pi.vec = pi.vec, n.treat = n.treat, is.cov = is.cov
+      )
+      Y <- as.numeric(data.test$Y)
+      D <- as.numeric(data.test$D)
+      S <- strata_set$S
+      if (is.cov == TRUE) {
+        X <- data.test$X
+        data.sim <- data.frame(Y, S, D, X)
+      } else {
+        data.sim <- data.frame(Y, S, D)
+      }
     }
   }
   return(data.sim)

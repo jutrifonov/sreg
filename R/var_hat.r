@@ -133,10 +133,14 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
       Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all), -1))
 
-      Xi.1.mean <- Xi.tilde.1.mean[S, 2]
-      Xi.0.mean <- Xi.tilde.0.mean[S, 1]
-      Y.tau.D.1.mean <- Y.tau.D.mean[S, 2]
-      Y.tau.D.0.mean <- Y.tau.D.mean[S, 1]
+      # Use S_reset as in the X block
+      S_reset <- as.integer(factor(S, levels = Xi.tilde.1.all$S))
+      Xi.1.mean <- Xi.tilde.1.mean[S_reset, 2]
+      S_reset <- as.integer(factor(S, levels = Xi.tilde.0.all$S))
+      Xi.0.mean <- Xi.tilde.0.mean[S_reset, 1]
+      S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
+      Y.tau.D.1.mean <- Y.tau.D.mean[S_reset, 2]
+      Y.tau.D.0.mean <- Y.tau.D.mean[S_reset, 1]
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
@@ -144,7 +148,8 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
 
       sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2)
       if (HC1 == TRUE) {
-        var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S) + max(D) * max(S)))) +
+        S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
+        var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S_reset) + max(D) * max(S_reset)))) +
           mean(Xi.hat.2^2)
       } else {
         var.vec[d] <- sigma.hat.sq
@@ -222,11 +227,12 @@ as.var.creg <- function(model = NULL, fit, HC1)
       Y.Ng.mean <- as.matrix(select(data.frame(Y.Ng.all), -1))
       Ng.bar.mean <- as.matrix(select(data.frame(Ng.bar.all), -1))
 
-      Xi.1.mean <- Xi.tilde.1.mean[data$S, 2]
-      Xi.0.mean <- Xi.tilde.0.mean[data$S, 1]
-      Y.g.bar.cl.1 <- Y.Ng.mean[data$S, 2]
-      Y.g.bar.cl.0 <- Y.Ng.mean[data$S, 1]
-      N.g.bar.cl <- Ng.bar.mean[data$S, 1]
+      S_reset <- as.integer(factor(data$S, levels = Xi.tilde.1.all$S))
+      Xi.1.mean <- Xi.tilde.1.mean[S_reset, 2]
+      Xi.0.mean <- Xi.tilde.0.mean[S_reset, 1]
+      Y.g.bar.cl.1 <- Y.Ng.mean[S_reset, 2]
+      Y.g.bar.cl.0 <- Y.Ng.mean[S_reset, 1]
+      N.g.bar.cl <- Ng.bar.mean[S_reset, 1]
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean - tau.est[d] * (Ng - N.g.bar.cl)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (Ng - N.g.bar.cl)
@@ -302,11 +308,12 @@ as.var.creg <- function(model = NULL, fit, HC1)
       Y.Ng.mean <- as.matrix(select(data.frame(Y.Ng.all), -1))
       Ng.bar.mean <- as.matrix(select(data.frame(Ng.bar.all), -1))
 
-      Xi.1.mean <- Xi.tilde.1.mean[data$S, 2]
-      Xi.0.mean <- Xi.tilde.0.mean[data$S, 1]
-      Y.g.bar.cl.1 <- Y.Ng.mean[data$S, 2]
-      Y.g.bar.cl.0 <- Y.Ng.mean[data$S, 1]
-      N.g.bar.cl <- Ng.bar.mean[data$S, 1]
+      S_reset <- as.integer(factor(data$S, levels = Xi.tilde.1.all$S))
+      Xi.1.mean <- Xi.tilde.1.mean[S_reset, 2]
+      Xi.0.mean <- Xi.tilde.0.mean[S_reset, 1]
+      Y.g.bar.cl.1 <- Y.Ng.mean[S_reset, 2]
+      Y.g.bar.cl.0 <- Y.Ng.mean[S_reset, 1]
+      N.g.bar.cl <- Ng.bar.mean[S_reset, 1]
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean - tau.est[d] * (Ng - N.g.bar.cl)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (Ng - N.g.bar.cl)
@@ -518,9 +525,10 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
     Gamma_hat_0 <- sum(Y_a[data$D == 0]) * (1 / sum(data$D == 0))
 
     # Precompute sums of Y_a for treated & untreated in each block
-    sums_treated <- tapply(Y_a * (data$D == d), data$S, sum)
-    sums_untreated <- tapply(Y_a * (data$D == 0), data$S, sum)
+    sums_treated <- as.numeric(tapply(Y_a * (data$D == d), data$S, sum))
+    sums_untreated <- as.numeric(tapply(Y_a * (data$D == 0), data$S, sum))
 
+    
 
     #----------------------------------------
     # Compute rho_hat_00 and rho_hat_11
@@ -529,10 +537,10 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
     # Indices of pairs
     idx1 <- seq(1, n, 2)
     idx2 <- seq(2, n, 2)
-
+   
     # zeta_0 = sum of products of untreated across pairs of blocks
     zeta_0 <- sum(sums_untreated[idx1] * sums_untreated[idx2]) / (q^2)
-
+    
     # zeta_1 = sum of products of treated across pairs of blocks
     zeta_1 <- sum(sums_treated[idx1] * sums_treated[idx2]) / (l^2)
 
@@ -553,7 +561,7 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
     #----------------------------------------
     sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (data$D == d)) * (1 / (n * l))
     sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (data$D == 0)) * (1 / (n * q))
-
+    
     #----------------------------------------
     # Compute the final variance components
     #----------------------------------------
@@ -593,3 +601,5 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
   }
   return(V)
 }
+
+
