@@ -508,7 +508,7 @@ test_that("simulations with clusters work", {
   )
 })
 
-test_that("covariates do not vary within one or more strata-treatment combinations", {
+test_that("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE", {
   set.seed(123)
   data <- sreg.rgen(n = 25, tau.vec = c(0.2, 0.5), n.strata = 3, cluster = F, is.cov = TRUE)
   Y <- data$Y
@@ -520,7 +520,7 @@ test_that("covariates do not vary within one or more strata-treatment combinatio
     invisible(capture.output({
       result <- sreg::sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X)
     })),
-    "covariates do not vary within one or more strata-treatment combinations"
+    "One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE"
   )
 
   set.seed(123)

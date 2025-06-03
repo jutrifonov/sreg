@@ -53,13 +53,13 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Y.tau.D.all <- j %>%
         select(c("S", "A", "Y.tau")) %>%
         spread(key = "A", value = "Y.tau")
-      #print(data.frame(Xi.tilde.1.all))
+      # print(data.frame(Xi.tilde.1.all))
       Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
       Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all), -1))
-      #print(data.frame(Y.tau.D.all))
+      # print(data.frame(Y.tau.D.all))
 
-      #Xi.1.mean <- Xi.tilde.1.mean[S, 2]
+      # Xi.1.mean <- Xi.tilde.1.mean[S, 2]
       S_reset <- as.integer(factor(S, levels = Xi.tilde.1.all$S))
       Xi.1.mean <- Xi.tilde.1.mean[S_reset, 2]
       S_reset <- as.integer(factor(S, levels = Xi.tilde.0.all$S))
@@ -73,7 +73,7 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
       sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2)
-      
+
       if (HC1 == TRUE) {
         S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
         var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S_reset) + max(D) * max(S_reset)))) +
@@ -149,8 +149,15 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2)
       if (HC1 == TRUE) {
         S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
-        var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S_reset) + max(D) * max(S_reset)))) +
-          mean(Xi.hat.2^2)
+        adj_factor_denom <- n - (max(S_reset) + max(D) * max(S_reset))
+        if (adj_factor_denom <= 0 || is.nan(adj_factor_denom)) {
+          warning("HC1 adjustment unstable or undefined due to degenerate strata-treatment structure; reverting to unadjusted estimator.")
+          var.vec[d] <- sigma.hat.sq
+        } else {
+          adj_factor <- n / adj_factor_denom
+          var.vec[d] <- mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2)) * adj_factor +
+            mean(Xi.hat.2^2)
+        }
       } else {
         var.vec[d] <- sigma.hat.sq
       }
@@ -333,7 +340,7 @@ as.var.creg <- function(model = NULL, fit, HC1)
   return(se.vec)
 }
 #-------------------------------------------------------------------
-as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE) 
+as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE)
 #-------------------------------------------------------------------
 {
   # n = number of blocks
@@ -458,7 +465,7 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE)
   return(V)
 }
 #-------------------------------------------------------------------
-as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE) 
+as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
 #-------------------------------------------------------------------
 {
   n <- max(S)
@@ -475,7 +482,7 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
       working.df <- as.data.frame(working.df)
     }
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng"))) ])
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng")))])
   } else {
     if (!is.null(Ng)) {
       working.df <- data.frame(Y, S, D, G.id, Ng)
@@ -528,7 +535,7 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
     sums_treated <- as.numeric(tapply(Y_a * (data$D == d), data$S, sum))
     sums_untreated <- as.numeric(tapply(Y_a * (data$D == 0), data$S, sum))
 
-    
+
 
     #----------------------------------------
     # Compute rho_hat_00 and rho_hat_11
@@ -537,10 +544,10 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
     # Indices of pairs
     idx1 <- seq(1, n, 2)
     idx2 <- seq(2, n, 2)
-   
+
     # zeta_0 = sum of products of untreated across pairs of blocks
     zeta_0 <- sum(sums_untreated[idx1] * sums_untreated[idx2]) / (q^2)
-    
+
     # zeta_1 = sum of products of treated across pairs of blocks
     zeta_1 <- sum(sums_treated[idx1] * sums_treated[idx2]) / (l^2)
 
@@ -561,7 +568,7 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
     #----------------------------------------
     sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (data$D == d)) * (1 / (n * l))
     sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (data$D == 0)) * (1 / (n * q))
-    
+
     #----------------------------------------
     # Compute the final variance components
     #----------------------------------------
@@ -601,5 +608,3 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
   }
   return(V)
 }
-
-

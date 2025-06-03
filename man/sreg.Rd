@@ -91,8 +91,10 @@ X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
 result <- sreg(Y, S, D, G.id = NULL, X = X)
 print(result)
 ### Example 3. Matched Pairs (small strata).
-data <- sreg.rgen(n = 1000, tau.vec = c(1.2), cluster = FALSE,
-                  small.strata = TRUE, k = 2, treat.sizes = c(1, 1))
+data <- sreg.rgen(
+  n = 1000, tau.vec = c(1.2), cluster = FALSE,
+  small.strata = TRUE, k = 2, treat.sizes = c(1, 1)
+)
 Y <- data$Y
 S <- data$S
 D <- data$D
@@ -107,7 +109,7 @@ Bugni, F., Canay, I., Shaikh, A., and Tabord-Meehan, M. (2024+). Inference for C
 
 Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. \emph{Forthcoming in Review of Economics and Statistics}, \doi{10.48550/arXiv.2204.08356}.
 
-Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariate adjustment in experiments with matched pairs. \emph{Journal of Econometrics}, 241(1), \doi{10.1016/j.jeconom.2024.105740}. 
+Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariate adjustment in experiments with matched pairs. \emph{Journal of Econometrics}, 241(1), \doi{10.1016/j.jeconom.2024.105740}.
 
 Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. \doi{10.48550/arXiv.2301.09016}.
 

@@ -208,7 +208,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
             X <- NULL
           }
           if (!check.within.stratatreatment.variation(dta.temp)) {
-            warning("Warning: One or more covariates do not vary within one or more strata-treatment combinations. Proceeding with unadjusted estimator.")
+            warning("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE. Proceeding with the unadjusted estimator. Note: please double-check whether the design is actually a small-strata design. If so, consider setting small.strata = TRUE to use the appropriate estimator.")
             X <- NULL
           }
         }
@@ -243,7 +243,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         stop("Error: Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification.")
       }
       if (mixed_design) {
-        result <- res.sreg.mixed(Y, S, D, X, HC1)
+        result <- res.sreg.mixed(Y, S, D, X, HC1, small.strata)
       } else {
         result <- res.sreg.ss(Y, S, D, X, HC1)
       }
@@ -280,7 +280,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         stop("Error: Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification.")
       }
       if (mixed_design) {
-        result <- res.creg.mixed(Y, S, D, G.id, Ng, X, HC1)
+        result <- res.creg.mixed(Y, S, D, G.id, Ng, X, HC1, small.strata)
       } else {
         result <- res.creg.ss(Y, S, D, G.id, Ng, X, HC1)
       }
