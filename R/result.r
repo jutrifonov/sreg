@@ -319,10 +319,12 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE) {
     HC1 = HC1
   )
 
+  # Reset stratum IDs for internal use
+  S_big_reset <- match(data_big$S, unique(data_big$S))
   res_big <- res.sreg(
     Y = data_big$Y,
     D = data_big$D,
-    S = data_big$S,
+    S = S_big_reset,
     X = X_big,
     HC1 = HC1
   )
@@ -361,13 +363,25 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE) {
   return(res.list)
 }
 
-res.creg.mixed <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE, small.strata = TRUE) {
+res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = TRUE) {
+  # Handle Ng = NULL gracefully
+  if (is.null(Ng)) {
+    Ng <- rep(NA_real_, length(Y))  # placeholder to allow data.frame construction
+  }
   data <- data.frame(Y = Y, D = D, S = S, G.id = G.id, Ng = Ng)
+
   if (!is.null(X)) {
     data <- cbind(data, X)
   }
 
   data_all <- design.classifier(data, S = S, G.id = G.id, small.strata = small.strata)
+  # Update Ng if it was originally NULL (all NA)
+  if (all(is.na(data_all$Ng))) {
+    data_all <- data_all %>%
+      group_by(G.id) %>%
+      mutate(Ng = n()) %>%
+      ungroup()
+  }
   data_small <- dplyr::filter(data_all, stratum_type == "small")
   data_big   <- dplyr::filter(data_all, stratum_type == "big")
 
@@ -378,9 +392,11 @@ res.creg.mixed <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE, small.strata
   res_small <- res.creg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S,
                            G.id = data_small$G.id, Ng = data_small$Ng,
                            X = X_small, HC1 = HC1)
-  res_big <- res.creg(Y = data_big$Y, D = data_big$D, S = data_big$S,
+  # Reset stratum IDs for internal use
+  S_big_reset <- match(data_big$S, unique(data_big$S))
+  res_big <- res.creg(Y = data_big$Y, D = data_big$D, S = S_big_reset,
                       G.id = data_big$G.id, Ng = data_big$Ng,
-                      X = NULL, HC1 = FALSE)
+                      X = NULL, HC1 = HC1)
 
   N_small <- nrow(data_small)
   N_big   <- nrow(data_big)

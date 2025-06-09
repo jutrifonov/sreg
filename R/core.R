@@ -151,13 +151,19 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
     #  }
   }
   if (small.strata == FALSE && !is.null(S)) {
+    if (!is.null(G.id)) {
+    cluster_strata <- unique(data.frame(S = S, G.id = G.id))
+    strata_sizes <- table(cluster_strata$S)
+  } else {
     strata_sizes <- table(S)
-    unique_sizes <- unique(strata_sizes)
-    mixed_design <- length(unique_sizes) > 1
-    if (length(unique_sizes) == 1 && unique_sizes[1] <= 5) {
-      warning("Warning: All strata have the same small size (e.g., pairs or triplets), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
-    }
   }
+
+  unique_sizes <- unique(strata_sizes)
+  mixed_design <- length(unique_sizes) > 1
+  if (length(unique_sizes) == 1 && unique_sizes[1] <= 5) {
+    warning("Warning: All strata have the same small number of clusters (e.g., matched pairs at the cluster level), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
+  }
+}
 
   if ("Ng" %in% names(X)) {
     names(X)[names(X) == "Ng"] <- "Ng_1"
@@ -262,15 +268,54 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
       # if(mixed_design){
       #    result <- res.creg.mixed(Y, S, D, G.id, Ng, X, HC1)
       # }else{
+            if (!is.null(X)) {
+        if (!is.null(S)) {
+          dta.temp <- data.frame(S, D, X)
+          cluster_df <- data.frame(G.id, S, D, X) %>%
+            group_by(G.id) %>%
+            summarise(across(c(S, D), ~ first(.x)),
+            across(where(is.numeric), ~ mean(.x, na.rm = TRUE)),
+            .groups = "drop")
+
+          if (!check.within.strata.variation(cluster_df)) {
+            warning("Warning: One or more covariates do not vary within one or more strata. Proceeding with unadjusted estimator.")
+            X <- NULL
+          }
+          if (!check.within.stratatreatment.variation(cluster_df)) {
+            warning("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE. Proceeding with the unadjusted estimator. Note: please double-check whether the design is actually a small-strata design. If so, consider setting small.strata = TRUE to use the appropriate estimator.")
+            X <- NULL
+          }
+        }
+        if (is.null(S)) {
+          S.temp <- rep(1, length(D))
+          dta.temp <- data.frame("S" = S.temp, D, X)
+          if (!check.within.strata.variation(dta.temp)) {
+            warning("Warning: One or more covariates do not vary within one or more strata. Proceeding with unadjusted estimator.")
+            X <- NULL
+          }
+          if (!check.within.stratatreatment.variation(dta.temp)) {
+            warning("Warning: One or more covariates do not vary within one or more strata-treatment combinations. Proceeding with unadjusted estimator.")
+            X <- NULL
+          }
+        }
+      }
       result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
+
       # }
       if (is.null(Ng)) {
         warning("Warning: Cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
       }
-      if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
-        stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
-      }
+
+      #if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
+      #  stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+      #}
       if (!is.null(result$lin.adj)) {
+        if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
+          stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
+        }
+        if (any(sapply(result$se.rob, function(x) any(is.infinite(x))))) {
+          stop("Error: Variance estimate is not finite. This may be due to too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)), remove covariate adjustments, or try setting HC1 = FALSE.")
+        }
         if (!check.cluster(data.frame("G.id" = result$data$G.id, result$lin.adj))) {
           warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
         }

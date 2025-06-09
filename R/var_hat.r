@@ -327,8 +327,16 @@ as.var.creg <- function(model = NULL, fit, HC1)
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
       if (HC1 == TRUE) {
-        var.vec[d] <- ((mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(data$S) + max(data$D) * max(data$S)))) +
-          mean(Xi.hat.2^2)) / mean(Ng)^2
+        adj_denom <- n - (max(data$S) + max(data$D) * max(data$S))
+        if (adj_denom <= 0 || is.nan(adj_denom)) {
+          warning("HC1 adjustment unstable or undefined due to degenerate strata-treatment structure; reverting to unadjusted estimator.")
+          var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2)) +
+                         mean(Xi.hat.2^2)) / (mean(Ng))^2
+        } else {
+          adj_factor <- n / adj_denom
+          var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2)) * adj_factor +
+                         mean(Xi.hat.2^2)) / (mean(Ng))^2
+        }
       } else {
         sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2) / (mean(Ng))^2
         var.vec[d] <- sigma.hat.sq

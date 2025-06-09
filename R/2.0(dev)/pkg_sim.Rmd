@@ -1341,24 +1341,8 @@ print(result)
 result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = FALSE)
 print(result)
 
-# Test 3. data: big strata, option: big strata
-tau.vec = c(0.2, 0.9, 1.5)
-n.treat = length(tau.vec)
-n_1 = 1000
 
-data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1, 1), k = 3)
-result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
-print(result)
-result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
-print(result)
-result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
-print(result)
-result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
-print(result)
-result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = FALSE)
-print(result)
-
-# Test 4. data: small strata, option: big strata
+# Test 3. data: small strata, option: big strata
 tau.vec = c(0.2, 0.8)
 n.treat = length(tau.vec)
 n_1 = 900
@@ -1366,7 +1350,7 @@ n_1 = 900
 data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
 result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
 print(result)
-result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = TRUE)
 print(result)
 result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
 print(result)
@@ -1397,10 +1381,127 @@ colMeans(se_big)
 colMeans(se_small)
 
 
-# Test 5. data: big strata, option: small strata 
+# Test 4. data: big strata, option: small strata 
 tau.vec = c(0.2, 0.9)
 n.treat = length(tau.vec)
 n_1 = 1000
 data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 20, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
 head(data)
 sreg(Y = data$Y, D = data$D, S = data$S, small.strata = TRUE)
+
+# Test 5. data: mixed design, option: small strata (so we should have just a mixed estimator)
+tau.vec = c(0.2, 0.9)
+n.treat = length(tau.vec)
+n_1 = 3000
+n_2 = 50
+data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+Y <- data$Y
+S <- data$S
+
+data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+# Step 1: Get the max stratum ID in data_s
+max_id <- max(data_s$S)
+
+# Step 2: Get unique strata in data_b and assign new IDs
+unique_b_strata <- sort(unique(data_b$S))
+num_b_strata <- length(unique_b_strata)
+
+# Create a named mapping from old to new stratum IDs
+new_ids <- seq(max_id + 1, max_id + num_b_strata)
+stratum_map <- setNames(new_ids, unique_b_strata)
+
+# Step 3: Relabel data_b$S
+data_b$S <- stratum_map[as.character(data_b$S)]
+
+data <- rbind(data_s, data_b)
+
+proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
+proba
+
+# Test 6. data: mixed design, option: big strata (just a big strata estimator!)
+proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, HC1 = FALSE, small.strata = TRUE)
+proba
+```
+
+# Let's run some tests to ensure that everything is working (with clusters)
+```{r}
+# Test 1. data: small strata, option: small strata
+tau.vec = c(0.2, 0.8)
+n.treat = length(tau.vec)
+n_1 = 900
+
+data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = TRUE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = TRUE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = TRUE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = NULL, HC1 = FALSE, small.strata = TRUE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), G.id = NULL, Ng = data$G.id, HC1 = FALSE, small.strata = TRUE)
+print(result)
+
+
+# Test 2. data: big strata, option: big strata
+tau.vec = c(0.2, 0.9, 1.5)
+n.treat = length(tau.vec)
+n_1 = 1000
+
+data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1, 1), k = 3)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, G.id = data$G.id, Ng = data$Ng, small.strata = FALSE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = FALSE, G.id = data$G.id, Ng = data$Ng, small.strata = FALSE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, G.id = data$G.id, Ng = data$Ng, small.strata = FALSE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, G.id = data$G.id, Ng = data$Ng, small.strata = FALSE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = FALSE)
+print(result)
+
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), G.id = data$G.id, Ng = NULL, HC1 = FALSE, small.strata = FALSE)
+print(result)
+
+# Test 3. data: small strata, option: big strata
+tau.vec = c(0.2, 0.8)
+n.treat = length(tau.vec)
+n_1 = 900
+
+data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = FALSE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = TRUE) # should not match fith small.strata = FALSE unless we change the estimator
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = FALSE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = FALSE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = TRUE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = FALSE)
+print(result)
+
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), G.id = data$G.id, Ng = NULL, HC1 = TRUE, small.strata = FALSE)
+print(result)
+
+
+# Test 4. data: big strata, option: small strata (should not work and throw a warning)
+tau.vec = c(0.2, 0.9)
+n.treat = length(tau.vec)
+n_1 = 1000
+data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 20, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+head(data)
+sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, small.strata = TRUE, HC1 = TRUE)
+sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, small.strata = TRUE, HC1 = FALSE)
+sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, X = data.frame(data$x_1), small.strata = TRUE, HC1 = TRUE)
+sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = NULL, X = data.frame(data$x_1), small.strata = TRUE, HC1 = TRUE)
+
+
+
+
+```
+
+
+
+

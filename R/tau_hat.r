@@ -372,6 +372,8 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
             S = df$S[1],
             Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
             Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
+            #Y_treated = sum(df$Y.bar[df$D == d] * df$Ng[df$D == d]) / sum(df$Ng[df$D == d]),
+            #Y_control = sum(df$Y.bar[df$D == 0] * df$Ng[df$D == 0]) / sum(df$Ng[df$D == 0]),
             k = nrow(df), # Total units in stratum (should be 2)
             l = sum(df$D == d),
             q = sum(df$D == 0)
@@ -396,12 +398,13 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
       # adjusted estimator:
       G_1 <- sum((data$D == d) * data$Ng)
       G_0 <- sum((data$D == 0) * data$Ng)
-      # print(X_dem)
-      # print(beta_hat)
-      # print(as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
-      #                             colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0)))
+
+      
       theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
         sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng)
+      
+      #theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) * length(Y.bar.g$Y) / (sum((data$D == d)) * sum(data$Ng)) -
+      #  sum(data$Y.bar * data$Ng * (data$D == 0)) * length(Y.bar.g$Y) / (sum((data$D == 0)) * sum(data$Ng))
 
       tau.hat[d] <- theta_hat
       beta.hat <- NULL

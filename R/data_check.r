@@ -69,33 +69,45 @@ boolean.check <- function(var) {
 }
 
 check.within.stratatreatment.variation <- function(data) {
-  covariate_columns <- names(data)[-(1:2)]
+  #covariate_columns <- names(data)[-(1:2)]
+
+  # Ensure the columns exist
+  stopifnot(all(c("S", "D") %in% names(data)))
+
+  # Exclude known non-covariate columns
+  covariate_columns <- setdiff(names(data), c("S", "D", "G.id"))
+
 
   variation_check <- data %>%
     group_by(.data$S, .data$D) %>%
     summarise(across(all_of(covariate_columns), ~ n_distinct(.) > 1, .names = "check_{.col}"),
-              .groups = "drop")
-  
+      .groups = "drop"
+    )
+
   all_variation <- variation_check %>%
     summarise(across(starts_with("check_"), all)) %>%
     unlist()
-  
+
   all(all_variation)
 }
 
 check.within.strata.variation <- function(data) {
+  # Ensure the columns exist
+  stopifnot(all(c("S", "D") %in% names(data)))
 
-  covariate_columns <- names(data)[-(1:2)]
+  # Exclude known non-covariate columns
+  covariate_columns <- setdiff(names(data), c("S", "D", "G.id"))
 
   variation_check <- data %>%
     group_by(.data$S) %>%
     summarise(across(all_of(covariate_columns), ~ n_distinct(.) > 1, .names = "check_{.col}"),
-              .groups = "drop") 
-  
+      .groups = "drop"
+    )
+
   all_variation <- variation_check %>%
     summarise(across(starts_with("check_"), all)) %>%
     unlist()
-  
+
   all(all_variation)
 }
 
@@ -157,7 +169,9 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
     NULL
   }
 
-  if (!small.strata) return(data)
+  if (!small.strata) {
+    return(data)
+  }
 
   if (!is.null(G_name)) {
     cluster_strata <- dplyr::distinct(data, .data[[S_name]], .data[[G_name]])
@@ -186,7 +200,9 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
     arrange(desc(count))
 
   if (nrow(small_modal_sizes) == 0) {
-    stop("All strata are large or too few small strata to justify small.strata = TRUE. Set small.strata = FALSE.")
+    stop("Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.
+
+Note: This error may also occur if G.id is NULL despite the data being cluster-randomized. If your design involves clusters, make sure to specify G.id correctly.")
   }
 
   modal_size <- small_modal_sizes$size[1]
@@ -198,8 +214,9 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
   if (!keep.size) strata_sizes$size <- NULL
   out <- dplyr::left_join(data, strata_sizes, by = S_name)
 
-  if (warn && any(strata_sizes$stratum_type == "big"))
+  if (warn && any(strata_sizes$stratum_type == "big")) {
     warning("Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.", call. = FALSE)
+  }
 
   return(out)
 }

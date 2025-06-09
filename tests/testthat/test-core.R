@@ -535,12 +535,31 @@ test_that("One or more covariates do not vary within one or more stratum-treatme
   G.id <- data$G.id
   Ng <- data$Ng
 
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
+    })),
+    "One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE."
+  )
+  set.seed(123)
+  data <- sreg.rgen(
+    n = 50, tau.vec = c(0.2, 0.8),
+    n.strata = 4, cluster = T, Nmax = 50
+  )
+  Y <- data$Y
+  S <- data$S
+  D <- data$D
+  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  G.id <- data$G.id
+  Ng <- data$Ng
+
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
     })),
-    "too many covariates relative to the number of observations"
+    "There are too many covariates relative to the number of observations."
   )
+
 })
 
 test_that("individual level X warning works", {
