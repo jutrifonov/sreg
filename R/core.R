@@ -231,6 +231,13 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
           }
         }
       }
+      if (!is.null(S)) {
+        data_tst <- data.frame(Y = Y, D = D, S = S)
+        if (!is.null(X)) {
+          data_tst <- cbind(data_tst, X)
+        }
+        data_tst <- design.classifier(data_tst, S = S, small.strata = small.strata)
+      }
       # if (mixed_design){
       # result <- res.sreg.mixed(Y, S, D, X, HC1)
       # }else{
@@ -379,7 +386,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         if (!is.null(X)) {
           data_tst <- cbind(data_tst, X)
         }
-     
+
         data_tst <- design.classifier(data_tst, S = S, G.id = G.id, small.strata = small.strata)
       }
     } else {

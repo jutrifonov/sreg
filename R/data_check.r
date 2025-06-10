@@ -191,9 +191,7 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
       filter(size <= 3, freq >= 0.25) %>%
       arrange(desc(count))
 
-    
     if (warn && nrow(small_modal_sizes) > 0) {
-      
       warning("At least 25% of strata are small, but small.strata = FALSE. If the experimental design includes small strata (e.g., matched pairs or triplets), then setting small.strata = FALSE may lead to invalid standard errors. If strata sizes vary, the design may be mixed. In that case, setting small.strata = TRUE will apply estimators suitable for such mixed designs.", call. = FALSE)
     }
 

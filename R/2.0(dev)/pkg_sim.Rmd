@@ -1390,7 +1390,7 @@ head(data)
 sreg(Y = data$Y, D = data$D, S = data$S, small.strata = TRUE)
 
 # Test 5. data: mixed design, option: small strata (so we should have just a mixed estimator)
-tau.vec = c(0.2, 0.9)
+tau.vec = c(0.2, 0.9) 
 n.treat = length(tau.vec)
 n_1 = 3000
 n_2 = 50
@@ -1419,8 +1419,11 @@ proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$
 proba
 
 # Test 6. data: mixed design, option: big strata (just a big strata estimator, but should through a warning that estimators are invalid!)
+proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+proba
 proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, HC1 = FALSE, small.strata = FALSE)
 proba
+
 ```
 
 # Let's run some tests to ensure that everything is working (with clusters)
