@@ -1418,7 +1418,7 @@ data <- rbind(data_s, data_b)
 proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
 proba
 
-# Test 6. data: mixed design, option: big strata (just a big strata estimator!)
+# Test 6. data: mixed design, option: big strata (just a big strata estimator, but should through a warning that estimators are invalid!)
 proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, HC1 = FALSE, small.strata = FALSE)
 proba
 ```

@@ -193,6 +193,7 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
 
     
     if (warn && nrow(small_modal_sizes) > 0) {
+      
       warning("At least 25% of strata are small, but small.strata = FALSE. If the experimental design includes small strata (e.g., matched pairs or triplets), then setting small.strata = FALSE may lead to invalid standard errors. If strata sizes vary, the design may be mixed. In that case, setting small.strata = TRUE will apply estimators suitable for such mixed designs.", call. = FALSE)
     }
 
@@ -241,7 +242,7 @@ Note: This error may also occur if G.id is NULL despite the data being cluster-r
   out <- dplyr::left_join(data, strata_sizes, by = S_name)
 
   if (warn && any(strata_sizes$stratum_type == "big")) {
-    warning("At least 25% of strata are small, but small.strata = FALSE. If the experimental design includes small strata (e.g., matched pairs or triplets), then setting small.strata = FALSE may lead to invalid standard errors. If strata sizes vary, the design may be mixed. In that case, setting small.strata = TRUE will apply estimators suitable for such mixed designs.", call. = FALSE)
+    warning("Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.", call. = FALSE)
   }
 
   return(out)  

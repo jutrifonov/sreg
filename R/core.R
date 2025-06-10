@@ -379,6 +379,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         if (!is.null(X)) {
           data_tst <- cbind(data_tst, X)
         }
+     
         data_tst <- design.classifier(data_tst, S = S, G.id = G.id, small.strata = small.strata)
       }
     } else {
