@@ -834,7 +834,7 @@ class(result)
 
 
 
-design.classifier <- function(data, S) {
+<!-- design.classifier <- function(data, S) {
   S_sym <- rlang::ensym(S)
 
   # Step 1: Compute stratum sizes
@@ -868,57 +868,57 @@ design.classifier <- function(data, S) {
   warning("Mixed design detected: strata of varying sizes found. Weighted estimators will be used.")
 
   return(data_classified)
-}
+} -->
 ```{r}
 # ------------------------------------------------------------------
 #  Classify strata as "small" or "big" in a mixed design
 # ------------------------------------------------------------------
-design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TRUE) {
-  ## 1. Capture column names (works with bare names or strings)
-  S_name <- if (is.character(substitute(S))) substitute(S) else deparse(substitute(S))
-  G_name <- if (!missing(G.id)) {
-    if (is.character(substitute(G.id))) substitute(G.id) else deparse(substitute(G.id))
-  } else {
-    NULL
-  }
+# design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TRUE) {
+#   ## 1. Capture column names (works with bare names or strings)
+#   S_name <- if (is.character(substitute(S))) substitute(S) else deparse(substitute(S))
+#   G_name <- if (!missing(G.id)) {
+#     if (is.character(substitute(G.id))) substitute(G.id) else deparse(substitute(G.id))
+#   } else {
+#     NULL
+#   }
 
-  ## 2. Compute stratum sizes
-  if (!is.null(G_name)) {
-    # -- clustered: count *clusters* per stratum
-    cluster_strata <- dplyr::distinct(data, .data[[S_name]], .data[[G_name]])
-    strata_sizes   <- dplyr::count(cluster_strata, .data[[S_name]], name = "size")
-  } else {
-    # -- individual: count *units* per stratum
-    strata_sizes   <- dplyr::count(data, .data[[S_name]], name = "size")
-  }
+#   ## 2. Compute stratum sizes
+#   if (!is.null(G_name)) {
+#     # -- clustered: count *clusters* per stratum
+#     cluster_strata <- dplyr::distinct(data, .data[[S_name]], .data[[G_name]])
+#     strata_sizes   <- dplyr::count(cluster_strata, .data[[S_name]], name = "size")
+#   } else {
+#     # -- individual: count *units* per stratum
+#     strata_sizes   <- dplyr::count(data, .data[[S_name]], name = "size")
+#   }
 
-  ## 3. If every stratum has the same size, nothing to classify
-  if (length(unique(strata_sizes$size)) == 1) {
-    if (!keep.size) strata_sizes$size <- NULL  # cosmetic
-    return(dplyr::left_join(data, strata_sizes, by = S_name))
-  }
+#   ## 3. If every stratum has the same size, nothing to classify
+#   if (length(unique(strata_sizes$size)) == 1) {
+#     if (!keep.size) strata_sizes$size <- NULL  # cosmetic
+#     return(dplyr::left_join(data, strata_sizes, by = S_name))
+#   }
 
-  ## 4. Find the modal size and classify
-  modal_size <- strata_sizes %>%
-    dplyr::count(size) %>%
-    dplyr::arrange(dplyr::desc(n)) %>%
-    dplyr::pull(size) %>%
-    .[[1]]
+#   ## 4. Find the modal size and classify
+#   modal_size <- strata_sizes %>%
+#     dplyr::count(size) %>%
+#     dplyr::arrange(dplyr::desc(n)) %>%
+#     dplyr::pull(size) %>%
+#     .[[1]]
 
-  strata_sizes <- strata_sizes %>%
-    dplyr::mutate(stratum_type = ifelse(size == modal_size, "small", "big"))
+#   strata_sizes <- strata_sizes %>%
+#     dplyr::mutate(stratum_type = ifelse(size == modal_size, "small", "big"))
 
-  if (!keep.size) strata_sizes$size <- NULL
+#   if (!keep.size) strata_sizes$size <- NULL
 
-  ## 5. Merge back and optionally warn
-  out <- dplyr::left_join(data, strata_sizes, by = S_name)
+#   ## 5. Merge back and optionally warn
+#   out <- dplyr::left_join(data, strata_sizes, by = S_name)
 
-  if (warn)
-    warning("Mixed design detected: strata of varying cluster/unit counts. ",
-            "Weighted estimators will be used.", call. = FALSE)
+#   if (warn)
+#     warning("Mixed design detected: strata of varying cluster/unit counts. ",
+#             "Weighted estimators will be used.", call. = FALSE)
 
-  return(out)
-}
+#   return(out)
+# }
 ```
 
 data_s <- sreg.rgen(n = 3000, tau.vec = c(0.2, 0.8), n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
@@ -1419,7 +1419,7 @@ proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$
 proba
 
 # Test 6. data: mixed design, option: big strata (just a big strata estimator!)
-proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, HC1 = FALSE, small.strata = TRUE)
+proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, HC1 = FALSE, small.strata = FALSE)
 proba
 ```
 
@@ -1440,6 +1440,8 @@ print(result)
 result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = NULL, HC1 = FALSE, small.strata = TRUE)
 print(result)
 result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), G.id = NULL, Ng = data$G.id, HC1 = FALSE, small.strata = TRUE)
+print(result)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, X = NULL, G.id = data$G.id, Ng = data$G.id, HC1 = TRUE, small.strata = TRUE)
 print(result)
 
 
@@ -1497,9 +1499,74 @@ sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, small.s
 sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, X = data.frame(data$x_1), small.strata = TRUE, HC1 = TRUE)
 sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = NULL, X = data.frame(data$x_1), small.strata = TRUE, HC1 = TRUE)
 
+# Test 4. data: big strata, option: small strata 
+tau.vec = c(0.2, 0.9)
+n.treat = length(tau.vec)
+n_1 = 1000
+data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 20, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+head(data)
+sreg(Y = data$Y, D = data$D, S = data$S, small.strata = TRUE)
 
+# Test 5. data: mixed design, option: small strata (so we should have just a mixed estimator)
+tau.vec = c(0.2, 0.9)
+n.treat = length(tau.vec)
+n_1 = 3000
+n_2 = 50
+data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+Y <- data$Y
+S <- data$S
 
+data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+# Step 1: Get the max stratum ID in data_s
+max_id <- max(data_s$S)
 
+# Step 2: Get unique strata in data_b and assign new IDs
+unique_b_strata <- sort(unique(data_b$S))
+num_b_strata <- length(unique_b_strata)
+
+# Create a named mapping from old to new stratum IDs
+new_ids <- seq(max_id + 1, max_id + num_b_strata)
+stratum_map <- setNames(new_ids, unique_b_strata)
+
+# Step 3: Relabel data_b$S
+data_b$S <- stratum_map[as.character(data_b$S)]
+
+# 🧠 Step 4: Make cluster IDs unique across the two datasets!!!!!
+max_gid <- max(data_s$G.id)
+data_b$G.id <- data_b$G.id + max_gid
+length(intersect(data_s$G.id, data_b$G.id)) == 0
+
+data <- rbind(data_s[, -ncol(data_s)], data_b)
+Y <- data$Y
+S <- data$S
+G.id <- data$G.id
+Ng <- data$Ng
+D <- data$D
+data_tst <- data.frame(Y = Y, D = D, S = S, G.id = G.id, Ng = Ng)
+proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2, data$Ng), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = TRUE)
+proba
+proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = TRUE)
+proba
+proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = TRUE)
+proba
+proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = TRUE)
+proba
+proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = NULL, HC1 = TRUE, small.strata = TRUE)
+proba
+proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = NULL, HC1 = FALSE, small.strata = TRUE)
+proba
+proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), G.id = NULL, Ng = NULL, HC1 = FALSE, small.strata = TRUE)
+proba
+
+# Test 6. data: mixed design, option: big strata (just a big strata estimator!)
+proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = FALSE)
+proba
+proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = FALSE)
+proba
+proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = FALSE)
+proba
+proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, G.id = data$G.id, Ng = NULL, HC1 = FALSE, small.strata = FALSE)
+proba
 ```
 
 

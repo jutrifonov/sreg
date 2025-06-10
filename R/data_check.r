@@ -69,7 +69,7 @@ boolean.check <- function(var) {
 }
 
 check.within.stratatreatment.variation <- function(data) {
-  #covariate_columns <- names(data)[-(1:2)]
+  # covariate_columns <- names(data)[-(1:2)]
 
   # Ensure the columns exist
   stopifnot(all(c("S", "D") %in% names(data)))
@@ -170,6 +170,32 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
   }
 
   if (!small.strata) {
+    # Always compute strata sizes for warning purposes
+    if (!is.null(G_name)) {
+      cluster_strata <- dplyr::distinct(data, .data[[S_name]], .data[[G_name]])
+      strata_sizes <- dplyr::count(cluster_strata, .data[[S_name]], name = "size")
+    } else {
+      strata_sizes <- dplyr::count(data, .data[[S_name]], name = "size")
+    }
+
+    unique_sizes <- unique(strata_sizes$size)
+    n_strata <- nrow(strata_sizes)
+
+    # Count frequencies of each size
+    size_counts <- strata_sizes %>%
+      count(size, name = "count") %>%
+      mutate(freq = count / n_strata)
+
+    # Check for small strata that meet the 25% rule
+    small_modal_sizes <- size_counts %>%
+      filter(size <= 3, freq >= 0.25) %>%
+      arrange(desc(count))
+
+    
+    if (warn && nrow(small_modal_sizes) > 0) {
+      warning("At least 25% of strata are small, but small.strata = FALSE. If the experimental design includes small strata (e.g., matched pairs or triplets), then setting small.strata = FALSE may lead to invalid standard errors. If strata sizes vary, the design may be mixed. In that case, setting small.strata = TRUE will apply estimators suitable for such mixed designs.", call. = FALSE)
+    }
+
     return(data)
   }
 
@@ -215,8 +241,8 @@ Note: This error may also occur if G.id is NULL despite the data being cluster-r
   out <- dplyr::left_join(data, strata_sizes, by = S_name)
 
   if (warn && any(strata_sizes$stratum_type == "big")) {
-    warning("Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.", call. = FALSE)
+    warning("At least 25% of strata are small, but small.strata = FALSE. If the experimental design includes small strata (e.g., matched pairs or triplets), then setting small.strata = FALSE may lead to invalid standard errors. If strata sizes vary, the design may be mixed. In that case, setting small.strata = TRUE will apply estimators suitable for such mixed designs.", call. = FALSE)
   }
 
-  return(out)
+  return(out)  
 }

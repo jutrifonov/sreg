@@ -152,18 +152,18 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
   }
   if (small.strata == FALSE && !is.null(S)) {
     if (!is.null(G.id)) {
-    cluster_strata <- unique(data.frame(S = S, G.id = G.id))
-    strata_sizes <- table(cluster_strata$S)
-  } else {
-    strata_sizes <- table(S)
-  }
+      cluster_strata <- unique(data.frame(S = S, G.id = G.id))
+      strata_sizes <- table(cluster_strata$S)
+    } else {
+      strata_sizes <- table(S)
+    }
 
-  unique_sizes <- unique(strata_sizes)
-  mixed_design <- length(unique_sizes) > 1
-  if (length(unique_sizes) == 1 && unique_sizes[1] <= 5) {
-    warning("Warning: All strata have the same small number of clusters (e.g., matched pairs at the cluster level), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
+    unique_sizes <- unique(strata_sizes)
+    mixed_design <- length(unique_sizes) > 1
+    if (length(unique_sizes) == 1 && unique_sizes[1] <= 5) {
+      warning("Warning: All strata have the same small number of clusters (e.g., matched pairs at the cluster level), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
+    }
   }
-}
 
   if ("Ng" %in% names(X)) {
     names(X)[names(X) == "Ng"] <- "Ng_1"
@@ -265,17 +265,67 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
   } else {
     check.cluster.lvl(G.id, S, D, Ng)
     if (small.strata == FALSE) {
+      # S_name <- if (is.character(substitute(S))) substitute(S) else deparse(substitute(S))
+      # G_name <- if (!missing(G.id)) {
+      #   if (is.character(substitute(G.id))) substitute(G.id) else deparse(substitute(G.id))
+      # } else {
+      #   NULL
+      # }
+
+      # if (!small.strata) {
+      #   return(data)
+      # }
+
+      # if (!is.null(G_name)) {
+      #   cluster_strata <- dplyr::distinct(data, .data[[S_name]], .data[[G_name]])
+      #   strata_sizes <- dplyr::count(cluster_strata, .data[[S_name]], name = "size")
+      # } else {
+      #   strata_sizes <- dplyr::count(data, .data[[S_name]], name = "size")
+      # }
+
+      # unique_sizes <- unique(strata_sizes$size)
+      # n_strata <- nrow(strata_sizes)
+      # if (length(unique_sizes) == 1) {
+      #   strata_sizes$stratum_type <- "small"
+      #   if (!keep.size) strata_sizes$size <- NULL
+      #   return(dplyr::left_join(data, strata_sizes, by = S_name))
+      # }
+
+      # # Count frequencies of each size
+      # size_counts <- strata_sizes %>%
+      #   count(size, name = "count") %>%
+      #   mutate(freq = count / n_strata)
+
+      # # Filter for small strata that meet the 25% rule
+      # small_modal_sizes <- size_counts %>%
+      #   filter(size <= 3, freq >= 0.25) %>%
+      #   arrange(desc(count))
+      # modal_size <- small_modal_sizes$size[1]
+
+      # # Classify small vs big, what are the proportions
+      # strata_sizes <- strata_sizes %>%
+      #   mutate(stratum_type = ifelse(size == modal_size, "small", "big"))
+
+      # if (!keep.size) strata_sizes$size <- NULL
+      # out <- dplyr::left_join(data, strata_sizes, by = S_name)
+
+      # if (warn && any(strata_sizes$stratum_type == "big")) {
+      #   warning("At least 25% of strata are small, while small.strata = FALSE. In case the data follows a small strata design, but small.strata = FALSE, the standard errors are invalid. If the data exhibits a mixed design, you can still set small.strata = TRUE and the mixed estimator will be implemented.", call. = FALSE)
+      # }
+
+
       # if(mixed_design){
       #    result <- res.creg.mixed(Y, S, D, G.id, Ng, X, HC1)
       # }else{
-            if (!is.null(X)) {
+      if (!is.null(X)) {
         if (!is.null(S)) {
           dta.temp <- data.frame(S, D, X)
           cluster_df <- data.frame(G.id, S, D, X) %>%
             group_by(G.id) %>%
             summarise(across(c(S, D), ~ first(.x)),
-            across(where(is.numeric), ~ mean(.x, na.rm = TRUE)),
-            .groups = "drop")
+              across(where(is.numeric), ~ mean(.x, na.rm = TRUE)),
+              .groups = "drop"
+            )
 
           if (!check.within.strata.variation(cluster_df)) {
             warning("Warning: One or more covariates do not vary within one or more strata. Proceeding with unadjusted estimator.")
@@ -306,9 +356,9 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         warning("Warning: Cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
       }
 
-      #if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
+      # if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
       #  stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
-      #}
+      # }
       if (!is.null(result$lin.adj)) {
         if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
           stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
@@ -319,6 +369,17 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         if (!check.cluster(data.frame("G.id" = result$data$G.id, result$lin.adj))) {
           warning("Warning: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates have been aggregated to their cluster-level averages.")
         }
+      }
+      if (!is.null(S)) {
+        if (is.null(Ng)) {
+          Ng <- rep(NA_real_, length(Y)) # placeholder to allow data.frame construction
+        }
+
+        data_tst <- data.frame(Y = Y, D = D, S = S, G.id = G.id, Ng = Ng)
+        if (!is.null(X)) {
+          data_tst <- cbind(data_tst, X)
+        }
+        data_tst <- design.classifier(data_tst, S = S, G.id = G.id, small.strata = small.strata)
       }
     } else {
       if (is.null(S)) {
