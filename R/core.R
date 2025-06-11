@@ -161,7 +161,11 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
     unique_sizes <- unique(strata_sizes)
     mixed_design <- length(unique_sizes) > 1
     if (length(unique_sizes) == 1 && unique_sizes[1] <= 5) {
-      warning("Warning: All strata have the same small number of clusters (e.g., matched pairs at the cluster level), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
+      if (!is.null(G.id)) {
+        warning("Warning: All strata have the same small number of clusters (e.g., matched pairs at the cluster level), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
+      } else {
+        warning("Warning: All strata have the same small number of observations (e.g., matched pairs), but small.strata = FALSE. Consider setting small.strata = TRUE to apply estimators designed for such designs.")
+      }
     }
   }
 

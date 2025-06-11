@@ -1308,9 +1308,10 @@ print(result_creg)
 # Let's run some tests to ensure that everything is working (no clusters)
 ```{r}
 # Test 1. data: small strata, option: small strata
+set.seed(123)
 tau.vec = c(0.2, 0.8)
 n.treat = length(tau.vec)
-n_1 = 60
+n_1 = 300
 
 data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
 result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = TRUE)
@@ -1323,6 +1324,11 @@ result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data
 print(result)
 result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = TRUE)
 print(result)
+result <- sreg(Y = data$Y, D = data$D, S = NULL, X = data.frame(data$x_1), HC1 = TRUE, small.strata = TRUE)
+print(result)
+result <- sreg(Y = NULL, D = NULL, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = TRUE)
+print(result)
+
 
 # Test 2. data: big strata, option: big strata
 tau.vec = c(0.2, 0.9, 1.5)

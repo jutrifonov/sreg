@@ -183,7 +183,7 @@ test_that("simulations with clusters work", {
   S <- data$S
   D <- data$D
   X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  
+
   G.id <- data$G.id
   Ng <- data$Ng
 
@@ -559,7 +559,6 @@ test_that("One or more covariates do not vary within one or more stratum-treatme
     })),
     "There are too many covariates relative to the number of observations."
   )
-
 })
 
 test_that("individual level X warning works", {
@@ -864,4 +863,134 @@ test_that("dgp.po warning work", {
     })),
     "The number of treatments doesn't match the length of vector theta.vec."
   )
+})
+
+# SREG 2.0 testing enviroment #
+### no clusters
+test_that("data: small strata, option: small strata", {
+  # data: small strata, option: small strata
+  set.seed(123)
+  tau.vec <- c(0.2, 0.8)
+  n.treat <- length(tau.vec)
+  n_1 <- 300
+  data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = TRUE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.4045371, 0.7833705))
+  expect_equal(round(result$se.rob, 7), c(0.2215056, 0.1960352))
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = FALSE, small.strata = TRUE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.4045371, 0.7833705))
+  expect_equal(round(result$se.rob, 7), c(0.2215056, 0.1960352))
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.3073525, 0.8224690))
+  expect_equal(round(result$se.rob, 7), c(0.1496169, 0.1450199))
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.3073525, 0.8224690))
+  expect_equal(round(result$se.rob, 7), c(0.1472941, 0.1427597))
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = TRUE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.4156365, 0.8045963))
+  expect_equal(round(result$se.rob, 7), c(0.2160681, 0.1947304))
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = FALSE, small.strata = TRUE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.4156365, 0.8045963))
+  expect_equal(round(result$se.rob, 7), c(0.2137443, 0.1926630))
+
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, D = data$D, S = NULL, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+    })),
+    "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification",
+    fixed = TRUE
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, D = NULL, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+    })),
+    "Treatments have not been provided (D = NULL). Please provide the vector of treatments.",
+    fixed = TRUE
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = NULL, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+    })),
+    "Observed outcomes have not been provided (Y = NULL). Please provide the vector of observed outcomes.",
+    fixed = TRUE
+  )
+})
+
+test_that("data: big strata, option: big strata", {
+  # data: small strata, option: small strata
+  set.seed(123)
+  tau.vec <- c(0.2, 0.9, 1.5)
+  n.treat <- length(tau.vec)
+  n_1 <- 1000
+  data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1, 1), k = 3)
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.4237099, 1.0070806, 1.4392785))
+  expect_equal(round(result$se.rob, 7), c(0.1319973, 0.1300569, 0.1325378))
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = FALSE, small.strata = FALSE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.4237099, 1.0070806, 1.4392785))
+  expect_equal(round(result$se.rob, 7), c(0.1309383, 0.1290127, 0.1314774))
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.2114763, 0.8411237, 1.4103687))
+  expect_equal(round(result$se.rob, 7), c(0.0887169, 0.0886237, 0.0888706))
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.2114763, 0.8411237, 1.4103687))
+  expect_equal(round(result$se.rob, 7), c(0.0880103, 0.0879149, 0.0881632))
+  invisible(capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = FALSE)
+  }))
+  expect_equal(round(result$tau.hat, 7), c(0.4104883, 0.9986809, 1.4669068))
+  expect_equal(round(result$se.rob, 7), c(0.1278097, 0.1237450, 0.1269005))
+})
+
+test_that("data: small strata, option: big strata", {
+  # data: small strata, option: big strata
+  set.seed(123)
+  tau.vec <- c(0.2, 0.8)
+  n.treat <- length(tau.vec)
+  n_1 <- 900
+  data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
+  })))
+  expect_equal(round(result$tau.hat, 7), c(-0.0866568, 0.6284132))
+  expect_equal(round(result$se.rob, 7), c(0.0676520, 0.0689729))
+expect_warning({
+  warnings <- character()
+
+  withCallingHandlers({
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
+    }))
+  }, warning = function(w) {
+    warnings <<- c(warnings, conditionMessage(w))
+    invokeRestart("muffleWarning")
+  })
+
+  expect_true(any(grepl("All strata have the same small number of observations", warnings, fixed = TRUE)))
+  expect_true(any(grepl("At least 25% of strata are small", warnings, fixed = TRUE)))
+  expect_true(any(grepl("HC1 adjustment unstable or undefined", warnings, fixed = TRUE)))
+}, regexp = NA)
 })
