@@ -1103,3 +1103,45 @@ test_that("data: small strata, option: big strata", {
     regexp = NA
   )
 })
+
+test_that("data: big strata, option: small strata", {
+  tau.vec <- c(0.2, 0.9)
+  n.treat <- length(tau.vec)
+  n_1 <- 1000
+  data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 20, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+    })),
+    "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
+    fixed = TRUE
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
+    fixed = TRUE
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, D = data$D, S = data$S, X = NULL, HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
+    fixed = TRUE
+  )
+    expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, D = data$D, S = NULL, X = NULL, HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE.",
+    fixed = TRUE
+  )
+      expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, D = data$D, S = NULL, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE.",
+    fixed = TRUE
+  )
+})
