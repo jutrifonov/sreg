@@ -973,24 +973,133 @@ test_that("data: small strata, option: big strata", {
   invisible(
     suppressWarnings(
       capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
-  })))
+        result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
   expect_equal(round(result$tau.hat, 7), c(-0.0866568, 0.6284132))
   expect_equal(round(result$se.rob, 7), c(0.0676520, 0.0689729))
-expect_warning({
-  warnings <- character()
+  expect_warning(
+    {
+      warnings <- character()
 
-  withCallingHandlers({
-    invisible(capture.output({
-      result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
-    }))
-  }, warning = function(w) {
-    warnings <<- c(warnings, conditionMessage(w))
-    invokeRestart("muffleWarning")
-  })
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
 
-  expect_true(any(grepl("All strata have the same small number of observations", warnings, fixed = TRUE)))
-  expect_true(any(grepl("At least 25% of strata are small", warnings, fixed = TRUE)))
-  expect_true(any(grepl("HC1 adjustment unstable or undefined", warnings, fixed = TRUE)))
-}, regexp = NA)
+      expect_true(any(grepl("All strata have the same small number of observations", warnings, fixed = TRUE)))
+      expect_true(any(grepl("At least 25% of strata are small", warnings, fixed = TRUE)))
+      expect_true(any(grepl("HC1 adjustment unstable or undefined", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0866568, 0.6284132))
+  expect_equal(round(result$se.rob, 7), c(0.0676520, 0.0689729))
+
+  expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+
+      expect_true(any(grepl("All strata have the same small number of observations", warnings, fixed = TRUE)))
+      expect_true(any(grepl("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("At least 25% of strata are small", warnings, fixed = TRUE)))
+      expect_true(any(grepl("HC1 adjustment unstable or undefined", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0866568, 0.6284132))
+  expect_equal(round(result$se.rob, 7), c(0.0676520, 0.0689729))
+
+  expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+
+      expect_true(any(grepl("All strata have the same small number of observations", warnings, fixed = TRUE)))
+      expect_true(any(grepl("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("At least 25% of strata are small", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0866568, 0.6284132))
+  expect_equal(round(result$se.rob, 7), c(0.0676520, 0.0689729))
+
+  expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+
+      expect_true(any(grepl("All strata have the same small number of observations", warnings, fixed = TRUE)))
+      expect_true(any(grepl("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("At least 25% of strata are small", warnings, fixed = TRUE)))
+      expect_true(any(grepl("HC1 adjustment unstable or undefined", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
 })
