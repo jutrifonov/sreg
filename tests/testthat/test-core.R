@@ -1881,8 +1881,192 @@ test_that("data: mixed design, option: small strata", {
   data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
   expect_error(
     invisible(capture.output({
-  result <- sreg(Y = data_b$Y, S = data_b$S, D = data_b$D, X = data.frame(data_b$x_1), G.id = data_b$G.id, Ng = data_b$G.id, HC1 = TRUE, small.strata = TRUE)
+      result <- sreg(Y = data_b$Y, S = data_b$S, D = data_b$D, X = data.frame(data_b$x_1), G.id = data_b$G.id, Ng = data_b$G.id, HC1 = TRUE, small.strata = TRUE)
     })), "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE.",
     fixed = TRUE
   )
+})
+
+test_that("data: mixed design, option: big strata", {
+  set.seed(123)
+  set.seed(123)
+  tau.vec <- c(0.2, 0.9)
+  n.treat <- length(tau.vec)
+  n_1 <- 600
+  n_2 <- 50
+  data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+  data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+  # Step 1: Get the max stratum ID in data_s
+  max_id <- max(data_s$S)
+
+  # Step 2: Get unique strata in data_b and assign new IDs
+  unique_b_strata <- sort(unique(data_b$S))
+  num_b_strata <- length(unique_b_strata)
+
+  # Create a named mapping from old to new stratum IDs
+  new_ids <- seq(max_id + 1, max_id + num_b_strata)
+  stratum_map <- setNames(new_ids, unique_b_strata)
+
+  # Step 3: Relabel data_b$S
+  data_b$S <- stratum_map[as.character(data_b$S)]
+
+  # 🧠 Step 4: Make cluster IDs unique across the two datasets!!!!!
+  max_gid <- max(data_s$G.id)
+  data_b$G.id <- data_b$G.id + max_gid
+  length(intersect(data_s$G.id, data_b$G.id)) == 0
+
+  data_sim <- rbind(data_s[, -ncol(data_s)], data_b)
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0747915, 0.7039973))
+  expect_equal(round(result$se.rob, 7), c(0.1810607, 0.1454232))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = FALSE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0747915, 0.7039973))
+  expect_equal(round(result$se.rob, 7), c(0.0746116, 0.0713877))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = NULL, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0747915, 0.7039973))
+  expect_equal(round(result$se.rob, 7), c(0.1810607, 0.1454232))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = data.frame(data_sim$x_1), G.id = data_sim$G.id, Ng = NULL, HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0747915, 0.7039973))
+  expect_equal(round(result$se.rob, 7), c(0.1810607, 0.1454232))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = NULL, G.id = data_sim$G.id, Ng = NULL, HC1 = FALSE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0747915, 0.7039973))
+  expect_equal(round(result$se.rob, 7), c(0.0746116, 0.0713877))
+
+  expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+
+      expect_true(any(grepl("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("At least 25% of strata are small, but small.strata = FALSE.", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
+
+  expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = NULL, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+      expect_true(any(grepl("At least 25% of strata are small, but small.strata = FALSE.", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
+  expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = data.frame(data_sim$x_1), G.id = data_sim$G.id, Ng = NULL, HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+      expect_true(any(grepl("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("At least 25% of strata are small, but small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("Cluster sizes have not been provided (Ng = NULL).", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
+
+    expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data_sim$Y, S = NULL, D = data_sim$D, X = NULL, G.id = data_sim$G.id, Ng = NULL, HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+      expect_true(any(grepl("Cluster sizes have not been provided (Ng = NULL).", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
+
+   invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, S = NULL, D = data_sim$D, X = data.frame(data_sim$x_1, data_sim$Ng), G.id = data_sim$G.id, Ng = NULL, HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0966109, 0.6779752))
+  expect_equal(round(result$se.rob, 7), c(0.1168654, 0.1126985))
+
+     invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, S = NULL, D = data_sim$D, X = data.frame(data_sim$x_1), G.id = data_sim$G.id, Ng = NULL, HC1 = FALSE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(-0.0894008, 0.6764126))
+  expect_equal(round(result$se.rob, 7), c(0.1168120, 0.1140083))
 })
