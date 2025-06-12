@@ -1580,7 +1580,7 @@ test_that("data: big strata, option: big strata", {
   )
 })
 
-test_that("data: big strata, option: big strata", {
+test_that("data: small strata, option: big strata", {
   set.seed(123)
   tau.vec <- c(0.2, 0.8)
   n.treat <- length(tau.vec)
