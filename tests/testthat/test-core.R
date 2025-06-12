@@ -1,10 +1,10 @@
 test_that("simulations without clusters work", {
   set.seed(123)
-  data <- sreg.rgen(n = 1000, tau.vec = c(0.2, 0.5), n.strata = 10, cluster = F, is.cov = TRUE)
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  sim_data <- sreg.rgen(n = 1000, tau.vec = c(0.2, 0.5), n.strata = 10, cluster = F, is.cov = TRUE)
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
 
   invisible(capture.output({
     result <- sreg::sreg(Y, S, D, G.id = NULL, Ng = NULL, X = X)
@@ -60,7 +60,7 @@ test_that("simulations without clusters work", {
     })),
     "must contain only integer values."
   )
-  S <- data$S
+  S <- sim_data$S
   D[5] <- 0.5
   expect_error(
     invisible(capture.output({
@@ -75,8 +75,8 @@ test_that("simulations without clusters work", {
     })),
     "must contain only integer values."
   )
-  S <- data$S
-  D <- data$D
+  S <- sim_data$S
+  D <- sim_data$D
 
   X[10:12, ] <- NaN
   Y[1:10] <- NaN
@@ -87,8 +87,8 @@ test_that("simulations without clusters work", {
     })),
     msg
   )
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  Y <- data$Y
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
+  Y <- sim_data$Y
   S[12] <- NA
   expect_warning(
     invisible(capture.output({
@@ -96,7 +96,7 @@ test_that("simulations without clusters work", {
     })),
     msg
   )
-  S <- data$S
+  S <- sim_data$S
   S[19] <- NaN
   expect_warning(
     invisible(capture.output({
@@ -104,7 +104,7 @@ test_that("simulations without clusters work", {
     })),
     msg
   )
-  S <- data$S
+  S <- sim_data$S
   S[1] <- 0
   expect_error(
     invisible(capture.output({
@@ -130,7 +130,7 @@ test_that("simulations without clusters work", {
       result <- sreg::sreg(Y, S = NULL, D = D, G.id = NULL, Ng = NULL, X = X)
     }))
   )
-  S <- data$S
+  S <- sim_data$S
   D[1:3] <- -1
   expect_error(
     invisible(capture.output({
@@ -145,7 +145,7 @@ test_that("simulations without clusters work", {
     })),
     "Error: The treatments should be indexed by"
   )
-  D <- data$D
+  D <- sim_data$D
   D[1] <- -1
   expect_error(
     invisible(capture.output({
@@ -165,7 +165,7 @@ test_that("simulations without clusters work", {
     })),
     "Error: The treatments should be indexed by"
   )
-  D <- data$D
+  D <- sim_data$D
   expect_silent(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
@@ -175,17 +175,17 @@ test_that("simulations without clusters work", {
 
 test_that("simulations with clusters work", {
   set.seed(123) # fix the random seed
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.8),
     n.strata = 4, cluster = T, Nmax = 50, is.cov = TRUE
   )
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
 
-  G.id <- data$G.id
-  Ng <- data$Ng
+  G.id <- sim_data$G.id
+  Ng <- sim_data$Ng
 
   invisible(capture.output({
     result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
@@ -222,7 +222,7 @@ test_that("simulations with clusters work", {
   expect_equal(round(result$tau.hat, 7), c(0.1548014, 0.6955543))
   expect_equal(round(result$se.rob, 8), c(0.06201006, 0.05871032))
 
-  X <- data.frame("Ng" = data$Ng, "x_1" = data$x_1, "x_2" = data$x_2)
+  X <- data.frame("Ng" = sim_data$Ng, "x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
 
   invisible(capture.output({
     result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
@@ -327,7 +327,7 @@ test_that("simulations with clusters work", {
     })),
     "variable has a different type than matrix, numeric vector, or data frame."
   )
-  S <- data$S
+  S <- sim_data$S
   S[1] <- 0
   expect_error(
     invisible(capture.output({
@@ -364,7 +364,7 @@ test_that("simulations with clusters work", {
       result <- sreg::sreg(Y, S = NULL, D = D, G.id = G.id, Ng = Ng, X = NULL)
     }))
   )
-  S <- data$S
+  S <- sim_data$S
   expect_silent(
     invisible(capture.output({
       result <- sreg::sreg(as.matrix(Y), S = S, D = D, G.id = G.id, Ng = Ng, X = X)
@@ -413,7 +413,7 @@ test_that("simulations with clusters work", {
     })),
     "must contain only integer values."
   )
-  S <- data$S
+  S <- sim_data$S
   D[5] <- 1.5
   D[7] <- 1.5
   expect_error(
@@ -441,8 +441,8 @@ test_that("simulations with clusters work", {
     })),
     "must contain only integer values."
   )
-  S <- data$S
-  D <- data$D
+  S <- sim_data$S
+  D <- sim_data$D
   Ng[2] <- 37.64
   expect_error(
     invisible(capture.output({
@@ -450,7 +450,7 @@ test_that("simulations with clusters work", {
     })),
     "must contain only integer values."
   )
-  Ng <- data$Ng
+  Ng <- sim_data$Ng
   G.id[29] <- 29.23480
   expect_error(
     invisible(capture.output({
@@ -465,16 +465,16 @@ test_that("simulations with clusters work", {
     "must contain only integer values."
   )
   set.seed(123) # fix the random seed
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.8),
     n.strata = 4, cluster = T, Nmax = 50
   )
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  G.id <- data$G.id
-  Ng <- data$Ng
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
+  G.id <- sim_data$G.id
+  Ng <- sim_data$Ng
   D[1:40] <- -1
   expect_error(
     invisible(capture.output({
@@ -500,7 +500,7 @@ test_that("simulations with clusters work", {
     })),
     "Error: The treatments should be indexed by"
   )
-  D <- data$D
+  D <- sim_data$D
   expect_silent(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
@@ -510,11 +510,11 @@ test_that("simulations with clusters work", {
 
 test_that("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE", {
   set.seed(123)
-  data <- sreg.rgen(n = 25, tau.vec = c(0.2, 0.5), n.strata = 3, cluster = F, is.cov = TRUE)
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  sim_data <- sreg.rgen(n = 25, tau.vec = c(0.2, 0.5), n.strata = 3, cluster = F, is.cov = TRUE)
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
 
   expect_warning(
     invisible(capture.output({
@@ -524,16 +524,16 @@ test_that("One or more covariates do not vary within one or more stratum-treatme
   )
 
   set.seed(123)
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.8),
     n.strata = 10, cluster = T, Nmax = 50
   )
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  G.id <- data$G.id
-  Ng <- data$Ng
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
+  G.id <- sim_data$G.id
+  Ng <- sim_data$Ng
 
   expect_warning(
     invisible(capture.output({
@@ -542,16 +542,16 @@ test_that("One or more covariates do not vary within one or more stratum-treatme
     "One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE."
   )
   set.seed(123)
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 50, tau.vec = c(0.2, 0.8),
     n.strata = 4, cluster = T, Nmax = 50
   )
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  G.id <- data$G.id
-  Ng <- data$Ng
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
+  G.id <- sim_data$G.id
+  Ng <- sim_data$Ng
 
   expect_error(
     invisible(capture.output({
@@ -563,16 +563,16 @@ test_that("One or more covariates do not vary within one or more stratum-treatme
 
 test_that("individual level X warning works", {
   set.seed(123)
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.8),
     n.strata = 4, cluster = T, Nmax = 50
   )
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  G.id <- data$G.id
-  Ng <- data$Ng
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
+  G.id <- sim_data$G.id
+  Ng <- sim_data$Ng
   X[1, 1] <- 2.3894
 
   expect_warning(
@@ -585,16 +585,16 @@ test_that("individual level X warning works", {
 
 test_that("no cluster sizes warning works", {
   set.seed(123)
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.8),
     n.strata = 4, cluster = T, Nmax = 50
   )
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  G.id <- data$G.id
-  Ng <- data$Ng
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
+  G.id <- sim_data$G.id
+  Ng <- sim_data$Ng
 
   expect_warning(
     invisible(capture.output({
@@ -608,17 +608,17 @@ test_that("data contains one or more NA (or NaN) values warning works", {
   set.seed(123) # fix the random seed
   # Generate a pseudo-random sample with clusters and two treatments = c(0.2, 0.8)
 
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.8),
     n.strata = 4, cluster = T, Nmax = 50
   )
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
   Y[1:10] <- NA
-  G.id <- data$G.id
-  Ng <- data$Ng
+  G.id <- sim_data$G.id
+  Ng <- sim_data$Ng
 
   msg <- "ignoring these values"
   expect_warning(
@@ -627,7 +627,7 @@ test_that("data contains one or more NA (or NaN) values warning works", {
     })),
     msg
   )
-  Y <- data$Y
+  Y <- sim_data$Y
   X[1, 1] <- NA
   expect_warning(
     invisible(capture.output({
@@ -645,14 +645,14 @@ test_that("data contains one or more NA (or NaN) values warning works", {
     msg
   )
   X[10:12, ] <- NaN
-  Y <- data$Y
+  Y <- sim_data$Y
   expect_warning(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D, G.id = G.id, Ng = Ng, X = X, HC1 = TRUE)
     })),
     msg
   )
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
   G.id[100:105] <- NA
   expect_warning(
     invisible(capture.output({
@@ -660,7 +660,7 @@ test_that("data contains one or more NA (or NaN) values warning works", {
     })),
     msg
   )
-  G.id <- data$G.id
+  G.id <- sim_data$G.id
   Ng[4:5] <- NaN
   expect_warning(
     invisible(capture.output({
@@ -668,7 +668,7 @@ test_that("data contains one or more NA (or NaN) values warning works", {
     })),
     msg
   )
-  Ng <- data$Ng
+  Ng <- sim_data$Ng
   D[24:25] <- NA
   expect_warning(
     invisible(capture.output({
@@ -676,7 +676,7 @@ test_that("data contains one or more NA (or NaN) values warning works", {
     })),
     msg
   )
-  D <- data$D
+  D <- sim_data$D
   S[23] <- NaN
   expect_warning(
     invisible(capture.output({
@@ -688,15 +688,15 @@ test_that("data contains one or more NA (or NaN) values warning works", {
 
 test_that("skipped values in range of S/D works", {
   set.seed(123)
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.5),
     n.strata = 5, cluster = F, is.cov = TRUE
   )
-  Y <- data$Y
-  S <- data$S
+  Y <- sim_data$Y
+  S <- sim_data$S
   S[S == 4] <- 1
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = NULL, Ng = NULL, X = X)
@@ -704,24 +704,24 @@ test_that("skipped values in range of S/D works", {
     "There are skipped values in the range"
   )
   set.seed(123)
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.5),
     n.strata = 5, cluster = T, is.cov = TRUE
   )
-  Y <- data$Y
-  S <- data$S
+  Y <- sim_data$Y
+  S <- sim_data$S
   S[S == 3] <- 4
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  G.id <- data$G.id
-  Ng <- data$Ng
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
+  G.id <- sim_data$G.id
+  Ng <- sim_data$Ng
   expect_error(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
     })),
     "There are skipped values in the range"
   )
-  S <- data$S
+  S <- sim_data$S
   G.id[41:50] <- 3
   S[41:50] <- 3
   Ng[41:50] <- 30
@@ -736,16 +736,16 @@ test_that("skipped values in range of S/D works", {
 
 test_that("non cluster-level error for S, D, Ng works", {
   set.seed(123)
-  data <- sreg.rgen(
+  sim_data <- sreg.rgen(
     n = 100, tau.vec = c(0.2, 0.5),
     n.strata = 5, cluster = T, is.cov = TRUE
   )
-  Y <- data$Y
-  S <- data$S
-  D <- data$D
-  X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-  G.id <- data$G.id
-  Ng <- data$Ng
+  Y <- sim_data$Y
+  S <- sim_data$S
+  D <- sim_data$D
+  X <- data.frame("x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
+  G.id <- sim_data$G.id
+  Ng <- sim_data$Ng
   expect_silent(
     invisible(capture.output({
       result <- sreg::sreg(Y, S = S, D = D, G.id = G.id, Ng = Ng, X = X)
@@ -764,7 +764,7 @@ test_that("non cluster-level error for S, D, Ng works", {
     })),
     "The values for S, D, and Ng must be consistent within each cluster"
   )
-  S <- data$S
+  S <- sim_data$S
   D[13:20] <- 1
   expect_error(
     invisible(capture.output({
@@ -772,7 +772,7 @@ test_that("non cluster-level error for S, D, Ng works", {
     })),
     "The values for S, D, and Ng must be consistent within each cluster"
   )
-  D <- data$D
+  D <- sim_data$D
   Ng[300] <- 30
   expect_error(
     invisible(capture.output({
@@ -780,7 +780,7 @@ test_that("non cluster-level error for S, D, Ng works", {
     })),
     "The values for S, D, and Ng must be consistent within each cluster"
   )
-  Ng <- data$Ng
+  Ng <- sim_data$Ng
   S[41] <- 3
   D[13:20] <- 1
   Ng[300] <- 30
@@ -814,12 +814,12 @@ test_that("non cluster-level error for S, D, Ng works", {
 test_that("empirical example works", {
   library(haven)
   data("AEJapp")
-  data <- AEJapp
-  Y <- data$gradesq34
-  D <- data$treatment
-  S <- data$class_level
-  pills <- data$pills_taken
-  age <- data$age_months
+  sim_data <- AEJapp
+  Y <- sim_data$gradesq34
+  D <- sim_data$treatment
+  S <- sim_data$class_level
+  pills <- sim_data$pills_taken
+  age <- sim_data$age_months
   data.clean <- data.frame(Y, D, S, pills, age)
   data.clean <- data.clean %>%
     mutate(D = ifelse(D == 3, 0, D))
@@ -868,60 +868,60 @@ test_that("dgp.po warning work", {
 # SREG 2.0 testing enviroment #
 ### no clusters
 test_that("data: small strata, option: small strata", {
-  # data: small strata, option: small strata
+  # sim_data: small strata, option: small strata
   set.seed(123)
   tau.vec <- c(0.2, 0.8)
   n.treat <- length(tau.vec)
   n_1 <- 300
-  data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+  sim_data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = TRUE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, HC1 = TRUE, small.strata = TRUE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.4045371, 0.7833705))
   expect_equal(round(result$se.rob, 7), c(0.2215056, 0.1960352))
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = FALSE, small.strata = TRUE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, HC1 = FALSE, small.strata = TRUE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.4045371, 0.7833705))
   expect_equal(round(result$se.rob, 7), c(0.2215056, 0.1960352))
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = TRUE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.3073525, 0.8224690))
   expect_equal(round(result$se.rob, 7), c(0.1496169, 0.1450199))
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = TRUE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.3073525, 0.8224690))
   expect_equal(round(result$se.rob, 7), c(0.1472941, 0.1427597))
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = TRUE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1), HC1 = TRUE, small.strata = TRUE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.4156365, 0.8045963))
   expect_equal(round(result$se.rob, 7), c(0.2160681, 0.1947304))
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = FALSE, small.strata = TRUE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1), HC1 = FALSE, small.strata = TRUE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.4156365, 0.8045963))
   expect_equal(round(result$se.rob, 7), c(0.2137443, 0.1926630))
 
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, D = data$D, S = NULL, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, D = sim_data$D, S = NULL, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = TRUE)
     })),
     "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification",
     fixed = TRUE
   )
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, D = NULL, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, D = NULL, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = TRUE)
     })),
     "Treatments have not been provided (D = NULL). Please provide the vector of treatments.",
     fixed = TRUE
   )
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = NULL, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+      result <- sreg(Y = NULL, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = TRUE)
     })),
     "Observed outcomes have not been provided (Y = NULL). Please provide the vector of observed outcomes.",
     fixed = TRUE
@@ -929,51 +929,51 @@ test_that("data: small strata, option: small strata", {
 })
 
 test_that("data: big strata, option: big strata", {
-  # data: small strata, option: small strata
+  # sim_data: small strata, option: small strata
   set.seed(123)
   tau.vec <- c(0.2, 0.9, 1.5)
   n.treat <- length(tau.vec)
   n_1 <- 1000
-  data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1, 1), k = 3)
+  sim_data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1, 1), k = 3)
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, HC1 = TRUE, small.strata = FALSE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.4237099, 1.0070806, 1.4392785))
   expect_equal(round(result$se.rob, 7), c(0.1319973, 0.1300569, 0.1325378))
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = FALSE, small.strata = FALSE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, HC1 = FALSE, small.strata = FALSE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.4237099, 1.0070806, 1.4392785))
   expect_equal(round(result$se.rob, 7), c(0.1309383, 0.1290127, 0.1314774))
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = FALSE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.2114763, 0.8411237, 1.4103687))
   expect_equal(round(result$se.rob, 7), c(0.0887169, 0.0886237, 0.0888706))
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = FALSE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.2114763, 0.8411237, 1.4103687))
   expect_equal(round(result$se.rob, 7), c(0.0880103, 0.0879149, 0.0881632))
   invisible(capture.output({
-    result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = FALSE)
+    result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1), HC1 = TRUE, small.strata = FALSE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.4104883, 0.9986809, 1.4669068))
   expect_equal(round(result$se.rob, 7), c(0.1278097, 0.1237450, 0.1269005))
 })
 
 test_that("data: small strata, option: big strata", {
-  # data: small strata, option: big strata
+  # sim_data: small strata, option: big strata
   set.seed(123)
   tau.vec <- c(0.2, 0.8)
   n.treat <- length(tau.vec)
   n_1 <- 900
-  data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+  sim_data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
 
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, HC1 = TRUE, small.strata = FALSE)
       })
     )
   )
@@ -986,7 +986,7 @@ test_that("data: small strata, option: big strata", {
       withCallingHandlers(
         {
           invisible(capture.output({
-            result <- sreg(Y = data$Y, D = data$D, S = data$S, HC1 = TRUE, small.strata = FALSE)
+            result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, HC1 = TRUE, small.strata = FALSE)
           }))
         },
         warning = function(w) {
@@ -1005,7 +1005,7 @@ test_that("data: small strata, option: big strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = FALSE)
       })
     )
   )
@@ -1019,7 +1019,7 @@ test_that("data: small strata, option: big strata", {
       withCallingHandlers(
         {
           invisible(capture.output({
-            result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
+            result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = FALSE)
           }))
         },
         warning = function(w) {
@@ -1039,7 +1039,7 @@ test_that("data: small strata, option: big strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = FALSE)
       })
     )
   )
@@ -1053,7 +1053,7 @@ test_that("data: small strata, option: big strata", {
       withCallingHandlers(
         {
           invisible(capture.output({
-            result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+            result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = FALSE)
           }))
         },
         warning = function(w) {
@@ -1072,7 +1072,7 @@ test_that("data: small strata, option: big strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1), HC1 = TRUE, small.strata = FALSE)
       })
     )
   )
@@ -1086,7 +1086,7 @@ test_that("data: small strata, option: big strata", {
       withCallingHandlers(
         {
           invisible(capture.output({
-            result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1 = TRUE, small.strata = FALSE)
+            result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1), HC1 = TRUE, small.strata = FALSE)
           }))
         },
         warning = function(w) {
@@ -1109,38 +1109,38 @@ test_that("data: big strata, option: small strata", {
   tau.vec <- c(0.2, 0.9)
   n.treat <- length(tau.vec)
   n_1 <- 1000
-  data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 20, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+  sim_data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 20, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = TRUE)
     })),
     "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
     fixed = TRUE
   )
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = TRUE)
     })),
     "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
     fixed = TRUE
   )
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, D = data$D, S = data$S, X = NULL, HC1 = TRUE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = NULL, HC1 = TRUE, small.strata = TRUE)
     })),
     "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
     fixed = TRUE
   )
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, D = data$D, S = NULL, X = NULL, HC1 = TRUE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, D = sim_data$D, S = NULL, X = NULL, HC1 = TRUE, small.strata = TRUE)
     })),
     "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE.",
     fixed = TRUE
   )
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, D = data$D, S = NULL, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, D = sim_data$D, S = NULL, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = TRUE)
     })),
     "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE.",
     fixed = TRUE
@@ -1154,8 +1154,7 @@ test_that("data: mixed design, option: small strata", {
   n_1 <- 3000
   n_2 <- 50
   data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
-  Y <- data$Y
-  S <- data$S
+
 
   data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
   # Step 1: Get the max stratum ID in data_s
@@ -1172,12 +1171,12 @@ test_that("data: mixed design, option: small strata", {
   # Step 3: Relabel data_b$S
   data_b$S <- stratum_map[as.character(data_b$S)]
 
-  data <- rbind(data_s, data_b)
+  sim_data <- rbind(data_s, data_b)
 
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
+        result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = TRUE)
       })
     )
   )
@@ -1187,7 +1186,7 @@ test_that("data: mixed design, option: small strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = TRUE, small.strata = TRUE)
+        result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = TRUE, small.strata = TRUE)
       })
     )
   )
@@ -1197,7 +1196,7 @@ test_that("data: mixed design, option: small strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+        result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = TRUE)
       })
     )
   )
@@ -1206,35 +1205,35 @@ test_that("data: mixed design, option: small strata", {
 
   expect_warning(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = TRUE)
     })),
     "Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.",
     fixed = TRUE
   )
   expect_warning(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = FALSE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = FALSE, small.strata = TRUE)
     })),
     "Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.",
     fixed = TRUE
   )
   expect_warning(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = TRUE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = TRUE, small.strata = TRUE)
     })),
     "Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.",
     fixed = TRUE
   )
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, S = NULL, D = data$D, X = data.frame(data$x_1), HC1 = TRUE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, S = NULL, D = sim_data$D, X = data.frame(sim_data$x_1), HC1 = TRUE, small.strata = TRUE)
     })),
     "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE.",
     fixed = TRUE
   )
   expect_error(
     invisible(capture.output({
-      result <- sreg(Y = data$Y, S = data$S, D = NULL, X = data.frame(data$x_1), HC1 = TRUE, small.strata = TRUE)
+      result <- sreg(Y = sim_data$Y, S = sim_data$S, D = NULL, X = data.frame(sim_data$x_1), HC1 = TRUE, small.strata = TRUE)
     })),
     "Treatments have not been provided (D = NULL). Please provide the vector of treatments.",
     fixed = TRUE
@@ -1248,8 +1247,6 @@ test_that("data: mixed design, option: big strata", {
   n_1 <- 3000
   n_2 <- 50
   data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
-  Y <- data$Y
-  S <- data$S
 
   data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
   # Step 1: Get the max stratum ID in data_s
@@ -1266,12 +1263,12 @@ test_that("data: mixed design, option: big strata", {
   # Step 3: Relabel data_b$S
   data_b$S <- stratum_map[as.character(data_b$S)]
 
-  data <- rbind(data_s, data_b)
+  sim_data <- rbind(data_s, data_b)
 
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = FALSE)
       })
     )
   )
@@ -1281,7 +1278,7 @@ test_that("data: mixed design, option: big strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = FALSE)
       })
     )
   )
@@ -1291,7 +1288,7 @@ test_that("data: mixed design, option: big strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = FALSE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = FALSE, small.strata = FALSE)
       })
     )
   )
@@ -1301,7 +1298,7 @@ test_that("data: mixed design, option: big strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = TRUE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = TRUE, small.strata = FALSE)
       })
     )
   )
@@ -1311,7 +1308,7 @@ test_that("data: mixed design, option: big strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, S = NULL, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, S = NULL, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = FALSE)
       })
     )
   )
@@ -1321,7 +1318,7 @@ test_that("data: mixed design, option: big strata", {
   invisible(
     suppressWarnings(
       capture.output({
-        result <- sreg(Y = data$Y, S = NULL, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+        result <- sreg(Y = sim_data$Y, S = NULL, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = FALSE)
       })
     )
   )
@@ -1336,7 +1333,7 @@ test_that("data: mixed design, option: big strata", {
       withCallingHandlers(
         {
           invisible(capture.output({
-            result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
+            result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = FALSE)
           }))
         },
         warning = function(w) {
@@ -1358,7 +1355,7 @@ test_that("data: mixed design, option: big strata", {
       withCallingHandlers(
         {
           invisible(capture.output({
-            result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = FALSE)
+            result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = FALSE)
           }))
         },
         warning = function(w) {
@@ -1380,7 +1377,7 @@ test_that("data: mixed design, option: big strata", {
       withCallingHandlers(
         {
           invisible(capture.output({
-            result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = FALSE, small.strata = FALSE)
+            result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = FALSE, small.strata = FALSE)
           }))
         },
         warning = function(w) {
@@ -1401,7 +1398,7 @@ test_that("data: mixed design, option: big strata", {
       withCallingHandlers(
         {
           invisible(capture.output({
-            result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = TRUE, small.strata = FALSE)
+            result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = TRUE, small.strata = FALSE)
           }))
         },
         warning = function(w) {
@@ -1422,7 +1419,7 @@ test_that("data: mixed design, option: big strata", {
       withCallingHandlers(
         {
           invisible(capture.output({
-            result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = FALSE, small.strata = FALSE)
+            result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = FALSE, small.strata = FALSE)
           }))
         },
         warning = function(w) {

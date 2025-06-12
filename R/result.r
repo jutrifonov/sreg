@@ -1,3 +1,5 @@
+# Suppress NSE notes during R CMD check
+utils::globalVariables(c("stratum_type"))
 #-------------------------------------------------------------------
 # %#     The core function. It provides estimates of ATE, their s.e.,
 # %#     calculates t-stats and corresponding p-values

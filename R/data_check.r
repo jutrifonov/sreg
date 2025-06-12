@@ -1,3 +1,6 @@
+# Suppress NSE notes during R CMD check
+utils::globalVariables(c("size", "freq"))
+
 check.data.types <- function(Y, S, D, G.id, Ng, X) {
   non.null.vars <- list(Y, S, D, G.id, Ng, X)[sapply(list(Y, S, D, G.id, Ng, X), Negate(is.null))]
   all.correct.types <- all(
