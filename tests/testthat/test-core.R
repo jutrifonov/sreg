@@ -1579,3 +1579,125 @@ test_that("data: big strata, option: big strata", {
     fixed = TRUE
   )
 })
+
+test_that("data: big strata, option: big strata", {
+  set.seed(123)
+  tau.vec <- c(0.2, 0.8)
+  n.treat <- length(tau.vec)
+  n_1 <- 900
+
+  data_sim <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = FALSE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.1399429, 0.8776288))
+  expect_equal(round(result$se.rob, 7), c(0.0571977, 0.0592139))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.1399429, 0.8776288))
+  expect_equal(round(result$se.rob, 7), c(0.0571977, 0.0592139))
+
+  expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+
+      expect_true(any(grepl("All strata have the same small number of clusters (e.g., matched pairs at the cluster level), but small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("HC1 adjustment unstable or undefined due to degenerate strata-treatment structure; reverting to unadjusted estimator.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("At least 25% of strata are small, but small.strata = FALSE.", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
+
+  expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, X = data.frame(data_sim$x_1, data_sim$x_2), Ng = data_sim$Ng, HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+
+      expect_true(any(grepl("All strata have the same small number of clusters (e.g., matched pairs at the cluster level), but small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("HC1 adjustment unstable or undefined due to degenerate strata-treatment structure; reverting to unadjusted estimator.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("At least 25% of strata are small, but small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE.", warnings, fixed = TRUE)))
+    },
+    regexp = NA
+  )
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, X = data.frame(data_sim$x_1, data_sim$x_2), HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.1399429, 0.8776288))
+  expect_equal(round(result$se.rob, 7), c(0.0571977, 0.0592139))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = NULL, X = data.frame(data_sim$x_1, data_sim$x_2, data_sim$Ng), HC1 = TRUE, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.1399429, 0.8776288))
+  expect_equal(round(result$se.rob, 7), c(0.0571977, 0.0592139))
+
+  expect_warning(
+    {
+      warnings <- character()
+
+      withCallingHandlers(
+        {
+          invisible(capture.output({
+            result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = NULL, X = data.frame(data_sim$x_1, data_sim$x_2, data_sim$Ng), HC1 = TRUE, small.strata = FALSE)
+          }))
+        },
+        warning = function(w) {
+          warnings <<- c(warnings, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+
+      expect_true(any(grepl("All strata have the same small number of clusters (e.g., matched pairs at the cluster level), but small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("HC1 adjustment unstable or undefined due to degenerate strata-treatment structure; reverting to unadjusted estimator.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("At least 25% of strata are small, but small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("Cluster sizes have not been provided (Ng = NULL).", warnings, fixed = TRUE)))
+
+    },
+    regexp = NA
+  )
+})
