@@ -1105,6 +1105,7 @@ test_that("data: small strata, option: big strata", {
 })
 
 test_that("data: big strata, option: small strata", {
+  set.seed(123)
   tau.vec <- c(0.2, 0.9)
   n.treat <- length(tau.vec)
   n_1 <- 1000
@@ -1130,18 +1131,112 @@ test_that("data: big strata, option: small strata", {
     "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
     fixed = TRUE
   )
-    expect_error(
+  expect_error(
     invisible(capture.output({
       result <- sreg(Y = data$Y, D = data$D, S = NULL, X = NULL, HC1 = TRUE, small.strata = TRUE)
     })),
     "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE.",
     fixed = TRUE
   )
-      expect_error(
+  expect_error(
     invisible(capture.output({
       result <- sreg(Y = data$Y, D = data$D, S = NULL, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
     })),
     "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE.",
+    fixed = TRUE
+  )
+})
+
+test_that("data: mixed design, option: small strata", {
+  set.seed(123)
+  tau.vec <- c(0.2, 0.9)
+  n.treat <- length(tau.vec)
+  n_1 <- 3000
+  n_2 <- 50
+  data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+  Y <- data$Y
+  S <- data$S
+
+  data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+  # Step 1: Get the max stratum ID in data_s
+  max_id <- max(data_s$S)
+
+  # Step 2: Get unique strata in data_b and assign new IDs
+  unique_b_strata <- sort(unique(data_b$S))
+  num_b_strata <- length(unique_b_strata)
+
+  # Create a named mapping from old to new stratum IDs
+  new_ids <- seq(max_id + 1, max_id + num_b_strata)
+  stratum_map <- setNames(new_ids, unique_b_strata)
+
+  # Step 3: Relabel data_b$S
+  data_b$S <- stratum_map[as.character(data_b$S)]
+
+  data <- rbind(data_s, data_b)
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = TRUE, small.strata = TRUE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.1679006, 0.8306431))
+  expect_equal(round(result$se.rob, 7), c(0.0449655, 0.0451653))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = TRUE, small.strata = TRUE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.1475503, 0.8076297))
+  expect_equal(round(result$se.rob, 7), c(0.0649087, 0.0660474))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.1679006, 0.8306431))
+  expect_equal(round(result$se.rob, 7), c(0.0448600, 0.0450745))
+
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, S = data$S, D = data$D, X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = TRUE)
+    })),
+    "Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.",
+    fixed = TRUE
+  )
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = FALSE, small.strata = TRUE)
+    })),
+    "Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.",
+    fixed = TRUE
+  )
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, S = data$S, D = data$D, X = NULL, HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.",
+    fixed = TRUE
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, S = NULL, D = data$D, X = data.frame(data$x_1), HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE.",
+    fixed = TRUE
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data$Y, S = data$S, D = NULL, X = data.frame(data$x_1), HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Treatments have not been provided (D = NULL). Please provide the vector of treatments.",
     fixed = TRUE
   )
 })
