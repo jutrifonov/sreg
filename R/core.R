@@ -121,6 +121,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
   check.data.types(Y, S, D, G.id, Ng, X)
   check.integers(S, D, G.id, Ng)
   boolean.check(HC1)
+  boolean.check.ss(small.strata)
 
   if (is.null(Y)) {
     stop("Error: Observed outcomes have not been provided (Y = NULL). Please provide the vector of observed outcomes.")

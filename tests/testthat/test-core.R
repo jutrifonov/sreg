@@ -1433,3 +1433,149 @@ test_that("data: mixed design, option: big strata", {
     regexp = NA
   )
 })
+
+### WITH clusters
+test_that("data: small strata, option: small strata", {
+  set.seed(123)
+  tau.vec <- c(0.2, 0.8)
+  n.treat <- length(tau.vec)
+  n_1 <- 900
+
+  data_sim <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = FALSE, small.strata = TRUE)
+  expect_equal(round(result$tau.hat, 7), c(0.1321043, 0.8705829))
+  expect_equal(round(result$se.rob, 7), c(0.1015669, 0.1052238))
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
+  expect_equal(round(result$tau.hat, 7), c(0.1321043, 0.8705829))
+  expect_equal(round(result$se.rob, 7), c(0.1015669, 0.1052238))
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
+  expect_equal(round(result$tau.hat, 7), c(0.1399561, 0.8402642))
+  expect_equal(round(result$se.rob, 7), c(0.0455854, 0.0522454))
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = FALSE, small.strata = TRUE)
+  expect_equal(round(result$tau.hat, 7), c(0.1399561, 0.8402642))
+  expect_equal(round(result$se.rob, 7), c(0.0453538, 0.0519852))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = NULL, HC1 = FALSE, small.strata = TRUE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.1399561, 0.8402642))
+  expect_equal(round(result$se.rob, 7), c(0.0453538, 0.0519852))
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2, data_sim$Ng), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
+  expect_equal(round(result$tau.hat, 7), c(0.1400713, 0.8409700))
+  expect_equal(round(result$se.rob, 7), c(0.0456655, 0.0525556))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$Ng), G.id = data_sim$G.id, Ng = NULL, HC1 = TRUE, small.strata = TRUE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.1254917, 0.8627286))
+  expect_equal(round(result$se.rob, 7), c(0.1016849, 0.1038816))
+
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = NULL, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
+    fixed = TRUE
+  )
+
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data_sim$Y, D = data_sim$D, S = NULL, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification.",
+    fixed = TRUE
+  )
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data_sim$Y, D = NULL, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
+    })),
+    "Treatments have not been provided (D = NULL). Please provide the vector of treatments.",
+    fixed = TRUE
+  )
+})
+
+test_that("data: big strata, option: big strata", {
+  set.seed(123)
+  tau.vec <- c(0.2, 0.9, 1.5)
+  n.treat <- length(tau.vec)
+  n_1 <- 1000
+
+  data_sim <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1, 1), k = 3)
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, HC1 = TRUE, G.id = data_sim$G.id, Ng = data_sim$Ng, small.strata = FALSE)
+  expect_equal(round(result$tau.hat, 7), c(0.1366736, 1.0663200, 1.5402160))
+  expect_equal(round(result$se.rob, 7), c(0.1076841, 0.1073968, 0.1061023))
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, HC1 = FALSE, G.id = data_sim$G.id, Ng = data_sim$Ng, small.strata = FALSE)
+  expect_equal(round(result$tau.hat, 7), c(0.1366736, 1.0663200, 1.5402160))
+  expect_equal(round(result$se.rob, 7), c(0.1068247, 0.1065375, 0.1052502))
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), HC1 = TRUE, G.id = data_sim$G.id, Ng = data_sim$Ng, small.strata = FALSE)
+  expect_equal(round(result$tau.hat, 7), c(0.0695722, 0.8947400, 1.3867602))
+  expect_equal(round(result$se.rob, 7), c(0.0525225, 0.0545726, 0.0594523))
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), HC1 = FALSE, G.id = data_sim$G.id, Ng = data_sim$Ng, small.strata = FALSE)
+  expect_equal(round(result$tau.hat, 7), c(0.0695722, 0.8947400, 1.3867602))
+  expect_equal(round(result$se.rob, 7), c(0.0521126, 0.0541451, 0.0589783))
+
+  invisible(
+    suppressWarnings(
+      capture.output({
+        result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), HC1 = FALSE, G.id = data_sim$G.id, Ng = NULL, small.strata = FALSE)
+      })
+    )
+  )
+  expect_equal(round(result$tau.hat, 7), c(0.0695722, 0.8947400, 1.3867602))
+  expect_equal(round(result$se.rob, 7), c(0.0521126, 0.0541451, 0.0589783))
+
+  set.seed(123)
+  tau.vec <- c(0.2, 0.9, 1.5)
+  n.treat <- length(tau.vec)
+  n_1 <- 100
+
+  data_sim <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1, 1), k = 3)
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), HC1 = FALSE, G.id = NULL, Ng = data_sim$Ng, small.strata = FALSE)
+
+  expect_equal(round(result$tau.hat, 7), c(0.2199062, 0.6091449, 1.3856801))
+  expect_equal(round(result$se.rob, 7), c(0.0682736, 0.0689731, 0.0652965))
+
+  set.seed(123)
+  tau.vec <- c(0.2, 0.9, 1.5)
+  n.treat <- length(tau.vec)
+  n_1 <- 1000
+  data_sim <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1, 1), k = 3)
+
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), HC1 = FALSE, G.id = data_sim$G.id, Ng = NULL, small.strata = FALSE)
+    })),
+    "Cluster sizes have not been provided (Ng = NULL).",
+    fixed = TRUE
+  )
+
+  result <- sreg(Y = data_sim$Y, D = data_sim$D, S = NULL, X = data.frame(data_sim$x_1, data_sim$x_2), HC1 = FALSE, G.id = data_sim$G.id, Ng = data_sim$Ng, small.strata = FALSE)
+  expect_equal(round(result$tau.hat, 7), c(0.0751089, 0.9047198, 1.4042165))
+  expect_equal(round(result$se.rob, 7), c(0.0624560, 0.0635305, 0.0675028))
+
+  expect_error(
+    invisible(capture.output({
+      result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), HC1 = FALSE, G.id = data_sim$G.id, Ng = data_sim$Ng, small.strata = "abcd")
+    })),
+    "The value of small.strata must be either TRUE or FALSE. A non-boolean value was provided.",
+    fixed = TRUE
+  )
+})

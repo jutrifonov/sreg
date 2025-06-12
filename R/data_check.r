@@ -70,6 +70,14 @@ boolean.check <- function(var) {
     stop("Error: The value of HC must be either TRUE or FALSE. A non-boolean value was provided.")
   }
 }
+boolean.check.ss <- function(var) {
+  is.boolean <- function(x) {
+    is.logical(x) && length(x) == 1 && !is.na(x)
+  }
+  if (!is.boolean(var)) {
+    stop("Error: The value of small.strata must be either TRUE or FALSE. A non-boolean value was provided.")
+  }
+}
 
 check.within.stratatreatment.variation <- function(data) {
   # covariate_columns <- names(data)[-(1:2)]
