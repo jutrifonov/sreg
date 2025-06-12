@@ -1696,8 +1696,50 @@ test_that("data: small strata, option: big strata", {
       expect_true(any(grepl("At least 25% of strata are small, but small.strata = FALSE.", warnings, fixed = TRUE)))
       expect_true(any(grepl("One or more covariates do not vary within one or more stratum-treatment combinations while small.strata = FALSE.", warnings, fixed = TRUE)))
       expect_true(any(grepl("Cluster sizes have not been provided (Ng = NULL).", warnings, fixed = TRUE)))
-
     },
     regexp = NA
   )
+})
+
+test_that("data: big strata, option: small strata", {
+  set.seed(123)
+  tau.vec <- c(0.2, 0.9)
+  n.treat <- length(tau.vec)
+  n_1 <- 1000
+  data_sim <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 20, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+
+  expect_error(
+    invisible(capture.output({
+      sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, small.strata = TRUE, HC1 = TRUE)
+    })),
+    "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
+    fixed = TRUE
+  )
+    expect_error(
+    invisible(capture.output({
+      sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, small.strata = TRUE, HC1 = FALSE)
+    })),
+    "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
+    fixed = TRUE
+  )
+
+      expect_error(
+    invisible(capture.output({
+      sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, X = data.frame(data_sim$x_1), small.strata = TRUE, HC1 = FALSE)
+    })),
+    "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
+    fixed = TRUE
+  )
+        expect_error(
+    invisible(capture.output({
+      sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = NULL, X = data.frame(data_sim$x_1), small.strata = TRUE, HC1 = TRUE)
+    })),
+    "Invalid input: Either all strata are large or too few strata qualify as 'small' to proceed with small.strata = TRUE. Please set small.strata = FALSE.",
+    fixed = TRUE
+  )
+
+
+
+
+
 })
