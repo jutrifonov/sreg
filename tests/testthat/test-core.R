@@ -1889,7 +1889,6 @@ test_that("data: mixed design, option: small strata", {
 
 test_that("data: mixed design, option: big strata", {
   set.seed(123)
-  set.seed(123)
   tau.vec <- c(0.2, 0.9)
   n.treat <- length(tau.vec)
   n_1 <- 600
@@ -2030,7 +2029,7 @@ test_that("data: mixed design, option: big strata", {
     regexp = NA
   )
 
-    expect_warning(
+  expect_warning(
     {
       warnings <- character()
 
@@ -2050,7 +2049,7 @@ test_that("data: mixed design, option: big strata", {
     regexp = NA
   )
 
-   invisible(
+  invisible(
     suppressWarnings(
       capture.output({
         result <- sreg(Y = data_sim$Y, S = NULL, D = data_sim$D, X = data.frame(data_sim$x_1, data_sim$Ng), G.id = data_sim$G.id, Ng = NULL, HC1 = TRUE, small.strata = FALSE)
@@ -2060,7 +2059,7 @@ test_that("data: mixed design, option: big strata", {
   expect_equal(round(result$tau.hat, 7), c(-0.0966109, 0.6779752))
   expect_equal(round(result$se.rob, 7), c(0.1168654, 0.1126985))
 
-     invisible(
+  invisible(
     suppressWarnings(
       capture.output({
         result <- sreg(Y = data_sim$Y, S = NULL, D = data_sim$D, X = data.frame(data_sim$x_1), G.id = data_sim$G.id, Ng = NULL, HC1 = FALSE, small.strata = FALSE)
@@ -2069,4 +2068,371 @@ test_that("data: mixed design, option: big strata", {
   )
   expect_equal(round(result$tau.hat, 7), c(-0.0894008, 0.6764126))
   expect_equal(round(result$se.rob, 7), c(0.1168120, 0.1140083))
+})
+
+test_that("print.sreg outputs expected information for big strata", {
+  set.seed(123)
+  data_sim <- sreg.rgen(n = 200, tau.vec = c(0.2, 0.5), n.strata = 4, cluster = FALSE)
+  Y <- data_sim$Y
+  S <- data_sim$S
+  D <- data_sim$D
+  X <- data.frame("x_1" = data_sim$x_1, "x_2" = data_sim$x_2)
+
+  result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 200", output)))
+  expect_true(any(grepl("Number of treatments: 2", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: x_1, x_2", output)))
+  expect_true(any(grepl("Treatment assignment: individual level", output)))
+  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Number of strata: 4", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
+
+  output <- capture.output(print(result))
+
+  set.seed(123)
+  data_sim <- sreg.rgen(n = 200, tau.vec = c(0.2, 0.5, 0.9), n.strata = 6, cluster = TRUE)
+  Y <- data_sim$Y
+  S <- data_sim$S
+  D <- data_sim$D
+  X <- data.frame("x_1" = data_sim$x_1, "x_2" = data_sim$x_2)
+  G.id <- data_sim$G.id
+  Ng <- data_sim$Ng
+
+  result <- sreg(Y, S, D, G.id = data_sim$G.id, Ng = data_sim$Ng, X = data.frame(data_sim$x_1), HC1 = FALSE)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 5710", output)))
+  expect_true(any(grepl("Number of treatments: 3", output)))
+  expect_true(any(grepl("Standard errors: unadjusted", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: data_sim.x_1", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Number of strata: 6", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  result <- sreg(Y, S, D, G.id = data_sim$G.id, Ng = data_sim$Ng, X = NULL, HC1 = FALSE)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR", output)))
+  expect_true(any(grepl("Observations: 5710", output)))
+  expect_true(any(grepl("Clusters: 200", output)))
+  expect_true(any(grepl("Number of treatments: 3", output)))
+  expect_true(any(grepl("Standard errors: unadjusted", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: ", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Number of strata: 6", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE)
+
+
+  output <- capture.output(print(result))
+
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR", output)))
+  expect_true(any(grepl("Observations: 5710", output)))
+  expect_true(any(grepl("Number of treatments: 3", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: ", output)))
+  expect_true(any(grepl("Treatment assignment: individual level", output)))
+  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Number of strata: 6", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg(Y, S, D, G.id = G.id, Ng = NULL, X = NULL, HC1 = TRUE)
+    })),
+    "Cluster sizes have not been provided (Ng = NULL)",
+    fixed = TRUE
+  )
+  invisible(
+    suppressWarnings(
+      capture.output({
+        output <- capture.output(print(result))
+      })
+    )
+  )
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR", output)))
+  expect_true(any(grepl("Observations: 5710", output)))
+  expect_true(any(grepl("Clusters: 200", output)))
+  expect_true(any(grepl("Number of treatments: 3", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: ", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Number of strata: 6", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  set.seed(123)
+  data_sim <- sreg.rgen(n = 1000, tau.vec = c(0.2, 0.5, 0.9), n.strata = 6, cluster = TRUE)
+  Y <- data_sim$Y
+  S <- data_sim$S
+  D <- data_sim$D
+  X <- data.frame("x_1" = data_sim$x_1, "x_2" = data_sim$x_2)
+  G.id <- data_sim$G.id
+  Ng <- data_sim$Ng
+  result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = data.frame("x_1" = data_sim$x_1, "x_2" = data_sim$x_2, "Ng" = data_sim$Ng), HC1 = TRUE)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 30230", output)))
+  expect_true(any(grepl("Clusters: 1000", output)))
+  expect_true(any(grepl("Number of treatments: 3", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: x_1, x_2, Ng", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Number of strata: 6", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+})
+
+test_that("print.sreg outputs expected information for small strata", {
+  set.seed(123)
+  tau.vec <- c(0.2, 0.8)
+  n.treat <- length(tau.vec)
+  n_1 <- 900
+  data_sim <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+  Y <- data_sim$Y
+  S <- data_sim$S
+  D <- data_sim$D
+  X <- data.frame("x_1" = data_sim$x_1, "x_2" = data_sim$x_2)
+
+  result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X, small.strata = TRUE)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 900", output)))
+  expect_true(any(grepl("Number of treatments: 2", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: x_1, x_2", output)))
+  expect_true(any(grepl("Treatment assignment: individual level", output)))
+  expect_true(any(grepl("Setup: small strata", output)))
+  expect_true(any(grepl("Strata size (k): 3", output, fixed = TRUE)))
+  expect_true(any(grepl("Number of strata: 300", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  result <- sreg(Y, S, D, X = NULL, small.strata = TRUE, HC1 = FALSE)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR", output)))
+  expect_true(any(grepl("Observations: 900", output)))
+  expect_true(any(grepl("Number of treatments: 2", output)))
+  expect_true(any(grepl("Standard errors: unadjusted", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: ", output)))
+  expect_true(any(grepl("Treatment assignment: individual level", output)))
+  expect_true(any(grepl("Setup: small strata", output)))
+  expect_true(any(grepl("Strata size (k): 3", output, fixed = TRUE)))
+  expect_true(any(grepl("Number of strata: 300", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  result <- sreg(Y, S, D, X = data.frame("age" = data_sim$x_1), small.strata = TRUE, HC1 = TRUE)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 900", output)))
+  expect_true(any(grepl("Number of treatments: 2", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: age", output)))
+  expect_true(any(grepl("Treatment assignment: individual level", output)))
+  expect_true(any(grepl("Setup: small strata", output)))
+  expect_true(any(grepl("Strata size \\(k\\): 3", output)))
+  expect_true(any(grepl("Number of strata: 300", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  set.seed(123)
+  tau.vec <- c(0.2)
+  n.treat <- length(tau.vec)
+  n_1 <- 500
+  data_sim <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1), k = 2)
+  Y <- data_sim$Y
+  S <- data_sim$S
+  D <- data_sim$D
+  X <- data.frame("x_1" = data_sim$x_1, "x_2" = data_sim$x_2)
+  G.id <- data_sim$G.id
+  Ng <- data_sim$Ng
+
+  result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X, small.strata = TRUE, HC1 = TRUE)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 15200", output)))
+  expect_true(any(grepl("Clusters: 500", output)))
+  expect_true(any(grepl("Number of treatments: 1", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: x_1, x_2", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: small strata", output)))
+  expect_true(any(grepl("Number of strata: 250", output)))
+  expect_true(any(grepl("Strata size \\(k\\): 2", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = NULL, small.strata = TRUE, HC1 = TRUE)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR", output)))
+  expect_true(any(grepl("Observations: 15200", output)))
+  expect_true(any(grepl("Clusters: 500", output)))
+  expect_true(any(grepl("Number of treatments: 1", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: ", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: small strata", output)))
+  expect_true(any(grepl("Number of strata: 250", output)))
+  expect_true(any(grepl("Strata size \\(k\\): 2", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = data.frame("age" = data_sim$x_1, "Ng" = data_sim$Ng), small.strata = TRUE, HC1 = TRUE)
+
+  output <- capture.output(print(result))
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 15200", output)))
+  expect_true(any(grepl("Clusters: 500", output)))
+  expect_true(any(grepl("Number of treatments: 1", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: age, Ng", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: small strata", output)))
+  expect_true(any(grepl("Number of strata: 250", output)))
+  expect_true(any(grepl("Strata size \\(k\\): 2", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+  # now, let's check the same for the mixed design
+
+  set.seed(123)
+  tau.vec <- c(0.2, 0.9)
+  n.treat <- length(tau.vec)
+  n_1 <- 600
+  n_2 <- 50
+  data_s <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+  data_b <- sreg.rgen(n = n_2, tau.vec = tau.vec, n.strata = 2, cluster = TRUE, small.strata = FALSE, treat.sizes = c(1, 1), k = 2)
+  # Step 1: Get the max stratum ID in data_s
+  max_id <- max(data_s$S)
+
+  # Step 2: Get unique strata in data_b and assign new IDs
+  unique_b_strata <- sort(unique(data_b$S))
+  num_b_strata <- length(unique_b_strata)
+
+  # Create a named mapping from old to new stratum IDs
+  new_ids <- seq(max_id + 1, max_id + num_b_strata)
+  stratum_map <- setNames(new_ids, unique_b_strata)
+
+  # Step 3: Relabel data_b$S
+  data_b$S <- stratum_map[as.character(data_b$S)]
+
+  # 🧠 Step 4: Make cluster IDs unique across the two datasets!!!!!
+  max_gid <- max(data_s$G.id)
+  data_b$G.id <- data_b$G.id + max_gid
+  length(intersect(data_s$G.id, data_b$G.id)) == 0
+
+  data_sim <- rbind(data_s[, -ncol(data_s)], data_b)
+
+  Y <- data_sim$Y
+  S <- data_sim$S
+  D <- data_sim$D
+  X <- data.frame("x_1" = data_sim$x_1, "x_2" = data_sim$x_2)
+  G.id <- data_sim$G.id
+  Ng <- data_sim$Ng
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = data.frame("age" = data_sim$x_1), small.strata = TRUE, HC1 = TRUE)
+    })),
+    "Mixed design detected: at least 25% of strata are small.",
+    fixed = TRUE
+  )
+  invisible(
+    suppressWarnings(
+      capture.output({
+        output <- capture.output(print(result))
+      })
+    )
+  )
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 19760", output)))
+  expect_true(any(grepl("Clusters: 650", output)))
+  expect_true(any(grepl("Number of treatments: 2", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: age", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: mixed design \\(includes both small and large strata\\)", output)))
+  expect_true(any(grepl("Number of strata: 202", output)))
+  expect_true(any(grepl("Strata size \\(k, small strata only\\): 3", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+
+  expect_warning(
+    invisible(capture.output({
+      result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = data.frame("age" = data_sim$x_1, "Ng" = data_sim$Ng), small.strata = TRUE, HC1 = TRUE)
+    })),
+    "Mixed design detected: at least 25% of strata are small.",
+    fixed = TRUE
+  )
+  invisible(
+    suppressWarnings(
+      capture.output({
+        output <- capture.output(print(result))
+      })
+    )
+  )
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 19760", output)))
+  expect_true(any(grepl("Clusters: 650", output)))
+  expect_true(any(grepl("Number of treatments: 2", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: age, Ng", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: mixed design \\(includes both small and large strata\\)", output)))
+  expect_true(any(grepl("Number of strata: 202", output)))
+  expect_true(any(grepl("Strata size \\(k, small strata only\\): 3", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+expect_warning(
+    invisible(capture.output({
+      result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = data.frame("Ng" = data_sim$Ng), small.strata = TRUE, HC1 = TRUE)
+    })),
+    "Mixed design detected: at least 25% of strata are small.",
+    fixed = TRUE
+  )
+  invisible(
+    suppressWarnings(
+      capture.output({
+        output <- capture.output(print(result))
+      })
+    )
+  )
+
+  expect_true(any(grepl("Saturated Model Estimation Results under CAR with linear adjustments", output)))
+  expect_true(any(grepl("Observations: 19760", output)))
+  expect_true(any(grepl("Clusters: 650", output)))
+  expect_true(any(grepl("Number of treatments: 2", output)))
+  expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
+  expect_true(any(grepl("Covariates used in linear adjustments: Ng", output)))
+  expect_true(any(grepl("Treatment assignment: cluster level", output)))
+  expect_true(any(grepl("Setup: mixed design \\(includes both small and large strata\\)", output)))
+  expect_true(any(grepl("Number of strata: 202", output)))
+  expect_true(any(grepl("Strata size \\(k, small strata only\\): 3", output)))
+  expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
+
+
 })

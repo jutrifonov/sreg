@@ -180,6 +180,16 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
     NULL
   }
 
+  # ------------------------------------------------------------------
+  # If the user passed duplicate column names (e.g., two "Ng" columns),
+  # keep the last occurrence and drop the rest.  This preserves the
+  # X columns (last ones) and ensures that downstream code referencing
+  # X_names and "Ng" will work, while preventing dplyr joins
+  # from failing due to non‑unique names.
+  # ------------------------------------------------------------------
+  # Keep the *last* occurrence of any duplicated column name (so X columns survive)
+  data <- data[, !duplicated(names(data), fromLast = TRUE), drop = FALSE]
+
   if (!small.strata) {
     # Always compute strata sizes for warning purposes
     if (!is.null(G_name)) {
@@ -222,7 +232,10 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
   if (length(unique_sizes) == 1) {
     strata_sizes$stratum_type <- "small"
     if (!keep.size) strata_sizes$size <- NULL
-    return(dplyr::left_join(data, strata_sizes, by = S_name))
+    # Remove duplicate names in the join data (for safety)
+    data_renamed <- data
+    data_renamed <- data_renamed[, !duplicated(names(data_renamed), fromLast = TRUE), drop = FALSE]
+    return(dplyr::left_join(data_renamed, strata_sizes, by = S_name))
   }
 
   # Count frequencies of each size
@@ -248,11 +261,14 @@ Note: This error may also occur if G.id is NULL despite the data being cluster-r
     mutate(stratum_type = ifelse(size == modal_size, "small", "big"))
 
   if (!keep.size) strata_sizes$size <- NULL
-  out <- dplyr::left_join(data, strata_sizes, by = S_name)
+  # Remove duplicate names in the join data (for safety)
+  data_renamed <- data
+  data_renamed <- data_renamed[, !duplicated(names(data_renamed), fromLast = TRUE), drop = FALSE]
+  out <- dplyr::left_join(data_renamed, strata_sizes, by = S_name)
 
   if (warn && any(strata_sizes$stratum_type == "big")) {
     warning("Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.", call. = FALSE)
   }
 
-  return(out)  
+  return(out)
 }
