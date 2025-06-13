@@ -38,16 +38,16 @@ print.sreg <- function(x, ...) {
   cat(paste(col_blue("Number of treatments:"), max(x$data$D), "\n"))
   cat(paste(col_blue("Number of strata:"), max(x$data$S), "\n"))
   cat(paste(
-  col_blue("Setup:"),
-  if (!is.null(x$mixed.design) && x$mixed.design) {
-    "mixed design (includes both small and large strata)"
-  } else if (!is.null(x$small.strata) && x$small.strata) {
-    "small strata"
-  } else {
-    "big strata"
-  },
-  "\n"
-))
+    col_blue("Setup:"),
+    if (!is.null(x$mixed.design) && x$mixed.design) {
+      "mixed design (includes both small and large strata)"
+    } else if (!is.null(x$small.strata) && x$small.strata) {
+      "small strata"
+    } else {
+      "big strata"
+    },
+    "\n"
+  ))
   if (!is.null(x$mixed.design) && x$mixed.design) {
     data_small <- x$res.small$data
     if (is.null(data_small$G.id)) {
@@ -126,7 +126,7 @@ print.sreg <- function(x, ...) {
       gid_check <- x$data$G.id
     }
 
-if (!check.cluster(data.frame("G.id" = gid_check, x$lin.adj))) {
+    if (!check.cluster(data.frame("G.id" = gid_check, x$lin.adj))) {
     }
   }
 }
@@ -142,8 +142,23 @@ if (!check.cluster(data.frame("G.id" = gid_check, x$lin.adj))) {
 #' @method plot sreg
 #' @export
 #' @return A ggplot object (invisible).
-plot.sreg <- function(x, treatment_labels = NULL, ...) {
-
+plot.sreg <- function(x,
+                      treatment_labels = NULL,
+                      title = "Estimated ATEs with Confidence Intervals",
+                      bar_fill = NULL,
+                      point_shape = 23,
+                      point_size = 3,
+                      point_fill = "white",
+                      point_stroke = 1.2,
+                      point_color = "black",
+                      label_color = "black",
+                      label_size = 4,
+                      bg_color = NULL,
+                      grid = TRUE,
+                      zero_line = TRUE,
+                      y_axis_title = NULL,
+                      x_axis_title = NULL,
+                      ...) {
   df <- data.frame(
     treatment = seq_along(x$tau.hat),
     tau = x$tau.hat,
@@ -166,21 +181,59 @@ plot.sreg <- function(x, treatment_labels = NULL, ...) {
       ymax = as.numeric(label) + 0.01,
       fill = tau
     ), alpha = 0.8) +
-    geom_point(aes(x = tau), shape = 23, size = 3, fill = "white", stroke = 1.2, color = "black") +
-    geom_text(aes(x = tau, label = sprintf("%.2f (%.2f)", tau, SE)),
-              vjust = -1.5, color = "black", size = 4) +
-    geom_vline(xintercept = 0, linetype = "dashed", color = "gray40") +
-    scale_fill_viridis_c(option = "viridis", name = "Effect Size") +
-    labs(
-      x = "Treatment Effect",
-      y = NULL,
-      title = "Estimated ATEs with Confidence Intervals"
+    geom_point(aes(x = tau),
+      shape = point_shape,
+      size = point_size,
+      fill = point_fill,
+      stroke = point_stroke,
+      color = point_color
     ) +
-    theme_minimal(base_size = 14) +
+    geom_text(aes(x = tau, label = sprintf("%.2f (%.2f)", tau, SE)),
+      vjust = -1.5, color = label_color, size = label_size
+    )
+  if (zero_line) {
+    p <- p + geom_vline(xintercept = 0, linetype = "dashed", color = "gray40")
+  }
+
+  # Conditional fill scale
+  if (is.null(bar_fill)) {
+    p <- p + scale_fill_viridis_c(option = "viridis", name = "Effect Size")
+  } else if (length(bar_fill) == 1) {
+    p <- p + scale_fill_gradient(low = bar_fill, high = bar_fill, name = "Effect Size")
+  } else if (length(bar_fill) == 2) {
+    p <- p + scale_fill_gradient(low = bar_fill[1], high = bar_fill[2], name = "Effect Size")
+  } else {
+    warning("bar_fill must be NULL, a single color, or a vector of two colors. Ignoring custom fill.")
+    p <- p + scale_fill_viridis_c(option = "viridis", name = "Effect Size")
+  }
+
+  theme_custom <- theme_minimal(base_size = 14) +
     theme(
       axis.text.y = element_text(hjust = 1),
-      axis.title.x = element_text(face = "bold"),
-      legend.position = "right"
+      axis.title.x = element_text(),
+      legend.position = "none"
+    )
+
+  if (!grid) {
+    theme_custom <- theme_custom +
+      theme(
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()
+      )
+  }
+
+  if (!is.null(bg_color)) {
+    theme_custom <- theme_custom +
+      theme(
+        panel.background = element_rect(fill = bg_color, color = NA)
+      )
+  }
+
+  p <- p + theme_custom +
+    labs(
+      x = x_axis_title,
+      y = y_axis_title,
+      title = title
     )
 
   print(p)

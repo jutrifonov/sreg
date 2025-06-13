@@ -1577,6 +1577,22 @@ proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, G.id = data$G.id, N
 proba
 proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, G.id = data$G.id, Ng = NULL, HC1 = FALSE, small.strata = FALSE)
 proba
+
+
+
+
+#### Let's play around with out plot! ###
+tau.vec = c(0.2, 0.5)
+n.treat = length(tau.vec)
+n_1 = 900
+
+data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
+result <- sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, HC1 = FALSE, small.strata = TRUE)
+print(result)
+
+plot(result, treatment_labels = c('FIRST', 'SECOND'), bar_fill = c('blue', 'orange'), title = 'New Plot', point_shape = 23, point_size = 4, point_color = "green", point_fill = 'black', point_stroke = 1.2, label_color = 'purple', label_size = 10,
+      zero_line = FALSE, grid = TRUE, bg_color = 'grey')
+plot(result, grid = FALSE, bg_color = 'white', y_axis_title = 'Effects', x_axis_title = 'effect size')
 ```
 
 
