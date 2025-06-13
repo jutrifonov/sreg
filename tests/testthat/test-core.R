@@ -2436,3 +2436,22 @@ expect_warning(
 
 
 })
+
+test_that("plot.sreg works and returns ggplot object", {
+  set.seed(123)
+  tau.vec <- c(0.2, 0.9, 1.5)
+  n.treat <- length(tau.vec)
+  n_1 <- 1000
+  sim_data <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = FALSE, small.strata = FALSE, treat.sizes = c(1, 1, 1), k = 3)
+
+  result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = sim_data$x_1, HC = TRUE)
+  # Capture the plot invisibly and suppress printed output
+  p <- suppressMessages(suppressWarnings(
+    invisible(capture.output({
+      plt <- plot(result, y_axis_title = "My Title")
+    }))
+  ))
+
+  expect_s3_class(plt, "ggplot")
+})
+
