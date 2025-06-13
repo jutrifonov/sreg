@@ -3,6 +3,7 @@
 [![Static Badge](https://img.shields.io/badge/CRAN-v.1.0.1-orange?logo=R&labelColor=2A2523)](https://CRAN.R-project.org/package=sreg)
 [![R-CMD-check](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/jutrifonov/sreg/graph/badge.svg)](https://app.codecov.io/gh/jutrifonov/sreg)
+
 The `sreg` package for `R`, offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. It supports a wide range of stratification designs, including matched pairs, $k$-tuple designs, and larger strata with many units — possibly of unequal size across strata. The package is designed to accommodate scenarios with multiple treatments,  and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018); Bugni, Canay, Shaikh, Tabord-Meehan (2023); Jiang, Linton, Tang, Zhang (2023); Bai, Jiang, Romano, Shaikh, Zhang (2024), Liu (2024); and Cytrynbaum (2024).
 
 **Dependencies:** `dplyr`, `tidyr`, `extraDistr`, `rlang`
