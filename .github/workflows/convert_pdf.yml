@@ -48,13 +48,16 @@ jobs:
         run: head -n 10 actions_badge.png || true
 
       # Update the temporary README so that badge URLs point to the local PNG files.
-      - name: Update remote SVG references in README_pdf.md
+      - name: Replace badge URLs in README_pdf.md
         run: |
-          sed -i -E 's|https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg|actions_badge.png|g' README_pdf.md
-          sed -i -E 's|https://codecov.io/github/jutrifonov/sreg/graph/badge.svg\?token=KAUXB0ETCA|codecov_badge.png|g' README_pdf.md
-          sed -i -E 's|https://img\.shields\.io/badge/sreg-v\.1\.0\.1\.9000-green[^)]*|version_badge.png|g' README_pdf.md
-          sed -i -E 's|https://img\.shields\.io/badge/CRAN-v\.1\.0\.1-orange[^)]*|cran_badge.png|g' README_pdf.md
+          sed -i -E 's|https://github.com/.*/actions/workflows/[^)]*|actions_badge.png|g' README_pdf.md
+          sed -i -E 's|https://codecov.io/[^)]*|codecov_badge.png|g' README_pdf.md
+          sed -i -E 's|https://img\.shields\.io/badge/sreg-v[^)]*|version_badge.png|g' README_pdf.md
+          sed -i -E 's|https://img\.shields\.io/badge/CRAN-v[^)]*|cran_badge.png|g' README_pdf.md
 
+      - name: Print badge lines for debugging
+        run: grep -i 'badge' README_pdf.md || echo "No badge lines found"
+        
       # Convert the modified Markdown file to PDF.
       - name: Convert Markdown to PDF
         run: |
