@@ -34,12 +34,18 @@ jobs:
           wget -O cran_badge.svg "https://img.shields.io/badge/CRAN-v.1.0.1-orange?logo=R&labelColor=2A2523"
 
       # Convert the downloaded SVG badges to PNG at a higher resolution.
+      
       - name: Convert downloaded SVG badges to PNG
         run: |
-          rsvg-convert -w 600 actions_badge.svg -o actions_badge.png
-          rsvg-convert -w 600 codecov_badge.svg -o codecov_badge.png
-          rsvg-convert -w 600 version_badge.svg -o version_badge.png
-          rsvg-convert -w 600 cran_badge.svg -o cran_badge.png
+          for badge in actions_badge codecov_badge version_badge cran_badge; do
+          if ! rsvg-convert -w 600 ${badge}.svg -o ${badge}.png; then
+          echo "Failed to convert ${badge}.svg to PNG"
+          exit 1
+          fi
+          file ${badge}.png
+          done
+      - name: Debug image file content (if any fails)
+        run: head -n 10 actions_badge.png || true
 
       # Update the temporary README so that badge URLs point to the local PNG files.
       - name: Update remote SVG references in README_pdf.md
