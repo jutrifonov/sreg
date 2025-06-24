@@ -8,3 +8,9 @@
 inst/doc
 /doc/
 /Meta/
+two_stage_note.aux
+two_stage_note.bcf
+two_stage_note.log
+.gitignore
+two_stage_note.bib
+two_stage_note.run.xml

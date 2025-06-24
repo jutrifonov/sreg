@@ -338,7 +338,8 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE) {
 
   tau_hat <- (N_small / N_total) * res_small$tau.hat + (N_big / N_total) * res_big$tau.hat
   se_combined <- sqrt((N_small / N_total)^2 * res_small$se.rob^2 +
-                      (N_big   / N_total)^2 * res_big$se.rob^2)
+                      (N_big   / N_total)^2 * res_big$se.rob^2 +
+                      (N_big * N_small / N_total^3) * (res_small$tau.hat - res_big$tau.hat)^2)
 
   t.stat <- tau_hat / se_combined
   p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
