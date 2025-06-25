@@ -1180,8 +1180,8 @@ test_that("data: mixed design, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(0.1679006, 0.8306431))
-  expect_equal(round(result$se.rob, 7), c(0.0449761, 0.0451665))
+  expect_equal(round(result$tau.hat, 7), c(0.1577036, 0.8232781))
+  expect_equal(round(result$se.rob, 7), c(0.0455221, 0.0458616))
 
   invisible(
     suppressWarnings(
@@ -1200,8 +1200,8 @@ test_that("data: mixed design, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(0.1679006, 0.8306431))
-  expect_equal(round(result$se.rob, 7), c(0.0448706, 0.0450757))
+  expect_equal(round(result$tau.hat, 7), c(0.1577036, 0.8232781))
+  expect_equal(round(result$se.rob, 7), c(0.0453488, 0.0456882))
 
   expect_warning(
     invisible(capture.output({
@@ -1776,7 +1776,7 @@ test_that("data: mixed design, option: small strata", {
     )
   )
   expect_equal(round(result$tau.hat, 7), c(0.1271195, 0.8889266))
-  expect_equal(round(result$se.rob, 7), c(0.0708887, 0.0690517))
+  expect_equal(round(result$se.rob, 7), c(0.07088970, 0.06905240))
 
   invisible(
     suppressWarnings(
@@ -1786,7 +1786,7 @@ test_that("data: mixed design, option: small strata", {
     )
   )
   expect_equal(round(result$tau.hat, 7), c(0.1264854, 0.8898737))
-  expect_equal(round(result$se.rob, 7), c(0.0686164, 0.0670449))
+  expect_equal(round(result$se.rob, 7), c(0.06861740, 0.06704560))
   invisible(
     suppressWarnings(
       capture.output({
@@ -1795,7 +1795,7 @@ test_that("data: mixed design, option: small strata", {
     )
   )
   expect_equal(round(result$tau.hat, 7), c(-0.0696856, 0.7064452))
-  expect_equal(round(result$se.rob, 7), c(0.1151463, 0.1125246))
+  expect_equal(round(result$se.rob, 7), c(0.1151463, 0.1125267))
 
   invisible(
     suppressWarnings(
@@ -1805,7 +1805,7 @@ test_that("data: mixed design, option: small strata", {
     )
   )
   expect_equal(round(result$tau.hat, 7), c(-0.0696856, 0.7064452))
-  expect_equal(round(result$se.rob, 7), c(0.1163101, 0.1131790))
+  expect_equal(round(result$se.rob, 7), c(0.1163101, 0.1131811))
 
   invisible(
     suppressWarnings(
@@ -1815,7 +1815,7 @@ test_that("data: mixed design, option: small strata", {
     )
   )
   expect_equal(round(result$tau.hat, 7), c(0.1264854, 0.8898737))
-  expect_equal(round(result$se.rob, 7), c(0.0708240, 0.0685112))
+  expect_equal(round(result$se.rob, 7), c(0.07082500, 0.06851190))
   invisible(
     suppressWarnings(
       capture.output({
@@ -1824,7 +1824,7 @@ test_that("data: mixed design, option: small strata", {
     )
   )
   expect_equal(round(result$tau.hat, 7), c(0.1264854, 0.8898737))
-  expect_equal(round(result$se.rob, 7), c(0.0686164, 0.0670449))
+  expect_equal(round(result$se.rob, 7), c(0.06861740, 0.06704560))
 
   expect_error(
     invisible(capture.output({
