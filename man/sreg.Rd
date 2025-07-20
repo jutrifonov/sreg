@@ -129,5 +129,4 @@ Max Tabord-Meehan \email{maxtm@uchicago.edu}
 
 \strong{Maintainer}:
 
-Juri Trifonov \email{jutrifonov@u.northwestern.edu}
-}
+Juri Trifonov \email{jutrifonov@u.northwes
