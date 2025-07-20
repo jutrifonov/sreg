@@ -26,9 +26,9 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 ## Supplementary files 
 - PDF version of the manual: [Download PDF](https://github.com/jutrifonov/sreg/blob/main/.github/README.pdf) 
 
--  Sketch of the derivation of the ATE variance estimator under cluster-level treatment assignment: [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/cluster.pdf)
+-  Big Strata: Sketch of the derivation of the ATE variance estimator under cluster-level treatment assignment: [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/cluster.pdf)
 
--  Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/multiple.pdf)
+-  Big Strata: Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/multiple.pdf)
 
 
 
