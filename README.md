@@ -390,6 +390,8 @@ X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
 result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
 plot(result)
 ```
+![Example Plot](man/figures/example-plot.png)
+
 ## The function `sreg.rgen()`
 Generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect following the stratified block randomization design under covariate-adaptive randomization (CAR).
 
