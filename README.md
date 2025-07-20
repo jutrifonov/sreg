@@ -374,6 +374,22 @@ plot(x,
 - **`y_axis_title` -** an optional `string` specifying the y-axis title; if `NULL`, no title is displayed;
 - **`x_axis_title` -** an optional `string` specifying the x-axis title; if `NULL`, no title is displayed;
 - **`...` -** additional arguments passed to other methods (not used in this method).
+  
+### Return Value
+Invisibly returns the `ggplot` object used to generate the figure. The function is called primarily for its side effect — rendering the plot.
+### Example
+``` r
+library("sreg")
+library("dplyr")
+library("haven")
+data <- sreg.rgen(n = 1000, tau.vec = c(-0.3, 0.2), n.strata = 4, cluster = FALSE)
+Y <- data$Y
+S <- data$S
+D <- data$D
+X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
+result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
+plot(result)
+```
 ## The function `sreg.rgen()`
 Generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect following the stratified block randomization design under covariate-adaptive randomization (CAR).
 
