@@ -139,8 +139,9 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, small.strata 
 - **`Ng` -** a numeric `vector/matrix/data.frame/tibble` of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
 - **`X` -** a `matrix/data.frame/tibble` with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
 - **`HC1` -** a `TRUE/FALSE` logical argument indicating whether the small sample correction should be applied to the variance estimator;
-- **`small.strata` -** a `TRUE/FALSE` logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used.
+- **`small.strata` -** a `TRUE/FALSE` logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used [^**].
 [^*]: *Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages.*
+[^**]: *Note: if the data exhibit a mixed design (i.e., most observations are in small strata, but some are in big strata) and `small.strata = TRUE`, the function implements the mixed estimator—a weighted average of small and big strata estimators. See the supplementary PDF for details and expressions.*
 
 ### Data Structure
 Here we provide an example of a data frame that can be used with `sreg`.
