@@ -124,7 +124,7 @@ library(sreg)
 #> Type 'citation("sreg")' for citing this R package in publications.                
 ```
 
-## The function `sreg()`
+## Function: `sreg()`
 Estimates the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
 
 ### Syntax
@@ -333,7 +333,7 @@ Coefficients:
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
-## The function `plot.sreg()`
+## S3 Method: `plot.sreg()`
 Visualizes the estimated average treatment effects (ATEs) and their confidence intervals from an object returned by `sreg()`. This function defines an `S3` method for the generic `plot()` function for objects of class `sreg`. 
 
 ### Syntax
@@ -392,7 +392,19 @@ plot(result)
 ```
 ![Example Plot](man/figures/example-plot.png)
 
-## The function `sreg.rgen()`
+## S3 Method: `print.sreg()`
+Prints a summary table of the estimated treatment effects from an object returned by `sreg()`.
+This function defines an `S3` method for the generic `print()` function for objects of class `sreg`. This method prints a formatted summary table that includes the estimated average treatment effects, standard errors, $p$-values, confidence intervals, and details about the experimental design.
+
+### Syntax
+``` r
+print.sreg(x, ...)
+```
+### Arguments
+- **`x` -** an object of class `sreg`, typically returned by the `sreg()` function;
+- **`...` -** additional arguments.
+
+## Function `sreg.rgen()`
 Generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect following the stratified block randomization design under covariate-adaptive randomization (CAR).
 
 ### Syntax
