@@ -1,4 +1,4 @@
-# sreg (development version)
+# sreg 2.0.1
 
 # sreg 2.0.0
 * Major redesign of the package to support **small strata designs** (e.g., matched pairs and n-tuples), including correct estimators under both **individual-level** and **cluster-level** treatment assignment.
