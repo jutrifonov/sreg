@@ -548,5 +548,4 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
       }
     }
   }
-  return(data.sim)
-}
+  return(
