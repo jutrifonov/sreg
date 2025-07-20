@@ -333,8 +333,47 @@ Coefficients:
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
+## The function `plot.sreg()`
+Visualizes the estimated average treatment effects (ATEs) and their confidence intervals from an object returned by `sreg()`. This function defines an `S3` method for the generic `plot()` function for objects of class `sreg`. 
 
-
+### Syntax
+``` r
+plot(x,
+     treatment_labels = NULL,
+     title = "Estimated ATEs with Confidence Intervals",
+     bar_fill = NULL,
+     point_shape = 23,
+     point_size = 3,
+     point_fill = "white",
+     point_stroke = 1.2,
+     point_color = "black",
+     label_color = "black",
+     label_size = 4,
+     bg_color = NULL,
+     grid = TRUE,
+     zero_line = TRUE,
+     y_axis_title = NULL,
+     x_axis_title = NULL,
+     ...)
+```
+### Arguments
+- **`x` -** an object of class `sreg`, returned by the `sreg()` function;
+- **`treatment_labels` -** an optional `vector` of labels to display on the y-axis; if `NULL`, defaults to "Treatment 1", "Treatment 2", etc.;
+- **`title` -** an optional `string` specifying the plot title; default is "Estimated ATEs with Confidence Intervals";
+- **`bar_fill` -** an optional color specification for the confidence interval bars; can be `NULL` (default viridis scale), a single color, or a vector of two colors for a gradient;
+- **`point_shape` -**  an `integer` specifying the shape of the point representing the estimated ATE; default is 23 (diamond);
+- **`point_size` -**  a `numeric` value specifying the size of the ATE point;
+- **`point_fill` -**  a `string` indicating the fill color of the ATE point shape;
+- **`point_stroke` -**  a `numeric` value for the stroke (border thickness) of the ATE point shape;
+- **`point_color` -** a `string` specifying the outline color of the ATE point;
+- **`label_color` -** a `string` indicating the color of the text label displaying the estimate and standard error;
+- **`label_size` -**  a `numeric` value for the size of the text label;
+- **`bg_color` -**  an optional `string` specifying the background color of the plot panel; if `NULL`, the default theme background is used;
+- **`grid` -** a `TRUE/FALSE` argument indicating whether grid lines should be displayed (`TRUE` by default);
+- **`zero_line` -**  a `TRUE/FALSE` argument indicating whether to include a dashed vertical line at 0 (`TRUE` by default);
+- **`y_axis_title` -** an optional `string` specifying the y-axis title; if `NULL`, no title is displayed;
+- **`x_axis_title` -** an optional `string` specifying the x-axis title; if `NULL`, no title is displayed;
+- **`...` -** additional arguments passed to other methods (not used in this method).
 ## The function `sreg.rgen()`
 Generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect following the stratified block randomization design under covariate-adaptive randomization (CAR).
 
