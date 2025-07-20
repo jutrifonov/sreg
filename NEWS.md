@@ -1,5 +1,5 @@
 # sreg 2.0.1
-
+* CRAN release of the first stable version of sreg 2.0
 # sreg 2.0.0
 * Major redesign of the package to support **small strata designs** (e.g., matched pairs and n-tuples), including correct estimators under both **individual-level** and **cluster-level** treatment assignment.
 * Added full support for **mixed designs** combining small and big strata, with appropriate estimators implemented.
