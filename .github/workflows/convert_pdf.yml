@@ -79,10 +79,11 @@ jobs:
 
       - name: Commit and Push PDF
         run: |
+          git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
+          git fetch origin main
+          git reset --soft origin/main
           git add .github/README.pdf
           git commit -m "Update README.pdf in .github directory" || echo "No changes to commit"
-          git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
-          git pull --rebase origin main
           git push origin HEAD:main
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
