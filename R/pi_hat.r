@@ -93,11 +93,11 @@ pi.hat.sreg <- function(S, D, inverse = FALSE, vector = FALSE) {
 
   n <- length(D)
   data <- data.frame(S = S_reset, D)
-  
+
   counts <- data %>%
     group_by(S, D) %>%
     summarise(n = n(), .groups = "keep")
-  
+
   scount <- data %>%
     group_by(S) %>%
     summarise(ns = n(), .groups = "keep")

@@ -150,7 +150,7 @@ res.creg <- function(Y, S, D, G.id, Ng, X, HC1)
   return(res.list)
 }
 #-------------------------------------------------------------------
-res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE) 
+res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE)
 #-------------------------------------------------------------------
 {
   N <- length(Y)
@@ -201,7 +201,7 @@ res.sreg.ss <- function(Y, S, D, X, HC1 = TRUE)
   return(res.list)
 }
 #-------------------------------------------------------------------
-res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE) 
+res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE)
 #-------------------------------------------------------------------
 {
   N <- length(unique(G.id))
@@ -305,12 +305,12 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE) {
 
   # Step 2: Split data
   data_small <- dplyr::filter(data_all, stratum_type == "small")
-  data_big   <- dplyr::filter(data_all, stratum_type == "big")
+  data_big <- dplyr::filter(data_all, stratum_type == "big")
 
   # Step 3: Extract covariates
   X_names <- if (!is.null(X)) colnames(X) else character(0)
   X_small <- if (length(X_names) > 0) data_small[, X_names, drop = FALSE] else NULL
-  X_big   <- if (length(X_names) > 0) data_big[, X_names, drop = FALSE] else NULL
+  X_big <- if (length(X_names) > 0) data_big[, X_names, drop = FALSE] else NULL
 
   # Step 4: Run estimators
   res_small <- res.sreg.ss(
@@ -333,26 +333,26 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE) {
 
   # Step 5: Combine estimates
   N_small <- nrow(data_small)
-  N_big   <- nrow(data_big)
+  N_big <- nrow(data_big)
   N_total <- N_small + N_big
 
   tau_hat <- (N_small / N_total) * res_small$tau.hat + (N_big / N_total) * res_big$tau.hat
   se_combined <- sqrt((N_small / N_total)^2 * res_small$se.rob^2 +
-                      (N_big   / N_total)^2 * res_big$se.rob^2 +
-                      (N_big * N_small / N_total^3) * (res_small$tau.hat - res_big$tau.hat)^2)
+    (N_big / N_total)^2 * res_big$se.rob^2 +
+    (N_big * N_small / N_total^3) * (res_small$tau.hat - res_big$tau.hat)^2)
 
   t.stat <- tau_hat / se_combined
   p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
   CI.left <- tau_hat - qnorm(0.975) * se_combined
   CI.right <- tau_hat + qnorm(0.975) * se_combined
   res.list <- list(
-    "tau.hat"  = tau_hat,
-    "se.rob"   = se_combined,
-    "t.stat"   = t.stat,
-    "p.value"  = p.value,
-    "as.CI"    = c(CI.left, CI.right),
+    "tau.hat" = tau_hat,
+    "se.rob" = se_combined,
+    "t.stat" = t.stat,
+    "p.value" = p.value,
+    "as.CI" = c(CI.left, CI.right),
     "beta.hat" = res_small$beta.hat,
-    "CI.left"  = CI.left,
+    "CI.left" = CI.left,
     "CI.right" = CI.right,
     "ols.iter" = res_big$ols.iter,
     "lin.adj" = res_small$lin.adj,
@@ -369,7 +369,7 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE) {
 res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = TRUE) {
   # Handle Ng = NULL gracefully
   if (is.null(Ng)) {
-    Ng <- rep(NA_real_, length(Y))  # placeholder to allow data.frame construction
+    Ng <- rep(NA_real_, length(Y)) # placeholder to allow data.frame construction
   }
   data <- data.frame(Y = Y, D = D, S = S, G.id = G.id, Ng = Ng)
 
@@ -386,29 +386,33 @@ res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE, small
       ungroup()
   }
   data_small <- dplyr::filter(data_all, stratum_type == "small")
-  data_big   <- dplyr::filter(data_all, stratum_type == "big")
+  data_big <- dplyr::filter(data_all, stratum_type == "big")
 
   X_names <- if (!is.null(X)) colnames(X) else character(0)
   X_small <- if (length(X_names) > 0) data_small[, X_names, drop = FALSE] else NULL
-  X_big   <- if (length(X_names) > 0) data_big[, X_names, drop = FALSE] else NULL
+  X_big <- if (length(X_names) > 0) data_big[, X_names, drop = FALSE] else NULL
 
-  res_small <- res.creg.ss(Y = data_small$Y, D = data_small$D, S = data_small$S,
-                           G.id = data_small$G.id, Ng = data_small$Ng,
-                           X = X_small, HC1 = HC1)
+  res_small <- res.creg.ss(
+    Y = data_small$Y, D = data_small$D, S = data_small$S,
+    G.id = data_small$G.id, Ng = data_small$Ng,
+    X = X_small, HC1 = HC1
+  )
   # Reset stratum IDs for internal use
   S_big_reset <- match(data_big$S, unique(data_big$S))
-  res_big <- res.creg(Y = data_big$Y, D = data_big$D, S = S_big_reset,
-                      G.id = data_big$G.id, Ng = data_big$Ng,
-                      X = NULL, HC1 = HC1)
+  res_big <- res.creg(
+    Y = data_big$Y, D = data_big$D, S = S_big_reset,
+    G.id = data_big$G.id, Ng = data_big$Ng,
+    X = NULL, HC1 = HC1
+  )
 
   N_small <- nrow(data_small)
-  N_big   <- nrow(data_big)
+  N_big <- nrow(data_big)
   N_total <- N_small + N_big
 
   tau_hat <- (N_small / N_total) * res_small$tau.hat + (N_big / N_total) * res_big$tau.hat
   se_combined <- sqrt((N_small / N_total)^2 * res_small$se.rob^2 +
-                      (N_big   / N_total)^2 * res_big$se.rob^2 +
-                      (N_big * N_small / N_total^3) * (res_small$tau.hat - res_big$tau.hat)^2)
+    (N_big / N_total)^2 * res_big$se.rob^2 +
+    (N_big * N_small / N_total^3) * (res_small$tau.hat - res_big$tau.hat)^2)
 
   t.stat <- tau_hat / se_combined
   p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))
@@ -431,6 +435,6 @@ res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE, small
     "res.big"      = res_big,
     "mixed.design" = TRUE
   )
-  class(ret.list) = "sreg"
+  class(ret.list) <- "sreg"
   return(ret.list)
 }

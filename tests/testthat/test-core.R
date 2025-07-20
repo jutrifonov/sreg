@@ -2407,7 +2407,7 @@ test_that("print.sreg outputs expected information for small strata", {
   expect_true(any(grepl("Strata size \\(k, small strata only\\): 3", output)))
   expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
 
-expect_warning(
+  expect_warning(
     invisible(capture.output({
       result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = data.frame("Ng" = data_sim$Ng), small.strata = TRUE, HC1 = TRUE)
     })),
@@ -2433,8 +2433,6 @@ expect_warning(
   expect_true(any(grepl("Number of strata: 202", output)))
   expect_true(any(grepl("Strata size \\(k, small strata only\\): 3", output)))
   expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
-
-
 })
 
 test_that("plot.sreg works and returns ggplot object", {
@@ -2454,4 +2452,3 @@ test_that("plot.sreg works and returns ggplot object", {
 
   expect_s3_class(plt, "ggplot")
 })
-

@@ -136,7 +136,7 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL)
   return(rtrn.list)
 }
 #-------------------------------------------------------------------
-tau.hat.sreg.ss <- function(Y, D, X = NULL, S) 
+tau.hat.sreg.ss <- function(Y, D, X = NULL, S)
 #-------------------------------------------------------------------
 {
   if (!is.null(X)) {
@@ -241,7 +241,7 @@ tau.hat.sreg.ss <- function(Y, D, X = NULL, S)
   return(ret_list)
 }
 #-------------------------------------------------------------------
-tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) 
+tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
 #-------------------------------------------------------------------
 {
   if (!is.null(X)) {
@@ -263,7 +263,7 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
 
     Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
 
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng"))) ])
+    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng")))])
     cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
     # print(cl.lvl.data)
     data <- cl.lvl.data
@@ -309,7 +309,7 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
 
       # run the linear model for covariate adjustments
       lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
-      
+
       beta_hat <- unname(lm_model$coefficients[-1])
 
       covariate_cols <- names(X)
@@ -372,8 +372,8 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
             S = df$S[1],
             Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
             Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
-            #Y_treated = sum(df$Y.bar[df$D == d] * df$Ng[df$D == d]) / sum(df$Ng[df$D == d]),
-            #Y_control = sum(df$Y.bar[df$D == 0] * df$Ng[df$D == 0]) / sum(df$Ng[df$D == 0]),
+            # Y_treated = sum(df$Y.bar[df$D == d] * df$Ng[df$D == d]) / sum(df$Ng[df$D == d]),
+            # Y_control = sum(df$Y.bar[df$D == 0] * df$Ng[df$D == 0]) / sum(df$Ng[df$D == 0]),
             k = nrow(df), # Total units in stratum (should be 2)
             l = sum(df$D == d),
             q = sum(df$D == 0)
@@ -399,11 +399,11 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
       G_1 <- sum((data$D == d) * data$Ng)
       G_0 <- sum((data$D == 0) * data$Ng)
 
-      
+
       theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
         sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng)
-      
-      #theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) * length(Y.bar.g$Y) / (sum((data$D == d)) * sum(data$Ng)) -
+
+      # theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) * length(Y.bar.g$Y) / (sum((data$D == d)) * sum(data$Ng)) -
       #  sum(data$Y.bar * data$Ng * (data$D == 0)) * length(Y.bar.g$Y) / (sum((data$D == 0)) * sum(data$Ng))
 
       tau.hat[d] <- theta_hat

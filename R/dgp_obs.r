@@ -107,11 +107,11 @@ dgp.obs.creg <- function(baseline, I.S, pi.vec, n.treat)
 
 
 dgp.obs.sreg.ss <- function(dgp_list,
-                                 n.treat,
-                                 k,
-                                 treat_sizes,
-                                 badmatch = FALSE,
-                                 poutcome = FALSE) {
+                            n.treat,
+                            k,
+                            treat_sizes,
+                            badmatch = FALSE,
+                            poutcome = FALSE) {
   # Basic checks
   stopifnot(length(treat_sizes) == (n.treat + 1))
   if (sum(treat_sizes) != k) {
