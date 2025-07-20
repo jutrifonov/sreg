@@ -3,7 +3,7 @@ Type: Package
 Title: Stratified Randomized Experiments
 Version: 2.0.0.9001
 Authors@R: c(
-    person("Juri", "Trifonov", email = "jutrifonov@uchicago.edu", role = c("aut", "cre", "cph")),
+    person("Juri", "Trifonov", email = "jutrifonov@u.northwestern.edu", role = c("aut", "cre", "cph")),
     person("Yuehao", "Bai", email = "yuehao.bai@usc.edu", role = "aut"),
     person("Azeem", "Shaikh", email = "amshaikh@uchicago.edu", role = "aut"),
     person("Max", "Tabord-Meehan", email = "maxtm@uchicago.edu", role = "aut"))

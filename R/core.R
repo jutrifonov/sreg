@@ -48,7 +48,7 @@
 #' @author
 #' \strong{Authors}:
 #'
-#' Juri Trifonov \email{jutrifonov@uchicago.edu}
+#' Juri Trifonov \email{jutrifonov@u.northwestern.edu}
 #'
 #' Yuehao Bai \email{yuehao.bai@usc.edu}
 #'
@@ -59,7 +59,7 @@
 #'
 #' \strong{Maintainer}:
 #'
-#' Juri Trifonov \email{jutrifonov@uchicago.edu}
+#' Juri Trifonov \email{jutrifonov@u.northwestern.edu}
 #'
 #'
 #'

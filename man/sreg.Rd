@@ -118,7 +118,7 @@ Cytrynbaum, M. (2024). Covariate Adjustment in Stratified Experiments. \emph{Qua
 \author{
 \strong{Authors}:
 
-Juri Trifonov \email{jutrifonov@uchicago.edu}
+Juri Trifonov \email{jutrifonov@u.northwestern.edu}
 
 Yuehao Bai \email{yuehao.bai@usc.edu}
 
@@ -129,5 +129,4 @@ Max Tabord-Meehan \email{maxtm@uchicago.edu}
 
 \strong{Maintainer}:
 
-Juri Trifonov \email{jutrifonov@uchicago.edu}
-}
+Juri Trifonov \email{jutrifonov@u.northwes
