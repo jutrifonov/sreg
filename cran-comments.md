@@ -14,3 +14,8 @@
 ## sreg 1.0.1
  -  Fixed a bug in the `sreg` function that caused it to return output for the unadjusted estimator instead of the adjusted estimator when `X` contained a single covariate.  
  -  Minor improvements and bug fixes.
+ 
+ ## sreg 2.0.1
+ - Major release. Small strata estimators has been added to the 'sreg' package.
+ - Minor improvements and bug fixes.
+ - S3 method for plotting has been added to the 'sreg' package.
