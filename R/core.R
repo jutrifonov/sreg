@@ -54,7 +54,7 @@
 #'
 #' Azeem Shaikh \email{amshaikh@uchicago.edu}
 #'
-#' Max Tabord-Meehan \email{m.tabordmeehan@utoronto.ca}
+#' Max Tabord-Meehan \email{maxtm@uchicago.edu}
 #'
 #'
 #' \strong{Maintainer}:
