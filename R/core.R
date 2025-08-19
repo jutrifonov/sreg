@@ -42,10 +42,6 @@
 #'
 #' Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariate adjustment in experiments with matched pairs. \emph{Journal of Econometrics}, 241(1), \doi{10.1016/j.jeconom.2024.105740}.
 #'
-#' Bai, Y. (2022). Optimality of Matched-Pair Designs in Randomized Controlled Trials. \emph{American Economic Review}, 112(12), \doi{10.1257/aer.20201856}.
-#'
-#' Bai, Y., Romano, J. P., and Shaikh, A. M. (2022). Inference in Experiments With Matched Pairs. \emph{Journal of the American Statistical Association}, 117(540), \doi{10.1080/01621459.2021.1883437}.
-#'
 #' Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. \doi{10.48550/arXiv.2301.09016}.
 #'
 #' Cytrynbaum, M. (2024). Covariate Adjustment in Stratified Experiments. \emph{Quantitative Economics}, 15(4), 971–998,  \doi{10.3982/QE2475}.
