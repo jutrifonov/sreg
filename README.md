@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/jutrifonov/sreg/graph/badge.svg)](https://app.codecov.io/gh/jutrifonov/sreg)
 
-The `sreg` package for `R`, offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. It supports a wide range of stratification designs, including matched pairs, $k$-tuple designs, and larger strata with many units — possibly of unequal size across strata. The package is designed to accommodate scenarios with multiple treatments,  and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018); Bugni, Canay, Shaikh, Tabord-Meehan (2023); Jiang, Linton, Tang, Zhang (2023); Bai, Jiang, Romano, Shaikh, Zhang (2024), Liu (2024); and Cytrynbaum (2024).
+The `sreg` package for `R`, offers a toolkit for estimating average treatment effects (ATEs) in stratified randomized experiments. It supports a wide range of stratification designs, including matched pairs, $k$-tuple designs, and larger strata with many units — possibly of unequal size across strata. The package is designed to accommodate scenarios with multiple treatments,  and cluster-level treatment assignments, and accomodates optimal linear covariate adjustment based on baseline observable characteristics. The package computes estimators and standard errors based on Bugni, Canay, Shaikh (2018); Bugni, Canay, Shaikh, Tabord-Meehan (2023); Jiang, Linton, Tang, Zhang (2023); Bai, Jiang, Romano, Shaikh, Zhang (2024); Bai (2022); Bai, Romano, Shaikh (2022); Liu (2024); and Cytrynbaum (2024).
 
 **Dependencies:** `dplyr`, `tidyr`, `extraDistr`, `rlang`
 
@@ -472,6 +472,10 @@ Bugni, F., Canay, I., Shaikh, A., and Tabord-Meehan, M. (2024+). Inference for C
 Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. *Forthcoming in Review of Economics and Statistics*, doi:10.48550/arXiv.2204.08356.
 
 Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariate adjustment in experiments with matched pairs. *Journal of Econometrics*, 241(1), doi:10.1016/j.jeconom.2024.105740. 
+
+Bai, Y. (2022). Optimality of Matched-Pair Designs in Randomized Controlled Trials. *American Economic Review*, 112(12), doi:10.1257/aer.20201856.
+
+Bai, Y., Romano, J. P., and Shaikh, A. M. (2022). Inference in Experiments With Matched Pairs. *Journal of the American Statistical Association*, 117(540), doi:10.1080/01621459.2021.1883437.
 
 Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. doi:10.48550/arXiv.2301.09016.
 
