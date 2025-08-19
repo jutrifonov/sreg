@@ -6,7 +6,7 @@ Authors@R: c(
     person("Juri", "Trifonov", email = "jutrifonov@u.northwestern.edu", role = c("aut", "cre", "cph")),
     person("Yuehao", "Bai", email = "yuehao.bai@usc.edu", role = "aut"),
     person("Azeem", "Shaikh", email = "amshaikh@uchicago.edu", role = "aut"),
-    person("Max", "Tabord-Meehan", email = "m.tabordmeehan@utoronto.ca", role = "aut"))
+    person("Max", "Tabord-Meehan", email = "maxtm@uchicago.edu", role = "aut"))
 Description: Estimate average treatment effects (ATEs) in stratified randomized experiments. `sreg` supports a wide range of stratification designs, including matched pairs, n-tuple designs, and larger strata with many units — possibly of unequal size across strata. 'sreg' is designed to accommodate scenarios with multiple treatments and cluster-level treatment assignments, and accommodates optimal linear covariate adjustment based on baseline observable characteristics. 'sreg' computes estimators and standard errors based on Bugni, Canay, Shaikh (2018) <doi:10.1080/01621459.2017.1375934>; Bugni, Canay, Shaikh, Tabord-Meehan (2024+) <doi:10.48550/arXiv.2204.08356>; Jiang, Linton, Tang, Zhang (2023+) <doi:10.48550/arXiv.2201.13004>; Bai, Jiang, Romano, Shaikh, and Zhang (2024) <doi:10.1016/j.jeconom.2024.105740>; Liu (2024+) <doi:10.48550/arXiv.2301.09016>; and Cytrynbaum (2024) <doi:10.3982/QE2475>.   
 License: MIT + file LICENSE
 Encoding: UTF-8
