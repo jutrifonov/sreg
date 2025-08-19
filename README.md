@@ -21,7 +21,7 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 - Azeem Shaikh amshaikh@uchicago.edu
 
-- Max Tabord-Meehan  m.tabordmeehan@utoronto.ca
+- Max Tabord-Meehan maxtm@uchicago.edu
 
 ## Supplementary files 
 - PDF version of the manual: [Download PDF](https://github.com/jutrifonov/sreg/blob/main/.github/README.pdf) 
