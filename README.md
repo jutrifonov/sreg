@@ -1,6 +1,6 @@
 # sreg: Stratified Randomized Experiments<br><img src="https://github.com/jutrifonov/sreg.dev/blob/main/logo.png" align="right" height="250" />
 ![version](https://img.shields.io/badge/sreg-v.2.0.1-green?style=flat&logo=github&labelColor=2A2523)
-[![Static Badge](https://img.shields.io/badge/CRAN-v.1.0.1-orange?logo=R&labelColor=2A2523)](https://CRAN.R-project.org/package=sreg)
+[![Static Badge](https://img.shields.io/badge/CRAN-v.2.0.1-orange?logo=R&labelColor=2A2523)](https://CRAN.R-project.org/package=sreg)
 [![R-CMD-check](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/jutrifonov/sreg/graph/badge.svg)](https://app.codecov.io/gh/jutrifonov/sreg)
 
@@ -21,7 +21,7 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 - Azeem Shaikh amshaikh@uchicago.edu
 
-- Max Tabord-Meehan  m.tabordmeehan@utoronto.ca
+- Max Tabord-Meehan m.tabordmeehan@utoronto.ca
 
 ## Supplementary files 
 - PDF version of the manual: [Download PDF](https://github.com/jutrifonov/sreg/blob/main/.github/README.pdf) 
