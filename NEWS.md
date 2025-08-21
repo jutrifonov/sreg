@@ -1,3 +1,5 @@
+# sreg 2.0.2
+
 # sreg 2.0.1
 * CRAN release of the first stable version of sreg 2.0
 # sreg 2.0.0
