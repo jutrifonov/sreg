@@ -89,7 +89,7 @@ Downloading GitHub repo jutrifonov/sreg@HEAD
 ── R CMD build ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ✔  checking for file ‘/private/var/folders/mp/06gjwr8j56zdp5j2vgdkd4z40000gq/T/RtmpVk96vN/remotes1026130d7f9b4/jutrifonov-sreg-53c1377/DESCRIPTION’ ...
 ─  preparing ‘sreg’:
-✔  checking DESCRIPTION meta-information ...
+✔  checking DESCRIPTION meta-information ..
 ─  checking for LF line-endings in source and make files and shell scripts
 ─  checking for empty or unneeded directories
 ─  building ‘sreg_2.0.2.tar.gz’
