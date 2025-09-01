@@ -42,7 +42,7 @@ Install the official CRAN release using:
 install.packages("sreg")
 ```
 ``` r
-trying URL 'https://ftp.osuosl.org/pub/cran/src/contrib/sreg_1.0.1.tar.gz'
+trying URL 'https://ftp.osuosl.org/pub/cran/src/contrib/sreg_2.0.2.tar.gz'
 Content type 'application/x-gzip' length 43389 bytes (42 KB)
 ==================================================
 downloaded 42 KB
@@ -75,7 +75,7 @@ library(sreg)
 #> / ___||  _ \| ____/ ___|     Experiments
 #> \___ \| |_) |  _|| |  _  
 #>  ___) |  _ <| |__| |_| |  
-#> |____/|_| \_\_____\____| version 1.0.1
+#> |____/|_| \_\_____\____| version 2.0.2
 
 #> Type 'citation("sreg")' for citing this R package in publications. 
 ```
@@ -92,7 +92,7 @@ Downloading GitHub repo jutrifonov/sreg@HEAD
 ✔  checking DESCRIPTION meta-information ...
 ─  checking for LF line-endings in source and make files and shell scripts
 ─  checking for empty or unneeded directories
-─  building ‘sreg_2.0.0.9000.tar.gz’
+─  building ‘sreg_2.0.2.tar.gz’
    
 Installing package into ‘/opt/homebrew/lib/R/4.4/site-library’
 (as ‘lib’ is unspecified)
@@ -121,7 +121,7 @@ library(sreg)
 #> / ___||  _ \| ____/ ___|     Experiments
 #> \___ \| |_) |  _|| |  _  
 #>  ___) |  _ <| |__| |_| |  
-#> |____/|_| \_\_____\____| version 2.0.0.9000
+#> |____/|_| \_\_____\____| version 2.0.2
                            
 
 #> Type 'citation("sreg")' for citing this R package in publications.                
