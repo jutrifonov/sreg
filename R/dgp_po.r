@@ -22,7 +22,7 @@ dgp.po.sreg <- function(n, theta.vec, gamma.vec, n.treat, is.cov = TRUE)
   x_2 <- rnorm(n, mean = 2, sd = 1)
 
   if (is.cov == TRUE) {
-    X <- data.frame(x_1, x_2)
+    X <- data.frame(x_1, x_2) # nolint: object_usage_linter.
     m.0 <- gamma.vec[1] * W + gamma.vec[2] * x_1 + gamma.vec[3] * x_2
   } else {
     m.0 <- gamma.vec[1] * W
@@ -33,7 +33,7 @@ dgp.po.sreg <- function(n, theta.vec, gamma.vec, n.treat, is.cov = TRUE)
     assign(paste("m.", a, sep = ""), m.0)
   }
 
-  Y.0 <- m.0 + eps.0
+  Y.0 <- m.0 + eps.0 # nolint: object_usage_linter.
 
   for (a in 1:n.treat)
   {
@@ -72,10 +72,10 @@ dgp.po.creg <- function(Ng, G, tau.vec, sigma1 = sqrt(2),
   Z.g.2 <- (beta.rv - 0.5) * sqrt(20)
   x_1 <- (rnorm(G, mean = 5, sd = 2) - 5) / 2
   x_2 <- (rnorm(G, mean = 2, sd = 1) - 2) / 1
-  X <- data.frame(x_1, x_2)
+  X <- data.frame(x_1, x_2) # nolint: object_usage_linter.
 
   cluster.indicator <- rep(c(1:G), Ng)
-  cl.id <- cluster.indicator
+  cl.id <- cluster.indicator # nolint: object_usage_linter.
   total.sample <- length(cluster.indicator)
 
   for (a in 1:n.treat)
@@ -92,7 +92,7 @@ dgp.po.creg <- function(Ng, G, tau.vec, sigma1 = sqrt(2),
     assign(paste("m.", a, sep = ""), m.0)
   }
 
-  Yig.0 <- rep(m.0, Ng) + epsilon.ig.0
+  Yig.0 <- rep(m.0, Ng) + epsilon.ig.0 # nolint: object_usage_linter.
 
   for (a in 1:n.treat)
   {

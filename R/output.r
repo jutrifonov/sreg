@@ -126,8 +126,7 @@ print.sreg <- function(x, ...) {
       gid_check <- x$data$G.id
     }
 
-    if (!check.cluster(data.frame("G.id" = gid_check, x$lin.adj))) {
-    }
+    check.cluster(data.frame("G.id" = gid_check, x$lin.adj))
   }
 }
 

@@ -8,3 +8,5 @@
 ^Meta$
 ^CRAN-SUBMISSION$
 ^revdep$
+^\.lintr$
+^sim_results$

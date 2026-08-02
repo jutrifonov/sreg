@@ -2,7 +2,7 @@
 # %#     Function that implements \hat{\tau} --
 # %#     i.e. the ATE estimator
 #-------------------------------------------------------------------
-tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
+tau.hat.sreg <- function(Y, S, D, X = NULL, model = NULL)
 #-------------------------------------------------------------------
 {
   tau.hat <- numeric(max(D))
@@ -11,7 +11,7 @@ tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
     if (!is.null(X)) {
       data <- data.frame(Y, S, D, X)
       data$pi <- pi.hat.sreg(S, D)[, d]
-      data$pi.0 <- pi.hat.sreg(S, D, inverse = T)[, 1]
+      data$pi.0 <- pi.hat.sreg(S, D, inverse = TRUE)[, 1]
       data$A <- ifelse(D == d, 1, ifelse(D == 0, 0, -999999))
       data$I <- as.numeric(data$A != -999999)
 
@@ -26,7 +26,7 @@ tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
     } else {
       data <- data.frame(Y, S, D)
       data$pi <- pi.hat.sreg(S, D)[, d]
-      data$pi.0 <- pi.hat.sreg(S, D, inverse = T)[, 1]
+      data$pi.0 <- pi.hat.sreg(S, D, inverse = TRUE)[, 1]
       data$A <- ifelse(D == d, 1, ifelse(D == 0, 0, -999999))
       data$I <- as.numeric(data$A != -999999)
       mu.hat.d <- 0
@@ -42,11 +42,10 @@ tau.hat.sreg <- function(Y, S, D, X=NULL, model=NULL)
   return(tau.hat)
 }
 #-------------------------------------------------------------------
-tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL)
+tau.hat.creg <- function(Y, S, D, G.id, Ng, X = NULL, model = NULL)
 #-------------------------------------------------------------------
 {
   tau.hat.vec <- numeric(max(D))
-  Y.bar.g.list <- rep(list(NA), max(D))
   mu.hat.list <- rep(list(NA), max(D))
   pi.hat.list <- rep(list(NA), max(D))
   data.list <- rep(list(NA), max(D))
@@ -58,7 +57,7 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL)
     for (d in 1:max(D))
     {
       data$pi <- pi.hat.creg(data$S, data$D)[, d]
-      data$pi.0 <- pi.hat.creg(data$S, data$D, inverse = T)[, 1]
+      data$pi.0 <- pi.hat.creg(data$S, data$D, inverse = TRUE)[, 1]
       data$A <- ifelse(data$D == d, 1, ifelse(data$D == 0, 0, -999999))
       data$I <- as.numeric(data$A != -999999)
       data.list[[d]] <- data
@@ -105,7 +104,7 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X=NULL, model=NULL)
     {
       data <- cl.lvl.data
       data$pi <- pi.hat.creg(data$S, data$D)[, d]
-      data$pi.0 <- pi.hat.creg(data$S, data$D, inverse = T)[, 1]
+      data$pi.0 <- pi.hat.creg(data$S, data$D, inverse = TRUE)[, 1]
       data$A <- ifelse(data$D == d, 1, ifelse(data$D == 0, 0, -999999))
       data$I <- as.numeric(data$A != -999999)
       data.list[[d]] <- data
@@ -171,19 +170,10 @@ tau.hat.sreg.ss <- function(Y, D, X = NULL, S)
         ~ .x - .y
       ) %>%
         do.call(rbind, .)
-      # print(X_diff_mat)
-      # print(Y_diff)
-
-
-
-      data_decomp <- as.data.frame(agg_data)
-      X_treated_mat <- do.call(rbind, data_decomp$X_treated)
-      X_control_mat <- do.call(rbind, data_decomp$X_control)
 
 
       lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
 
-      # print(summary(lm_model))
       beta_hat <- unname(lm_model$coefficients[-1])
 
       covariate_cols <- setdiff(names(data_full), c("Y", "D", "S"))
@@ -201,8 +191,6 @@ tau.hat.sreg.ss <- function(Y, D, X = NULL, S)
     }
   } else {
     tau.hat <- numeric(max(D))
-    # beta.hat <- numeric(max(D))
-    # beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
     data_full <- data.frame(Y, D, S)
     for (d in 1:max(D))
     {
@@ -222,8 +210,6 @@ tau.hat.sreg.ss <- function(Y, D, X = NULL, S)
 
       # Create Y_diff vector
       Y_diff <- with(agg_data, Y_treated - Y_control)
-
-      data_decomp <- as.data.frame(agg_data)
 
       # adjusted estimator:
       theta_hat <- sum((data_full$Y * (data_full$D == d))) / sum((data_full$D == d)) -
@@ -265,9 +251,8 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
 
     cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng")))])
     cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
-    # print(cl.lvl.data)
     data <- cl.lvl.data
-    N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
+    N.bar.G <- mean(data$Ng) # nolint: object_usage_linter.
 
     covariate_cols <- names(X)
 
@@ -301,12 +286,6 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
       ) %>%
         do.call(rbind, .)
 
-      # print(Y_diff)
-      # print(X_diff_mat)
-      data_decomp <- as.data.frame(agg_data)
-      X_treated_mat <- do.call(rbind, data_decomp$X_treated)
-      X_control_mat <- do.call(rbind, data_decomp$X_control)
-
       # run the linear model for covariate adjustments
       lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
 
@@ -318,23 +297,14 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
       X_bar <- colMeans(X_mat)
       X_dem <- sweep(X_mat, 2, X_bar)
 
-      # X_bar <- mean(data$X)
-      # X_dem <- data$X - X_bar
       # adjusted estimator:
       G_1 <- sum((data$D == d) * data$Ng)
       G_0 <- sum((data$D == 0) * data$Ng)
-      # print(X_dem)
-      # print(beta_hat)
-      # print(as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
-      #                             colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0)))
       theta_hat_adj <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
         sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng) -
         as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
           colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0) %*% beta_hat)
 
-
-      # (sum(X_dem * (data$D == d)) / sum((data$D == d) * data$Ng) -
-      # sum(X_dem * (data$D == 0)) / sum((data$D == 0) * data$Ng)) * beta_hat
       tau.hat[d] <- theta_hat_adj
       beta.hat[d, ] <- beta_hat
     }
@@ -357,7 +327,6 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
 
     cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")])
     cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
-    # print(cl.lvl.data)
     data <- cl.lvl.data
     N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
 
@@ -372,8 +341,6 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
             S = df$S[1],
             Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
             Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
-            # Y_treated = sum(df$Y.bar[df$D == d] * df$Ng[df$D == d]) / sum(df$Ng[df$D == d]),
-            # Y_control = sum(df$Y.bar[df$D == 0] * df$Ng[df$D == 0]) / sum(df$Ng[df$D == 0]),
             k = nrow(df), # Total units in stratum (should be 2)
             l = sum(df$D == d),
             q = sum(df$D == 0)
@@ -383,18 +350,10 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
       # Create Y_diff vector
       Y_diff <- with(agg_data, Y_treated - Y_control)
 
-      # print(Y_diff)
-      # print(X_diff_mat)
-      data_decomp <- as.data.frame(agg_data)
-
 
       # run the linear model for covariate adjustments
-      # print(summary(lm_model))
-      # print(summary(lm_model))
       beta_hat <- 0
 
-      # X_bar <- mean(data$X)
-      # X_dem <- data$X - X_bar
       # adjusted estimator:
       G_1 <- sum((data$D == d) * data$Ng)
       G_0 <- sum((data$D == 0) * data$Ng)
@@ -403,8 +362,6 @@ tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
       theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
         sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng)
 
-      # theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) * length(Y.bar.g$Y) / (sum((data$D == d)) * sum(data$Ng)) -
-      #  sum(data$Y.bar * data$Ng * (data$D == 0)) * length(Y.bar.g$Y) / (sum((data$D == 0)) * sum(data$Ng))
 
       tau.hat[d] <- theta_hat
       beta.hat <- NULL

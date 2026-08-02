@@ -80,8 +80,6 @@ boolean.check.ss <- function(var) {
 }
 
 check.within.stratatreatment.variation <- function(data) {
-  # covariate_columns <- names(data)[-(1:2)]
-
   # Ensure the columns exist
   stopifnot(all(c("S", "D") %in% names(data)))
 
@@ -121,56 +119,6 @@ check.within.strata.variation <- function(data) {
 
   all(all_variation)
 }
-
-# ------------------------------------------------------------------
-#  Classify strata as "small" or "big" in a mixed design
-# ------------------------------------------------------------------
-# design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TRUE) {
-#   ## 1. Capture column names (works with bare names or strings)
-#   S_name <- if (is.character(substitute(S))) substitute(S) else deparse(substitute(S))
-#   G_name <- if (!missing(G.id)) {
-#     if (is.character(substitute(G.id))) substitute(G.id) else deparse(substitute(G.id))
-#   } else {
-#     NULL
-#   }
-
-#   ## 2. Compute stratum sizes
-#   if (!is.null(G_name)) {
-#     # -- clustered: count *clusters* per stratum
-#     cluster_strata <- dplyr::distinct(data, .data[[S_name]], .data[[G_name]])
-#     strata_sizes   <- dplyr::count(cluster_strata, .data[[S_name]], name = "size")
-#   } else {
-#     # -- individual: count *units* per stratum
-#     strata_sizes   <- dplyr::count(data, .data[[S_name]], name = "size")
-#   }
-
-#   ## 3. If every stratum has the same size, nothing to classify
-#   if (length(unique(strata_sizes$size)) == 1) {
-#     if (!keep.size) strata_sizes$size <- NULL  # cosmetic
-#     return(dplyr::left_join(data, strata_sizes, by = S_name))
-#   }
-
-#   ## 4. Find the modal size and classify
-#   modal_size <- strata_sizes %>%
-#     dplyr::count(size) %>%
-#     dplyr::arrange(dplyr::desc(n)) %>%
-#     dplyr::pull(size) %>%
-#     .[[1]]
-
-#   strata_sizes <- strata_sizes %>%
-#     dplyr::mutate(stratum_type = ifelse(size == modal_size, "small", "big"))
-
-#   if (!keep.size) strata_sizes$size <- NULL
-
-#   ## 5. Merge back and optionally warn
-#   out <- dplyr::left_join(data, strata_sizes, by = S_name)
-
-#   if (warn)
-#     warning("Mixed design detected: strata of varying cluster/unit counts. ",
-#             "Weighted estimators will be used.", call. = FALSE)
-
-#   return(out)
-# }
 
 design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TRUE, small.strata = TRUE) {
   S_name <- if (is.character(substitute(S))) substitute(S) else deparse(substitute(S))

@@ -45,7 +45,7 @@
 #' Bai, Y. (2022). Optimality of Matched-Pair Designs in Randomized Controlled Trials. \emph{American Economic Review}, 112(12), \doi{10.1257/aer.20201856}.
 #'
 #' Bai, Y., Romano, J. P., and Shaikh, A. M. (2022). Inference in Experiments With Matched Pairs. \emph{Journal of the American Statistical Association}, 117(540), \doi{10.1080/01621459.2021.1883437}.
-#' 
+#'
 #' Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. \doi{10.48550/arXiv.2301.09016}.
 #'
 #' Cytrynbaum, M. (2024). Covariate Adjustment in Stratified Experiments. \emph{Quantitative Economics}, 15(4), 971–998,  \doi{10.3982/QE2475}.
@@ -151,9 +151,6 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
     unique_sizes <- unique(strata_sizes)
     mixed_design <- length(unique_sizes) > 1
 
-    #  if (length(unique(strata_sizes)) > 1) {
-    #    stop("Error: One or more strata contain a different number of units (or clusters) while small.strata = TRUE. Consider using small.strata = FALSE or providing balanced strata.")
-    #  }
   }
   if (small.strata == FALSE && !is.null(S)) {
     if (!is.null(G.id)) {
@@ -247,11 +244,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         }
         data_tst <- design.classifier(data_tst, S = S, small.strata = small.strata)
       }
-      # if (mixed_design){
-      # result <- res.sreg.mixed(Y, S, D, X, HC1)
-      # }else{
       result <- res.sreg(Y, S, D, X, HC1)
-      # }
       if (!is.null(result$lin.adj)) {
         if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
           stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
@@ -281,58 +274,6 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
   } else {
     check.cluster.lvl(G.id, S, D, Ng)
     if (small.strata == FALSE) {
-      # S_name <- if (is.character(substitute(S))) substitute(S) else deparse(substitute(S))
-      # G_name <- if (!missing(G.id)) {
-      #   if (is.character(substitute(G.id))) substitute(G.id) else deparse(substitute(G.id))
-      # } else {
-      #   NULL
-      # }
-
-      # if (!small.strata) {
-      #   return(data)
-      # }
-
-      # if (!is.null(G_name)) {
-      #   cluster_strata <- dplyr::distinct(data, .data[[S_name]], .data[[G_name]])
-      #   strata_sizes <- dplyr::count(cluster_strata, .data[[S_name]], name = "size")
-      # } else {
-      #   strata_sizes <- dplyr::count(data, .data[[S_name]], name = "size")
-      # }
-
-      # unique_sizes <- unique(strata_sizes$size)
-      # n_strata <- nrow(strata_sizes)
-      # if (length(unique_sizes) == 1) {
-      #   strata_sizes$stratum_type <- "small"
-      #   if (!keep.size) strata_sizes$size <- NULL
-      #   return(dplyr::left_join(data, strata_sizes, by = S_name))
-      # }
-
-      # # Count frequencies of each size
-      # size_counts <- strata_sizes %>%
-      #   count(size, name = "count") %>%
-      #   mutate(freq = count / n_strata)
-
-      # # Filter for small strata that meet the 25% rule
-      # small_modal_sizes <- size_counts %>%
-      #   filter(size <= 3, freq >= 0.25) %>%
-      #   arrange(desc(count))
-      # modal_size <- small_modal_sizes$size[1]
-
-      # # Classify small vs big, what are the proportions
-      # strata_sizes <- strata_sizes %>%
-      #   mutate(stratum_type = ifelse(size == modal_size, "small", "big"))
-
-      # if (!keep.size) strata_sizes$size <- NULL
-      # out <- dplyr::left_join(data, strata_sizes, by = S_name)
-
-      # if (warn && any(strata_sizes$stratum_type == "big")) {
-      #   warning("At least 25% of strata are small, while small.strata = FALSE. In case the data follows a small strata design, but small.strata = FALSE, the standard errors are invalid. If the data exhibits a mixed design, you can still set small.strata = TRUE and the mixed estimator will be implemented.", call. = FALSE)
-      # }
-
-
-      # if(mixed_design){
-      #    result <- res.creg.mixed(Y, S, D, G.id, Ng, X, HC1)
-      # }else{
       if (!is.null(X)) {
         if (!is.null(S)) {
           dta.temp <- data.frame(S, D, X)
@@ -367,14 +308,10 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
       }
       result <- res.creg(Y, S, D, G.id, Ng, X, HC1)
 
-      # }
       if (is.null(Ng)) {
         warning("Warning: Cluster sizes have not been provided (Ng = NULL). Ng is assumed to be equal to the number of available observations in every cluster g.")
       }
 
-      # if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
-      #  stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
-      # }
       if (!is.null(result$lin.adj)) {
         if (any(sapply(result$ols.iter, function(x) any(is.na(x))))) {
           stop("Error: There are too many covariates relative to the number of observations. Please reduce the number of covariates (k = ncol(X)) or consider estimating the model without covariate adjustments.")
@@ -466,7 +403,7 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
                       tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
                       cluster = TRUE, is.cov = TRUE, small.strata = FALSE, k = 3, treat.sizes = c(1, 1, 1)) {
   n.treat <- length(tau.vec)
-  if (cluster == T) {
+  if (cluster == TRUE) {
     if (small.strata == TRUE) {
       G <- n
       Nmax <- Nmax
@@ -493,7 +430,6 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
       n.treat <- length(tau.vec)
       max.support <- Nmax / 10 - 1
       Ng <- gen.cluster.sizes(G, max.support)
-      # Ng <- rep(Nmax, G)                                                            # uncomment and comment the previous line for a equal-size design
       data.pot <- dgp.po.creg(
         Ng = Ng, tau.vec = tau.vec, G = G,
         gamma.vec = gamma.vec, n.treat = n.treat

@@ -3,7 +3,7 @@
 # %#     i.e. the variance estimator
 #-------------------------------------------------------------------
 as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
-  #-------------------------------------------------------------------
+#-------------------------------------------------------------------
 {
   var.vec <- numeric(max(D))
   n.vec <- numeric(max(D))
@@ -98,7 +98,7 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       # Center the other-treatment add-back term within each stratum
       # using all observations in the stratum
       Xi.hat.other <- data$Xi.tilde.other -
-        ave(data$Xi.tilde.other, data$S, FUN = mean)
+        stats::ave(data$Xi.tilde.other, data$S, FUN = mean)
 
       # This term contributes only for observations assigned to other treatment arms
       Xi.hat.other[data$I.other == 0] <- 0
@@ -214,7 +214,7 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
       Xi.hat.other <- data$Xi.tilde.other -
-        ave(data$Xi.tilde.other, data$S, FUN = mean)
+        stats::ave(data$Xi.tilde.other, data$S, FUN = mean)
 
       Xi.hat.other[data$I.other == 0] <- 0
 
@@ -256,7 +256,7 @@ as.var.creg <- function(model = NULL, fit, HC1)
   n.vec <- numeric(length(fit$tau.hat))
 
   if (!is.null(model)) {
-    for (d in 1:length(fit$tau.hat))
+    for (d in seq_along(fit$tau.hat))
     {
       Y.bar.g <- fit$Y.bar.g
       Ng <- fit$Ng
@@ -336,7 +336,7 @@ as.var.creg <- function(model = NULL, fit, HC1)
       n.vec[d] <- n
     }
   } else {
-    for (d in 1:length(fit$tau.hat))
+    for (d in seq_along(fit$tau.hat))
     {
       Y.bar.g <- fit$Y.bar.g
       Ng <- fit$Ng
@@ -433,9 +433,6 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE)
 {
   # n = number of blocks
   n <- max(S)
-  # N = number of observations
-  N <- length(Y)
-
   pi_hat_vec <- pi.hat.sreg(S, D, vector = TRUE)
   pi_hat_0 <- pi.hat.sreg(S, D, vector = TRUE, inverse = TRUE)[1]
   V <- numeric(max(D))
@@ -456,10 +453,6 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE)
       beta_hat <- 0
       Y_a <- Y
     }
-    # print(beta_hat)
-    # print(X_dem)
-    # Y_a     <- Y - beta_hat * X_dem
-    # Y_a <- Y - X_dem %*% beta_hat # check carefully here and in the cluster function what is wrong with the transpose sign?
 
     l <- sum(D == d) / n
     q <- sum(D == 0) / n
@@ -473,8 +466,6 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE)
     sums_treated <- tapply(Y_a * (D == d), S, sum)
     sums_untreated <- tapply(Y_a * (D == 0), S, sum)
 
-    # print(head(sums_treated))
-    # print(head(sums_untreated))
 
     #----------------------------------------
     # Compute rho_hat_00 and rho_hat_11
@@ -486,15 +477,12 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE)
 
     # zeta_0 = sum of products of untreated across pairs of blocks
     zeta_0 <- sum(sums_untreated[idx1] * sums_untreated[idx2]) / (q^2)
-    # print(head(zeta_0))
 
     # zeta_1 = sum of products of treated across pairs of blocks
     zeta_1 <- sum(sums_treated[idx1] * sums_treated[idx2]) / (l^2)
-    # print(head(zeta_1))
     # Multiply each by (2/n) to get rho_00 and rho_11
     rho_hat_00 <- zeta_0 * (2 / n)
     rho_hat_11 <- zeta_1 * (2 / n)
-    # print(rho_hat_11)
 
     #----------------------------------------
     # Compute rho_hat_10
@@ -503,15 +491,12 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE)
     #----------------------------------------
     sum_rho_10 <- sum((sums_treated * sums_untreated) / (l * q))
     rho_hat_10 <- sum_rho_10 / n
-    # print(sum_rho_10)
-    # print(rho_hat_10)
 
     #----------------------------------------
     # Compute sigma_hat_1 and sigma_hat_0
     #----------------------------------------
     sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (D == d)) * (1 / (n * l))
     sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (D == 0)) * (1 / (n * q))
-    # print(s)
     #----------------------------------------
     # Compute the final variance components
     #----------------------------------------
@@ -591,7 +576,6 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
   N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
   # n = number of blocks
   if (!is.null(X)) {
-    # X_mat <- as.matrix(data[, grepl("^x_", names(data))])
     covariate_cols <- names(X)
     X_mat <- as.matrix(data[, covariate_cols, drop = FALSE])
     X_bar <- colMeans(X_mat)
@@ -612,8 +596,6 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
     }
     l <- sum(data$D == d) / n
     q <- sum(data$D == 0) / n
-    # print(l)
-    # print(q)
     pi_hat <- pi_hat_vec[d]
     # Compute Gamma_hat_1 and Gamma_hat_0
     Gamma_hat_1 <- sum(Y_a[data$D == d]) * (1 / sum(data$D == d))
@@ -622,7 +604,6 @@ as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
     # Precompute sums of Y_a for treated & untreated in each block
     sums_treated <- as.numeric(tapply(Y_a * (data$D == d), data$S, sum))
     sums_untreated <- as.numeric(tapply(Y_a * (data$D == 0), data$S, sum))
-
 
 
     #----------------------------------------

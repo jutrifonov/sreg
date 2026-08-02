@@ -4,7 +4,7 @@ utils::globalVariables(c("stratum_type"))
 # %#     The core function. It provides estimates of ATE, their s.e.,
 # %#     calculates t-stats and corresponding p-values
 #-------------------------------------------------------------------
-res.sreg <- function(Y, S=NULL, D, X=NULL, HC1)
+res.sreg <- function(Y, S = NULL, D, X = NULL, HC1)
 #-------------------------------------------------------------------
 {
   n <- length(Y)
@@ -310,7 +310,6 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE) {
   # Step 3: Extract covariates
   X_names <- if (!is.null(X)) colnames(X) else character(0)
   X_small <- if (length(X_names) > 0) data_small[, X_names, drop = FALSE] else NULL
-  X_big <- if (length(X_names) > 0) data_big[, X_names, drop = FALSE] else NULL
 
   # Step 4: Run estimators
   res_small <- res.sreg.ss(
@@ -390,7 +389,6 @@ res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE, small
 
   X_names <- if (!is.null(X)) colnames(X) else character(0)
   X_small <- if (length(X_names) > 0) data_small[, X_names, drop = FALSE] else NULL
-  X_big <- if (length(X_names) > 0) data_big[, X_names, drop = FALSE] else NULL
 
   res_small <- res.creg.ss(
     Y = data_small$Y, D = data_small$D, S = data_small$S,

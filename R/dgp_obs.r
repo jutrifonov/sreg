@@ -13,8 +13,6 @@ dgp.obs.sreg <- function(baseline, I.S, pi.vec, n.treat, is.cov = TRUE)
   num.strata <- ncol(I.S)
   n <- length(baseline$Y.0)
   A <- cbind(rep(0, n))
-  l.seq <- num.strata / 2
-
   pi.matr <- matrix(1, ncol = num.strata, nrow = n.treat)
   pi.matr.w <- pi.matr * pi.vec
 
@@ -57,8 +55,6 @@ dgp.obs.creg <- function(baseline, I.S, pi.vec, n.treat)
   num.strata <- ncol(I.S)
   n <- baseline$G
   A <- cbind(rep(0, n))
-  l.seq <- num.strata / 2
-
   pi.matr <- matrix(1, ncol = num.strata, nrow = n.treat)
   pi.matr.w <- pi.matr * pi.vec
 
@@ -125,8 +121,6 @@ dgp.obs.sreg.ss <- function(dgp_list,
   #    We assume that your dgp_list has elements named "Y.0","Y.1",...,"Y.n.treat", plus W, plus X (if is.cov=TRUE).
   #    Make a data.frame that has columns for each potential outcome and your stratification variable(s).
 
-  # First, figure out how many observations:
-  n <- length(dgp_list[[paste0("Y.", 0)]]) # length of Y.0
   # Build a DF row-by-row:
   #  Potential Outcomes:
   Y_mat <- sapply(all_treat_levels, function(a) dgp_list[[paste0("Y.", a)]])
@@ -200,7 +194,6 @@ dgp.obs.sreg.ss <- function(dgp_list,
 
   # For each block, randomly permute the treat_sizes among the k units
   # so that exactly treat_sizes[1] get treat=0, treat_sizes[2] get treat=1, etc.
-  # all_treat_levels = c(0,1,...,n.treat)
   for (j in seq_len(n.blocks)) {
     # indices for block j
     these_inds <- ((j - 1) * k + 1):(j * k)
@@ -242,9 +235,6 @@ dgp.obs.sreg.ss <- function(dgp_list,
   )
   # If your df_sorted includes multiple X columns (like x_1, x_2, etc.), you can add them:
   out_df <- cbind(out_df, df_sorted[, c("x_1", "x_2")])
-  # if ("x_1" %in% names(df_sorted)) {
-  #  out_df[["X"]] <- df_sorted[["x_1"]] # NB CORRECT FOR MULTIPLE COVARIATES!!! Working on it... No flexibility needed for dgp functions!
-  # }
   # Optionally attach all potential outcomes for debugging/evaluation
   if (poutcome) {
     out_df <- cbind(
@@ -262,23 +252,10 @@ dgp.obs.sreg.ss <- function(dgp_list,
 dgp.obs.creg.ss <- function(baseline, n.treat, k, treat_sizes)
 #-------------------------------------------------------------------
 {
-  # num.strata <- ncol(I.S)
   n <- baseline$G
   A <- cbind(rep(0, n))
   # Number of total arms is n.treat + 1, labeled 0,1,...,n.treat
   all_treat_levels <- 0:n.treat
-  # l.seq <- num.strata / 2
-
-  # pi.matr <- matrix(1, ncol = num.strata, nrow = n.treat)
-  # pi.matr.w <- pi.matr * pi.vec
-
-  # for (k in 1:num.strata)
-  # {
-  #  index <- which(I.S[, k] == 1)
-  #  ns <- length(index)
-
-  #   A[index] <- gen.treat.creg(pi.matr.w, ns, k)
-  # }
   Y_mat <- sapply(all_treat_levels, function(a) baseline[[paste0("Yig.", a)]])
   colnames(Y_mat) <- paste0("Y.", all_treat_levels)
 
@@ -293,9 +270,6 @@ dgp.obs.creg.ss <- function(baseline, n.treat, k, treat_sizes)
     "cl.id" = G.seq, Ng = baseline$Ng,
     W, X
   )
-
-  # print(data.short)
-
   # Stratification. We use the cluster level data to first assign strata
   match_var <- data.short[["W"]] # or df[["X"]], etc.
 
@@ -315,7 +289,6 @@ dgp.obs.creg.ss <- function(baseline, n.treat, k, treat_sizes)
 
   # For each block, randomly permute the treat_sizes among the k units
   # so that exactly treat_sizes[1] get treat=0, treat_sizes[2] get treat=1, etc.
-  # all_treat_levels = c(0,1,...,n.treat)
   for (j in seq_len(n.blocks)) {
     # indices for block j
     these_inds <- ((j - 1) * k + 1):(j * k)
@@ -338,22 +311,10 @@ dgp.obs.creg.ss <- function(baseline, n.treat, k, treat_sizes)
     A,
     S = block_id, data.short_sorted
   )
-  # print(data.short)
-  # print(block_id)
-  # print(A)
-
-  # print(data.short_sorted)
-  # short data
-  # data.short <- data.frame(
-  #  "cl.id" = G.seq, A, S = strata.set$S, Ng = baseline$Ng,
-  #  baseline$X
-  # )
 
   data.long <- data.frame("cl.id" = cluster.indicator)
-  # print(data.long)
   # individual level data frame without Y! Just cl.id, Ng, W, X
   merged.data <- merge(data.long, data.short, by = "cl.id")
-  # print(head(merged.data, 200)) # Works! But we need to append potential outcomes!
 
   A <- merged.data$A
   S <- merged.data$S
@@ -364,10 +325,8 @@ dgp.obs.creg.ss <- function(baseline, n.treat, k, treat_sizes)
   {
     assign(paste("Y.", a, sep = ""), baseline[[paste("Yig.", a, sep = "")]])
   }
-  # print(Y.1)
   formula <- gen.rubin.formula.creg(n.treat)
   Y.obs <- eval(parse(text = formula)) # observed outcomes for every individual
-  # print(Y.obs)
 
   ret.list <- list(
     "Y"           = Y.obs,
