@@ -11,7 +11,7 @@ test_that("simulations without clusters work", {
   }))
 
   expect_equal(round(result$tau.hat, 7), c(0.1580814, 0.4846882))
-  expect_equal(round(result$se.rob, 8), c(0.07524021, 0.07616346))
+  expect_equal(round(result$se.rob, 8), c(0.07567160, 0.07651933))
 
   invisible(capture.output({
     result <- sreg::sreg(Y, S, D, G.id = NULL, Ng = NULL, X = NULL)
@@ -25,7 +25,7 @@ test_that("simulations without clusters work", {
   }))
 
   expect_equal(round(result$tau.hat, 7), c(0.1578917, 0.4963735))
-  expect_equal(round(result$se.rob, 8), c(0.08255663, 0.08320655))
+  expect_equal(round(result$se.rob, 8), c(0.08256039, 0.08329688))
 
   invisible(capture.output({
     result <- sreg::sreg(Y, S = NULL, D = D, G.id = NULL, Ng = NULL, X = NULL)
@@ -220,7 +220,7 @@ test_that("simulations with clusters work", {
   }))
 
   expect_equal(round(result$tau.hat, 7), c(0.1548014, 0.6955543))
-  expect_equal(round(result$se.rob, 8), c(0.06201006, 0.05871032))
+  expect_equal(round(result$se.rob, 8), c(0.06220343, 0.05958632))
 
   X <- data.frame("Ng" = sim_data$Ng, "x_1" = sim_data$x_1, "x_2" = sim_data$x_2)
 
@@ -840,7 +840,7 @@ test_that("empirical example works", {
   }))
 
   expect_equal(round(result$tau.hat, 8), c(-0.02861589, 0.34608688))
-  expect_equal(round(result$se.rob, 7), c(0.1796427, 0.1836229))
+  expect_equal(round(result$se.rob, 7), c(0.1816173, 0.1857249))
 
   expect_error(
     invisible(capture.output({
@@ -949,17 +949,17 @@ test_that("data: big strata, option: big strata", {
     result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = TRUE, small.strata = FALSE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.2114763, 0.8411237, 1.4103687))
-  expect_equal(round(result$se.rob, 7), c(0.0887169, 0.0886237, 0.0888706))
+  expect_equal(round(result$se.rob, 7), c(0.0889232, 0.0887789, 0.0890084))
   invisible(capture.output({
     result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = FALSE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.2114763, 0.8411237, 1.4103687))
-  expect_equal(round(result$se.rob, 7), c(0.0880103, 0.0879149, 0.0881632))
+  expect_equal(round(result$se.rob, 7), c(0.0882149, 0.0880689, 0.0882998))
   invisible(capture.output({
     result <- sreg(Y = sim_data$Y, D = sim_data$D, S = sim_data$S, X = data.frame(sim_data$x_1), HC1 = TRUE, small.strata = FALSE)
   }))
   expect_equal(round(result$tau.hat, 7), c(0.4104883, 0.9986809, 1.4669068))
-  expect_equal(round(result$se.rob, 7), c(0.1278097, 0.1237450, 0.1269005))
+  expect_equal(round(result$se.rob, 7), c(0.1279147, 0.1237890, 0.1269721))
 })
 
 test_that("data: small strata, option: big strata", {
@@ -1313,7 +1313,7 @@ test_that("data: mixed design, option: big strata", {
     )
   )
   expect_equal(round(result$tau.hat, 7), c(0.1644669, 0.8312292))
-  expect_equal(round(result$se.rob, 7), c(0.0483432, 0.0477374))
+  expect_equal(round(result$se.rob, 7), c(0.0483446, 0.0477400))
 
   invisible(
     suppressWarnings(
@@ -1323,7 +1323,7 @@ test_that("data: mixed design, option: big strata", {
     )
   )
   expect_equal(round(result$tau.hat, 7), c(0.1644669, 0.8312292))
-  expect_equal(round(result$se.rob, 7), c(0.0483194, 0.0477140))
+  expect_equal(round(result$se.rob, 7), c(0.0483209, 0.0477165))
 
 
   expect_warning(
@@ -1551,7 +1551,7 @@ test_that("data: big strata, option: big strata", {
   result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), HC1 = FALSE, G.id = NULL, Ng = data_sim$Ng, small.strata = FALSE)
 
   expect_equal(round(result$tau.hat, 7), c(0.2199062, 0.6091449, 1.3856801))
-  expect_equal(round(result$se.rob, 7), c(0.0682736, 0.0689731, 0.0652965))
+  expect_equal(round(result$se.rob, 7), c(0.0683037, 0.0696617, 0.0654361))
 
   set.seed(123)
   tau.vec <- c(0.2, 0.9, 1.5)

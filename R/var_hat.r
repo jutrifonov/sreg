@@ -3,7 +3,7 @@
 # %#     i.e. the variance estimator
 #-------------------------------------------------------------------
 as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
-#-------------------------------------------------------------------
+  #-------------------------------------------------------------------
 {
   var.vec <- numeric(max(D))
   n.vec <- numeric(max(D))
@@ -13,10 +13,15 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
     {
       data <- data.frame(Y, S, D, X)
       data$pi <- pi.hat.sreg(S, D)[, d]
-      data$pi.0 <- pi.hat.sreg(S, D, inverse = T)[, 1]
+      data$pi.0 <- pi.hat.sreg(S, D, inverse = TRUE)[, 1]
       n <- length(Y)
+
       data$A <- ifelse(D == d, 1, ifelse(D == 0, 0, -999999))
       data$I <- as.numeric(data$A != -999999)
+
+      # Indicator for observations assigned to treatment arms
+      # other than d and control
+      data$I.other <- as.numeric(data$A == -999999)
 
       mu.hat.d <- lin.adj.sreg(d, data$S, data[4:(4 + ncol(X) - 1)], model)
       mu.hat.0 <- lin.adj.sreg(0, data$S, data[4:(4 + ncol(X) - 1)], model)
@@ -27,43 +32,61 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Xi.tilde.0 <- (mu.hat.d - mu.hat.0) -
         (data$Y - mu.hat.0) / data$pi.0
 
-      data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data$Y - tau[d] * data$A * data$I)
+      # Contribution for observations in treatment arms other than d and control
+      Xi.tilde.other <- mu.hat.d - mu.hat.0
+
+      data <- data.frame(
+        data,
+        Xi.tilde.1,
+        Xi.tilde.0,
+        Xi.tilde.other,
+        Y.tau.D = data$Y - tau[d] * data$A * data$I
+      )
 
       count.Xi.1 <- data %>%
         group_by(.data$S, .data$A) %>%
-        summarise(Xi.mean.1 = mean(.data$Xi.tilde.1)) %>%
-        filter(.data$A != -999999)
-      count.Xi.0 <- data %>%
-        group_by(.data$S, .data$A) %>%
-        summarise(Xi.mean.0 = mean(.data$Xi.tilde.0)) %>%
-        filter(.data$A != -999999)
-      count.Y <- data %>%
-        group_by(.data$S, .data$A) %>%
-        summarise(Y.tau = mean(.data$Y.tau.D)) %>%
+        summarise(Xi.mean.1 = mean(.data$Xi.tilde.1), .groups = "drop") %>%
         filter(.data$A != -999999)
 
-      j <- left_join(count.Xi.1, count.Xi.0, by = join_by("S" == "S", "A" == "A")) %>% left_join(count.Y, by = join_by("S" == "S", "A" == "A"))
+      count.Xi.0 <- data %>%
+        group_by(.data$S, .data$A) %>%
+        summarise(Xi.mean.0 = mean(.data$Xi.tilde.0), .groups = "drop") %>%
+        filter(.data$A != -999999)
+
+      count.Y <- data %>%
+        group_by(.data$S, .data$A) %>%
+        summarise(Y.tau = mean(.data$Y.tau.D), .groups = "drop") %>%
+        filter(.data$A != -999999)
+
+      j <- left_join(
+        count.Xi.1,
+        count.Xi.0,
+        by = join_by("S" == "S", "A" == "A")
+      ) %>%
+        left_join(count.Y, by = join_by("S" == "S", "A" == "A"))
 
       Xi.tilde.1.all <- j %>%
         select(c("S", "A", "Xi.mean.1")) %>%
         spread(key = "A", value = "Xi.mean.1")
+
       Xi.tilde.0.all <- j %>%
         select(c("S", "A", "Xi.mean.0")) %>%
         spread(key = "A", value = "Xi.mean.0")
+
       Y.tau.D.all <- j %>%
         select(c("S", "A", "Y.tau")) %>%
         spread(key = "A", value = "Y.tau")
-      # print(data.frame(Xi.tilde.1.all))
+
       Xi.tilde.1.mean <- as.matrix(select(data.frame(Xi.tilde.1.all), -1))
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
       Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all), -1))
-      # print(data.frame(Y.tau.D.all))
 
-      # Xi.1.mean <- Xi.tilde.1.mean[S, 2]
       S_reset <- as.integer(factor(S, levels = Xi.tilde.1.all$S))
       Xi.1.mean <- Xi.tilde.1.mean[S_reset, 2]
+
       S_reset <- as.integer(factor(S, levels = Xi.tilde.0.all$S))
       Xi.0.mean <- Xi.tilde.0.mean[S_reset, 1]
+
       S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
       Y.tau.D.1.mean <- Y.tau.D.mean[S_reset, 2]
       Y.tau.D.0.mean <- Y.tau.D.mean[S_reset, 1]
@@ -72,15 +95,38 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
-      sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2)
+      # Center the other-treatment add-back term within each stratum
+      # using all observations in the stratum
+      Xi.hat.other <- data$Xi.tilde.other -
+        ave(data$Xi.tilde.other, data$S, FUN = mean)
+
+      # This term contributes only for observations assigned to other treatment arms
+      Xi.hat.other[data$I.other == 0] <- 0
+
+      # Within-stratum variance includes treatment, control, and other-arm terms
+      within.var <- mean(
+        as.numeric(data$A == 1) * Xi.hat.1^2 +
+          as.numeric(data$A == 0) * Xi.hat.0^2 +
+          data$I.other * Xi.hat.other^2
+      )
+
+      sigma.hat.sq <- within.var + mean(Xi.hat.2^2)
 
       if (HC1 == TRUE) {
         S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
-        var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(S_reset) + max(D) * max(S_reset)))) +
-          mean(Xi.hat.2^2)
+        adj_factor_denom <- n - (max(S_reset) + max(D) * max(S_reset))
+
+        if (adj_factor_denom <= 0 || is.nan(adj_factor_denom)) {
+          warning("HC1 adjustment unstable or undefined due to degenerate strata-treatment structure; reverting to unadjusted estimator.")
+          var.vec[d] <- sigma.hat.sq
+        } else {
+          adj_factor <- n / adj_factor_denom
+          var.vec[d] <- within.var * adj_factor + mean(Xi.hat.2^2)
+        }
       } else {
         var.vec[d] <- sigma.hat.sq
       }
+
       n.vec[d] <- n
     }
   } else {
@@ -88,10 +134,13 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
     {
       data <- data.frame(Y, S, D)
       data$pi <- pi.hat.sreg(S, D)[, d]
-      data$pi.0 <- pi.hat.sreg(S, D, inverse = T)[, 1]
+      data$pi.0 <- pi.hat.sreg(S, D, inverse = TRUE)[, 1]
       n <- length(Y)
+
       data$A <- ifelse(D == d, 1, ifelse(D == 0, 0, -999999))
       data$I <- as.numeric(data$A != -999999)
+
+      data$I.other <- as.numeric(data$A == -999999)
 
       mu.hat.d <- 0
       mu.hat.0 <- 0
@@ -102,29 +151,46 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Xi.tilde.0 <- (mu.hat.d - mu.hat.0) -
         (data$Y - mu.hat.0) / data$pi.0
 
-      data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.tau.D = data$Y - tau[d] * data$A * data$I)
+      Xi.tilde.other <- mu.hat.d - mu.hat.0
+
+      data <- data.frame(
+        data,
+        Xi.tilde.1,
+        Xi.tilde.0,
+        Xi.tilde.other,
+        Y.tau.D = data$Y - tau[d] * data$A * data$I
+      )
 
       count.Xi.1 <- data %>%
         group_by(.data$S, .data$A) %>%
-        summarise(Xi.mean.1 = mean(.data$Xi.tilde.1)) %>%
-        filter(.data$A != -999999)
-      count.Xi.0 <- data %>%
-        group_by(.data$S, .data$A) %>%
-        summarise(Xi.mean.0 = mean(.data$Xi.tilde.0)) %>%
-        filter(.data$A != -999999)
-      count.Y <- data %>%
-        group_by(.data$S, .data$A) %>%
-        summarise(Y.tau = mean(.data$Y.tau.D)) %>%
+        summarise(Xi.mean.1 = mean(.data$Xi.tilde.1), .groups = "drop") %>%
         filter(.data$A != -999999)
 
-      j <- left_join(count.Xi.1, count.Xi.0, by = join_by("S" == "S", "A" == "A")) %>% left_join(count.Y, by = join_by("S" == "S", "A" == "A"))
+      count.Xi.0 <- data %>%
+        group_by(.data$S, .data$A) %>%
+        summarise(Xi.mean.0 = mean(.data$Xi.tilde.0), .groups = "drop") %>%
+        filter(.data$A != -999999)
+
+      count.Y <- data %>%
+        group_by(.data$S, .data$A) %>%
+        summarise(Y.tau = mean(.data$Y.tau.D), .groups = "drop") %>%
+        filter(.data$A != -999999)
+
+      j <- left_join(
+        count.Xi.1,
+        count.Xi.0,
+        by = join_by("S" == "S", "A" == "A")
+      ) %>%
+        left_join(count.Y, by = join_by("S" == "S", "A" == "A"))
 
       Xi.tilde.1.all <- j %>%
         select(c("S", "A", "Xi.mean.1")) %>%
         spread(key = "A", value = "Xi.mean.1")
+
       Xi.tilde.0.all <- j %>%
         select(c("S", "A", "Xi.mean.0")) %>%
         spread(key = "A", value = "Xi.mean.0")
+
       Y.tau.D.all <- j %>%
         select(c("S", "A", "Y.tau")) %>%
         spread(key = "A", value = "Y.tau")
@@ -133,11 +199,12 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Xi.tilde.0.mean <- as.matrix(select(data.frame(Xi.tilde.0.all), -1))
       Y.tau.D.mean <- as.matrix(select(data.frame(Y.tau.D.all), -1))
 
-      # Use S_reset as in the X block
       S_reset <- as.integer(factor(S, levels = Xi.tilde.1.all$S))
       Xi.1.mean <- Xi.tilde.1.mean[S_reset, 2]
+
       S_reset <- as.integer(factor(S, levels = Xi.tilde.0.all$S))
       Xi.0.mean <- Xi.tilde.0.mean[S_reset, 1]
+
       S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
       Y.tau.D.1.mean <- Y.tau.D.mean[S_reset, 2]
       Y.tau.D.0.mean <- Y.tau.D.mean[S_reset, 1]
@@ -146,21 +213,34 @@ as.var.sreg <- function(Y, S, D, X = NULL, model = NULL, tau, HC1)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean
       Xi.hat.2 <- Y.tau.D.1.mean - Y.tau.D.0.mean
 
-      sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2)
+      Xi.hat.other <- data$Xi.tilde.other -
+        ave(data$Xi.tilde.other, data$S, FUN = mean)
+
+      Xi.hat.other[data$I.other == 0] <- 0
+
+      within.var <- mean(
+        as.numeric(data$A == 1) * Xi.hat.1^2 +
+          as.numeric(data$A == 0) * Xi.hat.0^2 +
+          data$I.other * Xi.hat.other^2
+      )
+
+      sigma.hat.sq <- within.var + mean(Xi.hat.2^2)
+
       if (HC1 == TRUE) {
         S_reset <- as.integer(factor(S, levels = Y.tau.D.all$S))
         adj_factor_denom <- n - (max(S_reset) + max(D) * max(S_reset))
+
         if (adj_factor_denom <= 0 || is.nan(adj_factor_denom)) {
           warning("HC1 adjustment unstable or undefined due to degenerate strata-treatment structure; reverting to unadjusted estimator.")
           var.vec[d] <- sigma.hat.sq
         } else {
           adj_factor <- n / adj_factor_denom
-          var.vec[d] <- mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2)) * adj_factor +
-            mean(Xi.hat.2^2)
+          var.vec[d] <- within.var * adj_factor + mean(Xi.hat.2^2)
         }
       } else {
         var.vec[d] <- sigma.hat.sq
       }
+
       n.vec[d] <- n
     }
   }
