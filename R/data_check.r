@@ -215,7 +215,14 @@ Note: This error may also occur if G.id is NULL despite the data being cluster-r
   out <- dplyr::left_join(data_renamed, strata_sizes, by = S_name)
 
   if (warn && any(strata_sizes$stratum_type == "big")) {
-    warning("Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.", call. = FALSE)
+    warning(
+      paste0(
+        "Mixed design detected: at least 25% of all strata have the same size (k = ",
+        modal_size,
+        "), which is used as the small-stratum size. Weighted estimators will be used."
+      ),
+      call. = FALSE
+    )
   }
 
   return(out)

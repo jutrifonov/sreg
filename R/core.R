@@ -377,7 +377,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
 #' Generate a Pseudo-Random Sample under the Stratified Block Randomization Design
 #'
 #' The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).
-#' @param n a total number of observations in a sample
+#' @param n the total number of units when \code{cluster = FALSE}, or the total number of clusters when \code{cluster = TRUE}
 #' @param Nmax a maximum size of generated clusters (maximum number of observations in a cluster)
 #' @param n.strata an integer specifying the number of strata
 #' @param tau.vec a numeric \eqn{1 \times |\mathcal A|} \code{vector} of treatment effects, where \eqn{|\mathcal A|} represents the number of treatments
@@ -386,8 +386,10 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
 #' @param is.cov a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not
 #' @param small.strata a \code{TRUE/FALSE} argument indicating whether the data-generating process should use a small-strata design (e.g., matched pairs, n-tuples)
 #' @param k an integer specifying the number of units per stratum when \code{small.strata = TRUE}
-#' @param treat.sizes a numeric \eqn{1 \times (|\mathcal A| + 1)} \code{vector} specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units (\eqn{D = 0}), the second to the first treatment (\eqn{D = 1}), and so on
-#' @return An object that is a `data.frame` with \eqn{n} observations containing the generated values of the following variables:
+#' @param treat.sizes a numeric \eqn{1 \times (|\mathcal A| + 1)} \code{vector} specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units (\eqn{D = 0}), the second to the first treatment (\eqn{D = 1}), and so on. When omitted for a mixed design, the \code{k} positions are allocated across arms as evenly as possible
+#' @param mixed.strata a \code{TRUE/FALSE} argument indicating whether to generate both small and large strata. When \code{TRUE}, \code{small.strata} is ignored, \code{n.small} units (or clusters when \code{cluster = TRUE}) are generated in strata of size \code{k}, and the remaining units or clusters are generated in \code{n.strata} large strata
+#' @param n.small the number of units (or clusters when \code{cluster = TRUE}) assigned to the small-strata component when \code{mixed.strata = TRUE}. It must be divisible by \code{k}; if \code{NULL}, the largest multiple of \code{k} not exceeding half of \code{n} is used
+#' @return A \code{data.frame} containing the generated values of the following variables (with \code{n} rows for individual-level designs and one row per observation within the \code{n} generated clusters for cluster-level designs):
 #' \itemize{
 #' \item \code{Y}: a numeric \eqn{n \times 1} \code{vector} of observed outcomes
 #' \item \code{S}: a numeric \eqn{n \times 1} \code{vector} of strata indicators
@@ -399,9 +401,88 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
 #'
 #' @examples
 #' data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
+#'
+#' mixed_data <- sreg.rgen(
+#'   n = 120, tau.vec = c(0.2, 0.8), cluster = FALSE,
+#'   mixed.strata = TRUE, n.small = 90, k = 3,
+#'   treat.sizes = c(1, 1, 1), n.strata = 4
+#' )
 sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
                       tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
-                      cluster = TRUE, is.cov = TRUE, small.strata = FALSE, k = 3, treat.sizes = c(1, 1, 1)) {
+                      cluster = TRUE, is.cov = TRUE, small.strata = FALSE, k = 3,
+                      treat.sizes = c(1, 1, 1), mixed.strata = FALSE,
+                      n.small = NULL) {
+  if (!is.logical(mixed.strata) || length(mixed.strata) != 1L || is.na(mixed.strata)) {
+    stop("mixed.strata must be either TRUE or FALSE.")
+  }
+
+  if (mixed.strata) {
+    if (missing(treat.sizes)) {
+      n.arms <- length(tau.vec) + 1L
+      treat.sizes <- rep(k %/% n.arms, n.arms)
+      remainder <- k %% n.arms
+      if (remainder > 0L) {
+        treat.sizes[seq_len(remainder)] <- treat.sizes[seq_len(remainder)] + 1L
+      }
+    }
+    if (!is.numeric(n) || length(n) != 1L || is.na(n) || n <= 0 || n != as.integer(n)) {
+      stop("n must be a positive integer.")
+    }
+    if (!is.numeric(k) || length(k) != 1L || is.na(k) || k <= 0 || k != as.integer(k)) {
+      stop("k must be a positive integer.")
+    }
+    if (is.null(n.small)) {
+      n.small <- floor((n / 2) / k) * k
+    }
+    if (!is.numeric(n.small) || length(n.small) != 1L || is.na(n.small) ||
+        n.small <= 0 || n.small >= n || n.small != as.integer(n.small)) {
+      stop("n.small must be a positive integer smaller than n.")
+    }
+    if (n.small %% k != 0) {
+      stop("n.small must be divisible by k.")
+    }
+    valid.treat.sizes <- is.numeric(treat.sizes) &&
+      length(treat.sizes) == length(tau.vec) + 1L &&
+      !anyNA(treat.sizes) && all(treat.sizes >= 0) &&
+      all(treat.sizes == as.integer(treat.sizes)) && sum(treat.sizes) == k
+    if (!valid.treat.sizes) {
+      stop("treat.sizes must be a nonnegative integer vector of length length(tau.vec) + 1 that sums to k.")
+    }
+    n.large <- n - n.small
+    if (!is.numeric(n.strata) || length(n.strata) != 1L || is.na(n.strata) ||
+        n.strata <= 0 || n.strata != as.integer(n.strata)) {
+      stop("n.strata must be a positive integer.")
+    }
+    if (n.large <= n.strata * k) {
+      stop("The large-strata component must contain more than k units (or clusters) per stratum on average; decrease n.small or n.strata.")
+    }
+    if ((n.small / k) <= n.strata) {
+      stop("The mixed design must contain more small strata than large strata; increase n.small or decrease n.strata.")
+    }
+
+    small.data <- sreg.rgen(
+      n = n.small, Nmax = Nmax, n.strata = n.strata,
+      tau.vec = tau.vec, gamma.vec = gamma.vec, cluster = cluster,
+      is.cov = is.cov, small.strata = TRUE, k = k,
+      treat.sizes = treat.sizes
+    )
+    large.data <- sreg.rgen(
+      n = n.large, Nmax = Nmax, n.strata = n.strata,
+      tau.vec = tau.vec, gamma.vec = gamma.vec, cluster = cluster,
+      is.cov = is.cov, small.strata = FALSE, k = k,
+      treat.sizes = treat.sizes
+    )
+
+    large.data$S <- large.data$S + max(small.data$S)
+    if (cluster) {
+      large.data$G.id <- large.data$G.id + max(small.data$G.id)
+    }
+
+    common.names <- intersect(names(small.data), names(large.data))
+    return(rbind(small.data[, common.names, drop = FALSE],
+                 large.data[, common.names, drop = FALSE]))
+  }
+
   n.treat <- length(tau.vec)
   if (cluster == TRUE) {
     if (small.strata == TRUE) {
