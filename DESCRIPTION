@@ -11,7 +11,6 @@ Description: Estimate average treatment effects (ATEs) in stratified randomized 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.2
 Imports:
     dplyr,
     tidyr,
@@ -32,3 +31,4 @@ Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://github.com/jutrifonov/sreg
 BugReports: https://github.com/jutrifonov/sreg/issues
+Config/roxygen2/version: 8.0.0

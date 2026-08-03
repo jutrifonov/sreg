@@ -14,11 +14,13 @@ sreg.rgen(
   is.cov = TRUE,
   small.strata = FALSE,
   k = 3,
-  treat.sizes = c(1, 1, 1)
+  treat.sizes = c(1, 1, 1),
+  mixed.strata = FALSE,
+  n.small = NULL
 )
 }
 \arguments{
-\item{n}{a total number of observations in a sample}
+\item{n}{the total number of units when \code{cluster = FALSE}, or the total number of clusters when \code{cluster = TRUE}}
 
 \item{Nmax}{a maximum size of generated clusters (maximum number of observations in a cluster)}
 
@@ -36,10 +38,14 @@ sreg.rgen(
 
 \item{k}{an integer specifying the number of units per stratum when \code{small.strata = TRUE}}
 
-\item{treat.sizes}{a numeric \eqn{1 \times (|\mathcal A| + 1)} \code{vector} specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units (\eqn{D = 0}), the second to the first treatment (\eqn{D = 1}), and so on}
+\item{treat.sizes}{a numeric \eqn{1 \times (|\mathcal A| + 1)} \code{vector} specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units (\eqn{D = 0}), the second to the first treatment (\eqn{D = 1}), and so on. When omitted for a mixed design, the \code{k} positions are allocated across arms as evenly as possible}
+
+\item{mixed.strata}{a \code{TRUE/FALSE} argument indicating whether to generate both small and large strata. When \code{TRUE}, \code{small.strata} is ignored, \code{n.small} units (or clusters when \code{cluster = TRUE}) are generated in strata of size \code{k}, and the remaining units or clusters are generated in \code{n.strata} large strata}
+
+\item{n.small}{the number of units (or clusters when \code{cluster = TRUE}) assigned to the small-strata component when \code{mixed.strata = TRUE}. It must be divisible by \code{k}; if \code{NULL}, the largest multiple of \code{k} not exceeding half of \code{n} is used}
 }
 \value{
-An object that is a `data.frame` with \eqn{n} observations containing the generated values of the following variables:
+A \code{data.frame} containing the generated values of the following variables (with \code{n} rows for individual-level designs and one row per observation within the \code{n} generated clusters for cluster-level designs):
 \itemize{
 \item \code{Y}: a numeric \eqn{n \times 1} \code{vector} of observed outcomes
 \item \code{S}: a numeric \eqn{n \times 1} \code{vector} of strata indicators
@@ -53,4 +59,10 @@ The function generates the observed outcomes, treatment assignments, strata indi
 }
 \examples{
 data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
+
+mixed_data <- sreg.rgen(
+  n = 120, tau.vec = c(0.2, 0.8), cluster = FALSE,
+  mixed.strata = TRUE, n.small = 90, k = 3,
+  treat.sizes = c(1, 1, 1), n.strata = 4
+)
 }

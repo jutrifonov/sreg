@@ -1207,21 +1207,21 @@ test_that("data: mixed design, option: small strata", {
     invisible(capture.output({
       result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = data.frame(sim_data$x_1, sim_data$x_2), HC1 = FALSE, small.strata = TRUE)
     })),
-    "Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.",
+    "Mixed design detected: at least 25% of all strata have the same size (k = 3), which is used as the small-stratum size. Weighted estimators will be used.",
     fixed = TRUE
   )
   expect_warning(
     invisible(capture.output({
       result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = FALSE, small.strata = TRUE)
     })),
-    "Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.",
+    "Mixed design detected: at least 25% of all strata have the same size (k = 3), which is used as the small-stratum size. Weighted estimators will be used.",
     fixed = TRUE
   )
   expect_warning(
     invisible(capture.output({
       result <- sreg(Y = sim_data$Y, S = sim_data$S, D = sim_data$D, X = NULL, HC1 = TRUE, small.strata = TRUE)
     })),
-    "Mixed design detected: at least 25% of strata are small. Weighted estimators will be used.",
+    "Mixed design detected: at least 25% of all strata have the same size (k = 3), which is used as the small-stratum size. Weighted estimators will be used.",
     fixed = TRUE
   )
   expect_error(
@@ -1838,7 +1838,7 @@ test_that("data: mixed design, option: small strata", {
     invisible(capture.output({
       result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
     })),
-    "Mixed design detected: at least 25% of strata are small.",
+    "Mixed design detected: at least 25% of all strata have the same size (k = 3), which is used as the small-stratum size.",
     fixed = TRUE
   )
 
@@ -1846,7 +1846,7 @@ test_that("data: mixed design, option: small strata", {
     invisible(capture.output({
       result <- sreg(Y = data_sim$Y, S = data_sim$S, D = data_sim$D, X = NULL, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
     })),
-    "Mixed design detected: at least 25% of strata are small.",
+    "Mixed design detected: at least 25% of all strata have the same size (k = 3), which is used as the small-stratum size.",
     fixed = TRUE
   )
 
@@ -1866,7 +1866,7 @@ test_that("data: mixed design, option: small strata", {
         }
       )
 
-      expect_true(any(grepl("Mixed design detected: at least 25% of strata are small.", warnings, fixed = TRUE)))
+      expect_true(any(grepl("Mixed design detected: at least 25% of all strata have the same size (k = 3), which is used as the small-stratum size.", warnings, fixed = TRUE)))
       expect_true(any(grepl("Cluster sizes have not been provided (Ng = NULL).", warnings, fixed = TRUE)))
     },
     regexp = NA
@@ -2356,7 +2356,7 @@ test_that("print.sreg outputs expected information for small strata", {
     invisible(capture.output({
       result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = data.frame("age" = data_sim$x_1), small.strata = TRUE, HC1 = TRUE)
     })),
-    "Mixed design detected: at least 25% of strata are small.",
+    "Mixed design detected: at least 25% of all strata have the same size (k = 3), which is used as the small-stratum size.",
     fixed = TRUE
   )
   invisible(
@@ -2384,7 +2384,7 @@ test_that("print.sreg outputs expected information for small strata", {
     invisible(capture.output({
       result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = data.frame("age" = data_sim$x_1, "Ng" = data_sim$Ng), small.strata = TRUE, HC1 = TRUE)
     })),
-    "Mixed design detected: at least 25% of strata are small.",
+    "Mixed design detected: at least 25% of all strata have the same size (k = 3), which is used as the small-stratum size.",
     fixed = TRUE
   )
   invisible(
@@ -2411,7 +2411,7 @@ test_that("print.sreg outputs expected information for small strata", {
     invisible(capture.output({
       result <- sreg(Y, S, D, G.id = G.id, Ng = Ng, X = data.frame("Ng" = data_sim$Ng), small.strata = TRUE, HC1 = TRUE)
     })),
-    "Mixed design detected: at least 25% of strata are small.",
+    "Mixed design detected: at least 25% of all strata have the same size (k = 3), which is used as the small-stratum size.",
     fixed = TRUE
   )
   invisible(
