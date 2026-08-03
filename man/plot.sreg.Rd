@@ -65,3 +65,22 @@ Invisibly returns the ggplot object. Called for its side effects (i.e., generati
 \description{
 Visualize estimated ATEs and confidence intervals for objects of class \code{sreg}.
 }
+\examples{
+set.seed(22)
+data <- sreg.rgen(
+  n = 120, tau.vec = c(0.2, 0.5), n.strata = 4,
+  cluster = FALSE
+)
+fit <- sreg(Y = data$Y, S = data$S, D = data$D)
+
+plot(fit)
+
+p <- plot(
+  fit,
+  treatment_labels = c("Program A", "Program B"),
+  title = "Estimated treatment effects",
+  x_axis_title = "ATE relative to control",
+  bar_fill = c("#3B82F6", "#14B8A6")
+)
+class(p)
+}

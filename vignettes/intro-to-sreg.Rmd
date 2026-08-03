@@ -1,57 +1,436 @@
 ---
-title: "Intro to sreg"
-output: rmarkdown::html_vignette
+title: "A Practical Guide to sreg"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
 vignette: >
-  %\VignetteIndexEntry{Intro to sreg}
+  %\VignetteIndexEntry{A Practical Guide to sreg}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-Here, we provide the empirical application example using the data from (Chong et al., 2016),
-who studied the effect of iron deficiency anemia on school-age children's educational attainment and cognitive ability in Peru. 
-The example replicates the empirical illustration from (Bugni et al., 2019). For replication purposes, the data is included in the package and can be accessed by running `data("AEJapp")`. 
-```{r}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4.5
+)
+```
+
+## Overview
+
+The **sreg** package estimates average treatment effects (ATEs) in stratified randomized experiments under covariate-adaptive randomization. It supports:
+
+- individual- and cluster-level treatment assignment;
+- one or multiple active treatment arms relative to control;
+- experiments without strata and experiments with large strata;
+- uniform small-strata designs, including matched pairs and general k-tuples;
+- mixed designs containing both small and large strata;
+- estimation with or without linear covariate adjustment;
+- heteroskedasticity-robust standard errors with an optional HC1 correction;
+- simulation through `sreg.rgen()`; and
+- formatted summaries and confidence-interval plots.
+
+The package's main functions are `sreg()`, which performs estimation and inference, and `sreg.rgen()`, which generates simulated experiments. The `print()` and `plot()` methods summarize fitted `sreg` objects.
+
+```{r load-package}
 library(sreg)
-library(haven)
-library(dplyr)
 ```
-We can upload the `AEJapp` dataset to the R session via `data()`:
-```{r}
-data(AEJapp)
-data <- AEJapp
+
+## The basic workflow
+
+A typical analysis has four steps:
+
+1. Identify the randomization unit and the stratification design.
+2. Prepare the outcome, treatment, stratum, cluster, and covariate variables.
+3. Call `sreg()` with arguments matching the experimental design.
+4. Inspect, print, or plot the returned object.
+
+The core call is:
+
+```r
+sreg(
+  Y, S = NULL, D,
+  G.id = NULL, Ng = NULL,
+  X = NULL, HC1 = TRUE,
+  small.strata = FALSE, k = NULL
+)
 ```
-It is pretty straightforward to prepare the data to fit the package syntax using `dplyr`:
-```{r}
-Y <- data$gradesq34
-D <- data$treatment
-S <- data$class_level
-data.clean <- data.frame(Y, D, S)
-data.clean <- data.clean %>%
-  mutate(D = ifelse(D == 3, 0, D))
-Y <- data.clean$Y
-D <- data.clean$D
-S <- data.clean$S
-head(data.clean)
+
+### Required data and indexing conventions
+
+Argument | Meaning | Important convention
+---|---|---
+`Y` | Observed outcome | One value per observation
+`D` | Treatment assignment | Control must be coded `0`; active treatments are `1, 2, ...`
+`S` | Stratum indicator | Strata must be coded `1, 2, ...`; use `NULL` for no stratification
+`G.id` | Cluster identifier | Use `NULL` for individual-level assignment
+`Ng` | Cluster size | Required for the intended cluster-size weighting; if omitted, observed cluster counts are used
+`X` | Adjustment covariates | Use `NULL` for the unadjusted estimator
+
+All supplied variables must refer to the same observations and contain valid numeric or data-frame inputs as described in `help("sreg")`.
+
+### Choosing the design options
+
+Design | Recommended call
+---|---
+No stratification | `S = NULL, small.strata = FALSE`
+Large strata | `S = S, small.strata = FALSE`
+Uniform matched pairs or k-tuples | `small.strata = TRUE`; `k` is optional
+Mixed pairs or triplets plus large strata | `small.strata = TRUE`; automatic detection is available
+Mixed general k-tuples plus large strata | `small.strata = TRUE, k = <known size>`
+Cluster-randomized version of any design | Also supply `G.id` and, preferably, `Ng`
+
+`small.strata` selects an inference procedure; it should reflect the actual randomization design rather than being chosen after comparing numerical results.
+
+## Large-strata designs
+
+When `small.strata = FALSE`, `sreg()` applies the large-strata estimator. This is the default. The following example generates an individual-level experiment with four strata, a control arm, and two active treatments.
+
+```{r generate-large}
+set.seed(101)
+
+large_data <- sreg.rgen(
+  n = 600,
+  tau.vec = c(0.3, 0.7),
+  n.strata = 4,
+  cluster = FALSE
+)
+
+head(large_data)
+table(large_data$S, large_data$D)
 ```
-We can take a look at the frequency table of `D` and `S`:
-```{r}
-table(D = data.clean$D, S = data.clean$S)
+
+### Unadjusted and adjusted estimation
+
+Omit `X` for the unadjusted estimator:
+
+```{r fit-large-unadjusted}
+fit_large_unadjusted <- sreg(
+  Y = large_data$Y,
+  S = large_data$S,
+  D = large_data$D
+)
+
+fit_large_unadjusted$tau.hat
+fit_large_unadjusted$se.rob
 ```
-Now, it is straightforward to replicate the results from (Bugni et al, 2019) using `sreg()`:
-```{r}
-result <- sreg::sreg(Y = Y, S = S, D = D)
-print(result)
+
+Supply a matrix or data frame to request linear covariate adjustment:
+
+```{r fit-large-adjusted}
+X_large <- large_data[c("x_1", "x_2")]
+
+fit_large <- sreg(
+  Y = large_data$Y,
+  S = large_data$S,
+  D = large_data$D,
+  X = X_large
+)
+
+print(fit_large)
 ```
-Besides that, sreg allows adding linear adjustments (covariates) to the estimation procedure:
-```{r}
-pills <- data$pills_taken
-age <- data$age_months
-data.clean <- data.frame(Y, D, S, pills, age)
-data.clean <- data.clean %>%
-  mutate(D = ifelse(D == 3, 0, D))
-Y <- data.clean$Y
-D <- data.clean$D
-S <- data.clean$S
-X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
-result <- sreg::sreg(Y, S, D, G.id = NULL, X = X)
-print(result)
+
+The printed table reports the ATE relative to control for each active treatment, its asymptotic standard error, test statistic, p-value, and 95% confidence interval. It also records the inferred design, treatment-assignment level, HC1 setting, and covariates used for adjustment.
+
+## Plotting treatment effects
+
+Calling `plot()` on an `sreg` object displays the estimated ATEs and their confidence intervals. Treatment labels, colors, axes, grid lines, and other graphical elements can be customized.
+
+```{r plot-large, fig.alt="Estimated treatment effects and 95 percent confidence intervals"}
+plot(
+  fit_large,
+  treatment_labels = c("Program A", "Program B"),
+  title = "Estimated treatment effects",
+  x_axis_title = "ATE relative to control",
+  bar_fill = c("#3B82F6", "#14B8A6"),
+  point_fill = "white",
+  zero_line = TRUE
+)
 ```
+
+The method invisibly returns a `ggplot` object, so it can be stored or further modified:
+
+```{r store-plot, eval=FALSE}
+p <- plot(fit_large, treatment_labels = c("Program A", "Program B"))
+p + ggplot2::theme_minimal()
+```
+
+See `help("plot.sreg")` for all graphical arguments.
+
+## Uniform small-strata designs
+
+Set `small.strata = TRUE` for designs such as matched pairs and k-tuples. In a uniform small-strata design, all strata have the same size. The package observes that common size directly, so the `k` argument is optional.
+
+```{r generate-small}
+set.seed(102)
+
+small_data <- sreg.rgen(
+  n = 300,
+  tau.vec = c(0.3, 0.7),
+  cluster = FALSE,
+  small.strata = TRUE,
+  k = 3,
+  treat.sizes = c(1, 1, 1)
+)
+
+table(table(small_data$S))
+```
+
+Here, every stratum is a triplet containing one observation in each of the three treatment arms. Estimation does not require `k = 3` because the common size is unambiguous:
+
+```{r fit-small}
+fit_small <- sreg(
+  Y = small_data$Y,
+  S = small_data$S,
+  D = small_data$D,
+  X = small_data[c("x_1", "x_2")],
+  small.strata = TRUE
+)
+
+print(fit_small)
+```
+
+Supplying `k = 3` gives the same design choice and adds a validation check. If the supplied value does not match the observed common size, `sreg()` returns an error.
+
+```{r validate-small-k, eval=FALSE}
+sreg(
+  Y = small_data$Y,
+  S = small_data$S,
+  D = small_data$D,
+  small.strata = TRUE,
+  k = 3
+)
+```
+
+The small-strata estimators are intended for experiments with a fixed treatment allocation within each stratum. The researcher remains responsible for verifying that the supplied assignments follow the randomization protocol; `sreg()` does not independently verify every feature of that protocol.
+
+## Mixed small- and large-strata designs
+
+A mixed design contains a recurring small-stratum component and a large-strata component. `sreg.rgen()` can generate both components in one call. For individual-level designs, `n.small` is the number of observations assigned to small strata. For cluster-randomized designs, it is the number of clusters assigned to small strata.
+
+The next example uses 80 observations in 20 four-tuples and distributes the remaining 40 observations across four large strata.
+
+```{r generate-mixed}
+set.seed(103)
+
+mixed_data <- sreg.rgen(
+  n = 120,
+  tau.vec = 0.5,
+  cluster = FALSE,
+  mixed.strata = TRUE,
+  n.small = 80,
+  k = 4,
+  treat.sizes = c(2, 2),
+  n.strata = 4
+)
+
+sort(table(mixed_data$S))
+```
+
+Because this mixed design uses 4-tuples, pass the known value `k = 4` to `sreg()`:
+
+```{r fit-mixed}
+fit_mixed <- suppressWarnings(sreg(
+  Y = mixed_data$Y,
+  S = mixed_data$S,
+  D = mixed_data$D,
+  small.strata = TRUE,
+  k = 4
+))
+
+print(fit_mixed)
+```
+
+Normally, this call emits an informative warning stating that a mixed design was detected, identifying `k = 4` as the small-stratum size, and noting that weighted estimators are used. The warning is suppressed above only to keep the vignette output compact.
+
+### How `k` and the 25% rule work
+
+For a mixed design:
+
+1. If `k` is supplied, strata of exactly that size are candidates for the small component.
+2. At least 25% of all strata must have that exact size.
+3. Those strata are analyzed with the small-strata estimator; all remaining strata use the large-strata estimator.
+4. The component estimates are combined using weights based on their numbers of observations.
+
+The 25% threshold concerns the proportion of strata, not the proportion of observations. If fewer than 25% have the supplied size, `sreg()` returns an error rather than selecting another value.
+
+When `k = NULL`, the package retains automatic detection for conventional matched pairs and triplets. Supply `k` for mixed 4-tuples or larger k-tuples. Providing the design value explicitly is also useful whenever several stratum sizes recur and automatic classification would be ambiguous.
+
+If `small.strata = FALSE` is used on data with a substantial small-strata component, `sreg()` proceeds with the large-strata estimator for the complete sample and warns that the resulting standard errors may be inappropriate for the design.
+
+## Cluster-randomized experiments
+
+Supply `G.id` when treatment is assigned at the cluster level. Each cluster must belong to one stratum and receive one treatment. `Ng` contains cluster sizes. When `Ng = NULL`, the package uses the number of observed records in each cluster and reports a warning.
+
+```{r generate-cluster}
+set.seed(104)
+
+cluster_data <- sreg.rgen(
+  n = 60,
+  tau.vec = 0.5,
+  n.strata = 4,
+  cluster = TRUE
+)
+
+c(
+  observations = nrow(cluster_data),
+  clusters = length(unique(cluster_data$G.id)),
+  strata = length(unique(cluster_data$S))
+)
+```
+
+```{r fit-cluster}
+fit_cluster <- sreg(
+  Y = cluster_data$Y,
+  S = cluster_data$S,
+  D = cluster_data$D,
+  G.id = cluster_data$G.id,
+  Ng = cluster_data$Ng,
+  X = cluster_data[c("x_1", "x_2")]
+)
+
+print(fit_cluster)
+```
+
+For cluster-randomized small or mixed designs, stratum size `k` means the number of distinct clusters per small stratum—not the number of individual observations. Individual-level covariates cannot be used directly for cluster-level adjustment; if supplied covariates vary within cluster, `sreg()` aggregates them to cluster averages and reports this behavior.
+
+## Experiments without stratification
+
+Set `S = NULL` when treatment was randomized without strata. This option uses the large-strata pathway with the entire experiment treated as one population:
+
+```{r no-stratification, eval=FALSE}
+fit_unstratified <- sreg(
+  Y = Y,
+  S = NULL,
+  D = D,
+  X = X,
+  small.strata = FALSE
+)
+```
+
+Do not combine `S = NULL` with `small.strata = TRUE`, because small-strata inference requires stratum identifiers.
+
+## The `sreg` result object
+
+In addition to its printed summary, an `sreg` object exposes components useful for reporting and further analysis:
+
+Component | Contents
+---|---
+`tau.hat` | ATE estimates relative to control
+`se.rob` | Estimated asymptotic standard errors
+`t.stat` | Test statistics
+`p.value` | Two-sided p-values
+`CI.left`, `CI.right` | Bounds of the 95% confidence intervals
+`beta.hat` | Covariate-adjustment coefficients when applicable
+`lin.adj` | Covariates used for adjustment
+`data` | Analysis data retained by the fit
+`small.strata` | Whether small-strata inference was requested
+`HC1` | Whether the HC1 correction was requested
+
+Mixed-design results also contain `res.small`, `res.big`, and `mixed.design`, which provide the component fits and identify the combined estimator.
+
+```{r inspect-result}
+names(fit_mixed)
+fit_mixed$tau.hat
+fit_mixed$se.rob
+fit_mixed$mixed.design
+```
+
+## HC1 correction
+
+`HC1 = TRUE`, the default, applies the package's small-sample correction to the variance estimator. Set `HC1 = FALSE` to obtain the corresponding uncorrected variance estimate:
+
+```{r hc1, eval=FALSE}
+fit_hc1 <- sreg(Y = Y, S = S, D = D, HC1 = TRUE)
+fit_no_hc1 <- sreg(Y = Y, S = S, D = D, HC1 = FALSE)
+```
+
+The choice should follow the inferential specification for the analysis rather than whichever option yields a preferred standard error.
+
+## Working with the built-in empirical data
+
+The package includes `AEJapp`, replication data associated with Chong et al. (2016). The following prepares the outcome, treatment, and stratum variables used in the package example. The original treatment value `3` is recoded as control (`0`) to match the required treatment indexing.
+
+```{r empirical-data}
+data("AEJapp", package = "sreg")
+
+Y_emp <- as.numeric(unclass(AEJapp$gradesq34))
+D_raw <- as.numeric(unclass(AEJapp$treatment))
+D_emp <- ifelse(D_raw == 3, 0, D_raw)
+S_emp <- as.numeric(unclass(AEJapp$class_level))
+
+fit_empirical <- sreg(
+  Y = Y_emp,
+  S = S_emp,
+  D = D_emp
+)
+
+fit_empirical$tau.hat
+fit_empirical$se.rob
+```
+
+See `help("AEJapp")` for the data description and source.
+
+## Simulation with `sreg.rgen()`
+
+`sreg.rgen()` is intended for examples, Monte Carlo exercises, and learning how different designs are represented. Important arguments include:
+
+Argument | Role
+---|---
+`n` | Number of units when `cluster = FALSE`; number of clusters when `cluster = TRUE`
+`tau.vec` | Treatment effects for active arms relative to control
+`n.strata` | Number of large strata
+`cluster` | Selects individual- or cluster-level assignment
+`is.cov` | Includes or omits generated covariates
+`small.strata` | Generates a uniform small-strata design
+`mixed.strata` | Generates both small and large components
+`k` | Number of units or clusters per small stratum
+`treat.sizes` | Fixed counts assigned to control and each active treatment within a small stratum
+`n.small` | Units or clusters assigned to the small component of a mixed design
+
+For small strata, `length(treat.sizes)` must equal `length(tau.vec) + 1`, and its entries must sum to `k`. In a mixed design, `n.small` must be divisible by `k`. Use `set.seed()` when reproducibility matters.
+
+## Common warnings and errors
+
+- **Mixed design detected:** the function has split the data into small and large components and is using the combined estimator.
+- **Too few strata qualify as small:** fewer than 25% of strata have the selected small size, or `k` was omitted for a mixed design with k-tuples larger than three.
+- **`small.strata = FALSE` warning:** the observed design appears to contain a substantial small-strata component, but the large-strata estimator was requested.
+- **Missing `S`:** small-strata inference cannot be performed without stratum indicators.
+- **Missing `Ng`:** observed cluster counts are substituted for cluster sizes.
+- **Covariates do not vary sufficiently:** adjusted estimation may be infeasible, in which case the package may proceed without adjustment or ask the user to reduce the covariate set.
+- **Too many covariates:** some stratum-treatment cells may not support the requested regressions; reduce `X` or fit the unadjusted estimator.
+
+Warnings about the design should not be suppressed in substantive analyses until the researcher has confirmed that the arguments match the actual randomization procedure.
+
+## Recommended analysis checklist
+
+Before reporting results:
+
+1. Confirm that `D` uses `0` for control and consecutive positive integers for active treatments.
+2. Confirm that `S` uses consecutive positive integers beginning at `1`.
+3. Verify whether assignment occurred at the individual or cluster level.
+4. For cluster assignment, verify `G.id`, `Ng`, and that treatment is constant within cluster.
+5. Decide whether the design has large, uniform small, or mixed strata.
+6. For mixed general k-tuples, supply the design value through `k`.
+7. Verify the fixed treatment allocation used in small strata.
+8. Check whether covariates vary sufficiently for adjustment and whether they are measured at the appropriate level.
+9. Review all warnings before interpreting standard errors.
+10. Record the package version and use a reproducible seed for simulations.
+
+## References and further help
+
+Use the following commands for function-level documentation:
+
+```r
+help("sreg")
+help("sreg.rgen")
+help("plot.sreg")
+help("AEJapp")
+citation("sreg")
+```
+
+The package help files and supplementary materials contain the formal references and estimator expressions underlying the supported designs.

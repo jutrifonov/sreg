@@ -120,7 +120,8 @@ check.within.strata.variation <- function(data) {
   all(all_variation)
 }
 
-design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TRUE, small.strata = TRUE) {
+design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TRUE,
+                              small.strata = TRUE, k = NULL) {
   S_name <- if (is.character(substitute(S))) substitute(S) else deparse(substitute(S))
   G_name <- if (!missing(G.id)) {
     if (is.character(substitute(G.id))) substitute(G.id) else deparse(substitute(G.id))
@@ -157,7 +158,7 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
 
     # Check for small strata that meet the 25% rule
     small_modal_sizes <- size_counts %>%
-      filter(size <= 3, freq >= 0.25) %>%
+      filter(if (is.null(k)) size <= 3 else size == k, freq >= 0.25) %>%
       arrange(desc(count))
 
     if (warn && nrow(small_modal_sizes) > 0) {
@@ -178,6 +179,14 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
   n_strata <- nrow(strata_sizes)
 
   if (length(unique_sizes) == 1) {
+    if (!is.null(k) && unique_sizes[1] != k) {
+      stop(
+        paste0(
+          "The supplied small-stratum size k = ", k,
+          " does not match the observed stratum size of ", unique_sizes[1], "."
+        )
+      )
+    }
     strata_sizes$stratum_type <- "small"
     if (!keep.size) strata_sizes$size <- NULL
     # Remove duplicate names in the join data (for safety)
@@ -193,7 +202,7 @@ design.classifier <- function(data, S, G.id = NULL, keep.size = FALSE, warn = TR
 
   # Filter for small strata that meet the 25% rule
   small_modal_sizes <- size_counts %>%
-    filter(size <= 3, freq >= 0.25) %>%
+    filter(if (is.null(k)) size <= 3 else size == k, freq >= 0.25) %>%
     arrange(desc(count))
 
   if (nrow(small_modal_sizes) == 0) {

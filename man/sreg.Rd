@@ -12,7 +12,8 @@ sreg(
   Ng = NULL,
   X = NULL,
   HC1 = TRUE,
-  small.strata = FALSE
+  small.strata = FALSE,
+  k = NULL
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ sreg(
 \item{HC1}{a \code{TRUE/FALSE} logical argument indicating whether the small sample correction should be applied to the variance estimator}
 
 \item{small.strata}{a \code{TRUE/FALSE} logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used.}
+
+\item{k}{an optional positive integer specifying the number of units per small stratum, or the number of clusters per small stratum in cluster-randomized designs. When \code{NULL}, mixed designs retain the automatic detection rule for matched pairs and triplets. Supply \code{k} for general k-tuple mixed designs.}
 }
 \value{
 An object of class \code{sreg} that is a list containing the following elements:
@@ -51,56 +54,54 @@ An object of class \code{sreg} that is a list containing the following elements:
 Estimate the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
 }
 \examples{
-library("sreg")
-library("dplyr")
-library("haven")
-### Example 1. Simulated Data.
-data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = FALSE)
-Y <- data$Y
-S <- data$S
-D <- data$D
-X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
-print(result)
-### Example 2. Empirical Data.
-?AEJapp
-data("AEJapp")
-data <- AEJapp
-head(data)
-Y <- data$gradesq34
-D <- data$treatment
-S <- data$class_level
-data.clean <- data.frame(Y, D, S)
-data.clean <- data.clean \%>\%
-  mutate(D = ifelse(D == 3, 0, D))
-Y <- data.clean$Y
-D <- data.clean$D
-S <- data.clean$S
-table(D = data.clean$D, S = data.clean$S)
-result <- sreg(Y, S, D)
-print(result)
-pills <- data$pills_taken
-age <- data$age_months
-data.clean <- data.frame(Y, D, S, pills, age)
-data.clean <- data.clean \%>\%
-  mutate(D = ifelse(D == 3, 0, D))
-Y <- data.clean$Y
-D <- data.clean$D
-S <- data.clean$S
-X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
-result <- sreg(Y, S, D, G.id = NULL, X = X)
-print(result)
-### Example 3. Matched Pairs (small strata).
-data <- sreg.rgen(
-  n = 1000, tau.vec = c(1.2), cluster = FALSE,
-  small.strata = TRUE, k = 2, treat.sizes = c(1, 1)
+### Large strata with covariate adjustment
+set.seed(1)
+large_data <- sreg.rgen(
+  n = 120, tau.vec = c(0.2, 0.5), n.strata = 4,
+  cluster = FALSE
 )
-Y <- data$Y
-S <- data$S
-D <- data$D
-X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-result <- sreg(Y = Y, S = S, D = D, X = X, small.strata = TRUE)
-print(result)
+fit_large <- sreg(
+  Y = large_data$Y, S = large_data$S, D = large_data$D,
+  X = large_data[c("x_1", "x_2")]
+)
+fit_large$tau.hat
+fit_large$se.rob
+
+### Uniform triplets: k is observed and may be omitted from sreg()
+set.seed(2)
+small_data <- sreg.rgen(
+  n = 60, tau.vec = c(0.2, 0.5), cluster = FALSE,
+  small.strata = TRUE, k = 3, treat.sizes = c(1, 1, 1)
+)
+fit_small <- sreg(
+  Y = small_data$Y, S = small_data$S, D = small_data$D,
+  small.strata = TRUE
+)
+fit_small$tau.hat
+
+### Mixed design with general k-tuples: specify k in sreg()
+set.seed(3)
+mixed_data <- sreg.rgen(
+  n = 60, tau.vec = 0.5, cluster = FALSE,
+  mixed.strata = TRUE, n.small = 40, k = 4,
+  treat.sizes = c(2, 2), n.strata = 2
+)
+fit_mixed <- suppressWarnings(sreg(
+  Y = mixed_data$Y, S = mixed_data$S, D = mixed_data$D,
+  small.strata = TRUE, k = 4
+))
+fit_mixed$mixed.design
+
+### Cluster-randomized design
+set.seed(4)
+cluster_data <- sreg.rgen(
+  n = 24, tau.vec = 0.5, n.strata = 3, cluster = TRUE
+)
+fit_cluster <- sreg(
+  Y = cluster_data$Y, S = cluster_data$S, D = cluster_data$D,
+  G.id = cluster_data$G.id, Ng = cluster_data$Ng
+)
+fit_cluster$tau.hat
 }
 \references{
 Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. \emph{Journal of the American Statistical Association}, 113(524), 1784–1796, \doi{10.1080/01621459.2017.1375934}.

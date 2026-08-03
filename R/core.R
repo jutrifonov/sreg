@@ -20,6 +20,7 @@
 #' @param X a \code{matrix/data.frame/tibble} with columns representing the covariate values for every observation; if \code{NULL} then the estimator without linear adjustments is applied. (Note: \code{sreg} cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages)
 #' @param HC1 a \code{TRUE/FALSE} logical argument indicating whether the small sample correction should be applied to the variance estimator
 #' @param small.strata a \code{TRUE/FALSE} logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used.
+#' @param k an optional positive integer specifying the number of units per small stratum, or the number of clusters per small stratum in cluster-randomized designs. When \code{NULL}, mixed designs retain the automatic detection rule for matched pairs and triplets. Supply \code{k} for general k-tuple mixed designs.
 #' @return An object of class \code{sreg} that is a list containing the following elements:
 #' \itemize{
 #' \item \code{tau.hat}: a \eqn{1 \times |\mathcal A|} \code{vector} of ATE estimates, where \eqn{|\mathcal A|} represents the number of treatments
@@ -71,61 +72,65 @@
 #' @export
 #'
 #' @examples
-#' library("sreg")
-#' library("dplyr")
-#' library("haven")
-#' ### Example 1. Simulated Data.
-#' data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = FALSE)
-#' Y <- data$Y
-#' S <- data$S
-#' D <- data$D
-#' X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-#' result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
-#' print(result)
-#' ### Example 2. Empirical Data.
-#' ?AEJapp
-#' data("AEJapp")
-#' data <- AEJapp
-#' head(data)
-#' Y <- data$gradesq34
-#' D <- data$treatment
-#' S <- data$class_level
-#' data.clean <- data.frame(Y, D, S)
-#' data.clean <- data.clean %>%
-#'   mutate(D = ifelse(D == 3, 0, D))
-#' Y <- data.clean$Y
-#' D <- data.clean$D
-#' S <- data.clean$S
-#' table(D = data.clean$D, S = data.clean$S)
-#' result <- sreg(Y, S, D)
-#' print(result)
-#' pills <- data$pills_taken
-#' age <- data$age_months
-#' data.clean <- data.frame(Y, D, S, pills, age)
-#' data.clean <- data.clean %>%
-#'   mutate(D = ifelse(D == 3, 0, D))
-#' Y <- data.clean$Y
-#' D <- data.clean$D
-#' S <- data.clean$S
-#' X <- data.frame("pills" = data.clean$pills, "age" = data.clean$age)
-#' result <- sreg(Y, S, D, G.id = NULL, X = X)
-#' print(result)
-#' ### Example 3. Matched Pairs (small strata).
-#' data <- sreg.rgen(
-#'   n = 1000, tau.vec = c(1.2), cluster = FALSE,
-#'   small.strata = TRUE, k = 2, treat.sizes = c(1, 1)
+#' ### Large strata with covariate adjustment
+#' set.seed(1)
+#' large_data <- sreg.rgen(
+#'   n = 120, tau.vec = c(0.2, 0.5), n.strata = 4,
+#'   cluster = FALSE
 #' )
-#' Y <- data$Y
-#' S <- data$S
-#' D <- data$D
-#' X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-#' result <- sreg(Y = Y, S = S, D = D, X = X, small.strata = TRUE)
-#' print(result)
-sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = FALSE) {
+#' fit_large <- sreg(
+#'   Y = large_data$Y, S = large_data$S, D = large_data$D,
+#'   X = large_data[c("x_1", "x_2")]
+#' )
+#' fit_large$tau.hat
+#' fit_large$se.rob
+#'
+#' ### Uniform triplets: k is observed and may be omitted from sreg()
+#' set.seed(2)
+#' small_data <- sreg.rgen(
+#'   n = 60, tau.vec = c(0.2, 0.5), cluster = FALSE,
+#'   small.strata = TRUE, k = 3, treat.sizes = c(1, 1, 1)
+#' )
+#' fit_small <- sreg(
+#'   Y = small_data$Y, S = small_data$S, D = small_data$D,
+#'   small.strata = TRUE
+#' )
+#' fit_small$tau.hat
+#'
+#' ### Mixed design with general k-tuples: specify k in sreg()
+#' set.seed(3)
+#' mixed_data <- sreg.rgen(
+#'   n = 60, tau.vec = 0.5, cluster = FALSE,
+#'   mixed.strata = TRUE, n.small = 40, k = 4,
+#'   treat.sizes = c(2, 2), n.strata = 2
+#' )
+#' fit_mixed <- suppressWarnings(sreg(
+#'   Y = mixed_data$Y, S = mixed_data$S, D = mixed_data$D,
+#'   small.strata = TRUE, k = 4
+#' ))
+#' fit_mixed$mixed.design
+#'
+#' ### Cluster-randomized design
+#' set.seed(4)
+#' cluster_data <- sreg.rgen(
+#'   n = 24, tau.vec = 0.5, n.strata = 3, cluster = TRUE
+#' )
+#' fit_cluster <- sreg(
+#'   Y = cluster_data$Y, S = cluster_data$S, D = cluster_data$D,
+#'   G.id = cluster_data$G.id, Ng = cluster_data$Ng
+#' )
+#' fit_cluster$tau.hat
+sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE,
+                 small.strata = FALSE, k = NULL) {
   check.data.types(Y, S, D, G.id, Ng, X)
   check.integers(S, D, G.id, Ng)
   boolean.check(HC1)
   boolean.check.ss(small.strata)
+  if (!is.null(k) &&
+      (!is.numeric(k) || length(k) != 1L || is.na(k) || k <= 0 ||
+       k != as.integer(k))) {
+    stop("k must be NULL or a positive integer.")
+  }
 
   if (is.null(Y)) {
     stop("Error: Observed outcomes have not been provided (Y = NULL). Please provide the vector of observed outcomes.")
@@ -150,7 +155,15 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
     }
     unique_sizes <- unique(strata_sizes)
     mixed_design <- length(unique_sizes) > 1
-
+    if (!mixed_design && !is.null(k) && as.numeric(unique_sizes[1]) != k) {
+      stop(
+        paste0(
+          "The supplied small-stratum size k = ", k,
+          " does not match the observed stratum size of ",
+          as.numeric(unique_sizes[1]), "."
+        )
+      )
+    }
   }
   if (small.strata == FALSE && !is.null(S)) {
     if (!is.null(G.id)) {
@@ -242,7 +255,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         if (!is.null(X)) {
           data_tst <- cbind(data_tst, X)
         }
-        data_tst <- design.classifier(data_tst, S = S, small.strata = small.strata)
+        data_tst <- design.classifier(data_tst, S = S, small.strata = small.strata, k = k)
       }
       result <- res.sreg(Y, S, D, X, HC1)
       if (!is.null(result$lin.adj)) {
@@ -258,7 +271,7 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
         stop("Error: Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification.")
       }
       if (mixed_design) {
-        result <- res.sreg.mixed(Y, S, D, X, HC1, small.strata)
+        result <- res.sreg.mixed(Y, S, D, X, HC1, small.strata, k)
       } else {
         result <- res.sreg.ss(Y, S, D, X, HC1)
       }
@@ -333,14 +346,14 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
           data_tst <- cbind(data_tst, X)
         }
 
-        data_tst <- design.classifier(data_tst, S = S, G.id = G.id, small.strata = small.strata)
+        data_tst <- design.classifier(data_tst, S = S, G.id = G.id, small.strata = small.strata, k = k)
       }
     } else {
       if (is.null(S)) {
         stop("Error: Strata indicator variable has not been provided (S = NULL), but small.strata = TRUE. This estimator requires stratification. Either supply a valid strata indicator S, or set small.strata = FALSE to proceed without stratification.")
       }
       if (mixed_design) {
-        result <- res.creg.mixed(Y, S, D, G.id, Ng, X, HC1, small.strata)
+        result <- res.creg.mixed(Y, S, D, G.id, Ng, X, HC1, small.strata, k)
       } else {
         result <- res.creg.ss(Y, S, D, G.id, Ng, X, HC1)
       }
@@ -400,13 +413,34 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, s
 #' @export
 #'
 #' @examples
-#' data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
-#'
-#' mixed_data <- sreg.rgen(
-#'   n = 120, tau.vec = c(0.2, 0.8), cluster = FALSE,
-#'   mixed.strata = TRUE, n.small = 90, k = 3,
-#'   treat.sizes = c(1, 1, 1), n.strata = 4
+#' ### Large-strata individual-level design
+#' set.seed(11)
+#' large_data <- sreg.rgen(
+#'   n = 80, tau.vec = 0.5, n.strata = 4, cluster = FALSE
 #' )
+#'
+#' ### Uniform matched pairs
+#' set.seed(12)
+#' pair_data <- sreg.rgen(
+#'   n = 40, tau.vec = 0.5, cluster = FALSE,
+#'   small.strata = TRUE, k = 2, treat.sizes = c(1, 1)
+#' )
+#'
+#' ### Mixed design with 4-tuples and large strata
+#' set.seed(13)
+#' mixed_data <- sreg.rgen(
+#'   n = 60, tau.vec = 0.5, cluster = FALSE,
+#'   mixed.strata = TRUE, n.small = 40, k = 4,
+#'   treat.sizes = c(2, 2), n.strata = 2
+#' )
+#' sort(table(mixed_data$S))
+#'
+#' ### For cluster assignment, n counts clusters rather than observations
+#' set.seed(14)
+#' cluster_data <- sreg.rgen(
+#'   n = 20, tau.vec = 0.5, n.strata = 2, cluster = TRUE
+#' )
+#' length(unique(cluster_data$G.id))
 sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
                       tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
                       cluster = TRUE, is.cov = TRUE, small.strata = FALSE, k = 3,

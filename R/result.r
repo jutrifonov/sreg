@@ -294,14 +294,15 @@ res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE)
   return(res.list)
 }
 
-res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE) {
+res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE,
+                           k = NULL) {
   # Step 1: Prepare data and classify strata
   data <- data.frame(Y = Y, S = S, D = D)
   if (!is.null(X)) {
     data <- cbind(data, X)
   }
 
-  data_all <- design.classifier(data, S = S, small.strata = small.strata)
+  data_all <- design.classifier(data, S = S, small.strata = small.strata, k = k)
 
   # Step 2: Split data
   data_small <- dplyr::filter(data_all, stratum_type == "small")
@@ -365,7 +366,8 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE) {
   return(res.list)
 }
 
-res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = TRUE) {
+res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE,
+                           small.strata = TRUE, k = NULL) {
   # Handle Ng = NULL gracefully
   if (is.null(Ng)) {
     Ng <- rep(NA_real_, length(Y)) # placeholder to allow data.frame construction
@@ -376,7 +378,9 @@ res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE, small
     data <- cbind(data, X)
   }
 
-  data_all <- design.classifier(data, S = S, G.id = G.id, small.strata = small.strata)
+  data_all <- design.classifier(
+    data, S = S, G.id = G.id, small.strata = small.strata, k = k
+  )
   # Update Ng if it was originally NULL (all NA)
   if (all(is.na(data_all$Ng))) {
     data_all <- data_all %>%

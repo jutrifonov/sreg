@@ -5,13 +5,16 @@ utils::globalVariables(c("CI.lower", "CI.upper", "SE", "label", "tau"))
 #' @param x An object of class \code{sreg}.
 #' @param ... Additional arguments passed to other methods.
 #' @examples
-#' data <- sreg.rgen(n = 200, tau.vec = c(0.1), n.strata = 4, cluster = TRUE)
-#' Y <- data$Y
-#' S <- data$S
-#' D <- data$D
-#' X <- data.frame("x_1" = data$x_1, "x_2" = data$x_2)
-#' result <- sreg(Y, S, D, G.id = NULL, Ng = NULL, X)
-#' print(result)
+#' set.seed(21)
+#' data <- sreg.rgen(
+#'   n = 80, tau.vec = c(0.2, 0.5), n.strata = 4,
+#'   cluster = FALSE
+#' )
+#' fit <- sreg(
+#'   Y = data$Y, S = data$S, D = data$D,
+#'   X = data[c("x_1", "x_2")]
+#' )
+#' print(fit)
 #' @method print sreg
 #' @export
 #' @return No return value, called for side effects.
@@ -155,6 +158,24 @@ print.sreg <- function(x, ...) {
 #' @method plot sreg
 #' @export
 #' @return Invisibly returns the ggplot object. Called for its side effects (i.e., generating a plot).
+#' @examples
+#' set.seed(22)
+#' data <- sreg.rgen(
+#'   n = 120, tau.vec = c(0.2, 0.5), n.strata = 4,
+#'   cluster = FALSE
+#' )
+#' fit <- sreg(Y = data$Y, S = data$S, D = data$D)
+#'
+#' plot(fit)
+#'
+#' p <- plot(
+#'   fit,
+#'   treatment_labels = c("Program A", "Program B"),
+#'   title = "Estimated treatment effects",
+#'   x_axis_title = "ATE relative to control",
+#'   bar_fill = c("#3B82F6", "#14B8A6")
+#' )
+#' class(p)
 plot.sreg <- function(x,
                       treatment_labels = NULL,
                       title = "Estimated ATEs with Confidence Intervals",

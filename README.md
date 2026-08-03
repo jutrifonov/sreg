@@ -132,7 +132,8 @@ Estimates the ATE(s) and the corresponding standard error(s) for a (collection o
 
 ### Syntax
 ``` r
-sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, small.strata = FALSE)
+sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL,
+     HC1 = TRUE, small.strata = FALSE, k = NULL)
 ```
 ### Arguments
 - **`Y` -** a numeric `vector/matrix/data.frame/tibble` of the observed outcomes;
@@ -142,9 +143,10 @@ sreg(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE, small.strata 
 - **`Ng` -** a numeric `vector/matrix/data.frame/tibble` of cluster sizes; if `NULL` then `Ng` is assumed to be equal to the number of available observations in every cluster;
 - **`X` -** a `matrix/data.frame/tibble` with columns representing the covariate values for every observation; if `NULL` then the estimator without linear adjustments is applied [^*];
 - **`HC1` -** a `TRUE/FALSE` logical argument indicating whether the small sample correction should be applied to the variance estimator;
-- **`small.strata` -** a `TRUE/FALSE` logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used [^**].
+- **`small.strata` -** a `TRUE/FALSE` logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used [^**];
+- **`k` -** an optional positive integer giving the number of units per small stratum, or the number of clusters per small stratum in a cluster-randomized design. For a uniform small-strata design, `k` can be omitted because the common size is observed directly. For a mixed design, supply `k` to identify the small component when it consists of 4-tuples or larger.
 [^*]: *Note: sreg cannot use individual-level covariates for covariate adjustment in cluster-randomized experiments. Any individual-level covariates will be aggregated to their cluster-level averages.*
-[^**]: *Note: if the data exhibit a mixed design (i.e., most observations are in small strata, but some are in big strata) and `small.strata = TRUE`, the function implements the mixed estimator—a weighted average of small and big strata estimators. See the supplementary PDF for details and expressions.*
+[^**]: *For a mixed design, at least 25% of the strata must share the size selected for the small component. The threshold concerns strata, not observations. With `k = NULL`, the package automatically detects conventional pairs and triplets; use an explicit `k` for general k-tuple mixed designs. The mixed estimator combines the small- and large-strata estimators using observation-count weights. See the supplementary PDF for details and expressions.*
 
 ### Data Structure
 Here we provide an example of a data frame that can be used with `sreg`.
@@ -337,6 +339,36 @@ Coefficients:
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
+
+Because all strata in this example have the same size, `sreg()` observes `k = 3` directly. Supplying `k = 3` to `sreg()` is optional and acts as a validation check.
+
+### Example (mixed small and large strata)
+
+Set `mixed.strata = TRUE` in `sreg.rgen()` to generate both components in one call. Here, 80 observations form 20 small strata of size four, and the remaining 40 observations form four large strata:
+
+```r
+mixed_data <- sreg.rgen(
+  n = 120,
+  tau.vec = 0.5,
+  cluster = FALSE,
+  mixed.strata = TRUE,
+  n.small = 80,
+  k = 4,
+  treat.sizes = c(2, 2),
+  n.strata = 4
+)
+
+mixed_fit <- sreg(
+  Y = mixed_data$Y,
+  S = mixed_data$S,
+  D = mixed_data$D,
+  small.strata = TRUE,
+  k = 4
+)
+```
+
+For mixed designs, `k` identifies the intended small-stratum size. If it is omitted, `sreg()` retains automatic detection for matched pairs and triplets. An explicit value is therefore required for mixed 4-tuples and larger k-tuples. At least 25% of all strata must have the specified size; otherwise, the function returns an error rather than guessing another `k`.
+
 ## S3 Method: `plot.sreg()`
 Visualizes the estimated average treatment effects (ATEs) and their confidence intervals from an object returned by `sreg()`. This function defines an `S3` method for the generic `plot()` function for objects of class `sreg`. 
 
@@ -413,13 +445,14 @@ Generates the observed outcomes, treatment assignments, strata indicators, clust
 
 ### Syntax
 ``` r
-sreg.rgen(n, Nmax = 50, n.strata,
+sreg.rgen(n, Nmax = 50, n.strata = 10,
          tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
          cluster = TRUE, is.cov = TRUE, small.strata = FALSE,
-         k = 3, treat.sizes = c(1, 1, 1))
+         k = 3, treat.sizes = c(1, 1, 1),
+         mixed.strata = FALSE, n.small = NULL)
 ```
 ### Arguments
-- **`n` -** a total number of observations in a sample;
+- **`n` -** the total number of units when `cluster = FALSE`, or the total number of clusters when `cluster = TRUE`;
 - **`Nmax` -** a maximum size of generated clusters (maximum number of observations in a cluster);
 - **`n.strata` -** an `integer` specifying the number of strata;
 - **`tau.vec` -** a numeric $1 \times |\mathcal A|$ `vector` of treatment effects, where $|\mathcal A|$ represents the number of treatments;
@@ -429,6 +462,8 @@ sreg.rgen(n, Nmax = 50, n.strata,
 - **`small.strata` -** a `TRUE/FALSE` argument indicating whether the data-generating process should use a small-strata design (e.g., matched pairs, $n$-tuples);
 - **`k` -** an integer specifying the number of units per stratum when `small.strata = TRUE`;
 - **`treat.sizes` -** a numeric $1 \times (|\mathcal A| + 1)$ `vector` specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units ($D = 0$), the second to the first treatment ($D = 1$), and so on.
+- **`mixed.strata` -** a `TRUE/FALSE` argument indicating whether to generate both small and large strata;
+- **`n.small` -** the number of units, or clusters for cluster-randomized designs, assigned to the small-strata component. It must be divisible by `k`. If `NULL`, the largest multiple of `k` not exceeding half of `n` is used.
 
 ### Return Value
 - **`Y` -** a numeric $n \times 1$ `vector` of the observed outcomes;
@@ -462,6 +497,13 @@ data <- sreg.rgen(n = 100, tau.vec = c(1.2), cluster = FALSE, small.strata = TRU
 4 3.0991776 2 1 7.437064 1.098371
 5 1.7406104 3 1 5.008703 1.750753
 6 0.6986514 3 0 3.418835 1.375744
+
+# mixed design with 4-tuples and large strata
+mixed_data <- sreg.rgen(
+  n = 120, tau.vec = 0.5, cluster = FALSE,
+  mixed.strata = TRUE, n.small = 80, k = 4,
+  treat.sizes = c(2, 2), n.strata = 4
+)
 ```
 
 ## References
@@ -480,5 +522,4 @@ Bai, Y., Romano, J. P., and Shaikh, A. M. (2022). Inference in Experiments With 
 Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. doi:10.48550/arXiv.2301.09016.
 
 Cytrynbaum, M. (2024). Covariate Adjustment in Stratified Experiments. *Quantitative Economics*, 15(4), 971–998, doi:10.3982/QE2475
-
 

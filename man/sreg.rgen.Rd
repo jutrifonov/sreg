@@ -58,11 +58,32 @@ A \code{data.frame} containing the generated values of the following variables (
 The function generates the observed outcomes, treatment assignments, strata indicators, cluster indicators, cluster sizes, and covariates for estimating the treatment effect within the context of a stratified block randomization design under the covariate-adaptive randomization (CAR).
 }
 \examples{
-data <- sreg.rgen(n = 1000, tau.vec = c(0), n.strata = 4, cluster = TRUE)
-
-mixed_data <- sreg.rgen(
-  n = 120, tau.vec = c(0.2, 0.8), cluster = FALSE,
-  mixed.strata = TRUE, n.small = 90, k = 3,
-  treat.sizes = c(1, 1, 1), n.strata = 4
+### Large-strata individual-level design
+set.seed(11)
+large_data <- sreg.rgen(
+  n = 80, tau.vec = 0.5, n.strata = 4, cluster = FALSE
 )
+
+### Uniform matched pairs
+set.seed(12)
+pair_data <- sreg.rgen(
+  n = 40, tau.vec = 0.5, cluster = FALSE,
+  small.strata = TRUE, k = 2, treat.sizes = c(1, 1)
+)
+
+### Mixed design with 4-tuples and large strata
+set.seed(13)
+mixed_data <- sreg.rgen(
+  n = 60, tau.vec = 0.5, cluster = FALSE,
+  mixed.strata = TRUE, n.small = 40, k = 4,
+  treat.sizes = c(2, 2), n.strata = 2
+)
+sort(table(mixed_data$S))
+
+### For cluster assignment, n counts clusters rather than observations
+set.seed(14)
+cluster_data <- sreg.rgen(
+  n = 20, tau.vec = 0.5, n.strata = 2, cluster = TRUE
+)
+length(unique(cluster_data$G.id))
 }
