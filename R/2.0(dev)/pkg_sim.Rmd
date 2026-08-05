@@ -1330,7 +1330,7 @@ result <- sreg(Y = NULL, D = NULL, S = data$S, X = data.frame(data$x_1), HC1 = T
 print(result)
 
 
-# Test 2. data: big strata, option: big strata
+# Test 2. data: large strata, option: large strata
 tau.vec = c(0.2, 0.9, 1.5)
 n.treat = length(tau.vec)
 n_1 = 1000
@@ -1348,7 +1348,7 @@ result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), HC1
 print(result)
 
 
-# Test 3. data: small strata, option: big strata
+# Test 3. data: small strata, option: large strata
 set.seed(123)
 tau.vec = c(0.2, 0.8)
 n.treat = length(tau.vec)
@@ -1388,7 +1388,7 @@ colMeans(se_big)
 colMeans(se_small)
 
 
-# Test 4. data: big strata, option: small strata 
+# Test 4. data: large strata, option: small strata
 tau.vec = c(0.2, 0.9)
 n.treat = length(tau.vec)
 n_1 = 1000
@@ -1436,7 +1436,7 @@ N_total <- N_s  + N_b
 sqrt(result$se.rob[1] ^ 2 + ((N_s * N_b) / N_total^3 * (result$res.small$tau.hat[1] - result$res.big$tau.hat[1])^2))
 
 tau_hat <- result$tau.hat[1]
-# Test 6. data: mixed design, option: big strata (just a big strata estimator, but should through a warning that estimators are invalid!)
+# Test 6. data: mixed design, option: large strata (just a large-strata estimator, but should throw a warning that estimators are invalid!)
 proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), HC1 = FALSE, small.strata = FALSE)
 proba
 proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, HC1 = FALSE, small.strata = FALSE)
@@ -1466,7 +1466,7 @@ result <- sreg(Y = data$Y, D = data$D, S = data$S, X = NULL, G.id = data$G.id, N
 print(result)
 
 
-# Test 2. data: big strata, option: big strata
+# Test 2. data: large strata, option: large strata
 tau.vec = c(0.2, 0.9, 1.5)
 n.treat = length(tau.vec)
 n_1 = 1000
@@ -1486,7 +1486,7 @@ print(result)
 result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), G.id = data$G.id, Ng = NULL, HC1 = FALSE, small.strata = FALSE)
 print(result)
 
-# Test 3. data: small strata, option: big strata
+# Test 3. data: small strata, option: large strata
 tau.vec = c(0.2, 0.8)
 n.treat = length(tau.vec)
 n_1 = 900
@@ -1509,7 +1509,7 @@ result <- sreg(Y = data$Y, D = data$D, S = data$S, X = data.frame(data$x_1), G.i
 print(result)
 
 
-# Test 4. data: big strata, option: small strata (should not work and throw a warning)
+# Test 4. data: large strata, option: small strata (should not work and throw a warning)
 tau.vec = c(0.2, 0.9)
 n.treat = length(tau.vec)
 n_1 = 1000
@@ -1520,7 +1520,7 @@ sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, small.s
 sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = data$Ng, X = data.frame(data$x_1), small.strata = TRUE, HC1 = TRUE)
 sreg(Y = data$Y, D = data$D, S = data$S, G.id = data$G.id, Ng = NULL, X = data.frame(data$x_1), small.strata = TRUE, HC1 = TRUE)
 
-# Test 4. data: big strata, option: small strata 
+# Test 4. data: large strata, option: small strata
 tau.vec = c(0.2, 0.9)
 n.treat = length(tau.vec)
 n_1 = 1000
@@ -1579,7 +1579,7 @@ proba
 proba <-sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), G.id = NULL, Ng = NULL, HC1 = FALSE, small.strata = TRUE)
 proba
 
-# Test 6. data: mixed design, option: big strata (just a big strata estimator!)
+# Test 6. data: mixed design, option: large strata (just a large-strata estimator!)
 proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = data.frame(data$x_1, data$x_2), G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = FALSE)
 proba
 proba <- sreg(Y = data$Y, S = data$S, D = data$D,  X = NULL, G.id = data$G.id, Ng = data$Ng, HC1 = TRUE, small.strata = FALSE)
@@ -1605,7 +1605,5 @@ plot(result, treatment_labels = c('FIRST', 'SECOND'), bar_fill = c('blue', 'oran
       zero_line = FALSE, grid = TRUE, bg_color = 'grey')
 plot(result, grid = FALSE, bg_color = 'white', y_axis_title = 'Effects', x_axis_title = 'effect size')
 ```
-
-
 
 

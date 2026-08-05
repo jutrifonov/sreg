@@ -26,9 +26,9 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 ## Supplementary files 
 - PDF version of the manual: [Download PDF](https://github.com/jutrifonov/sreg/blob/main/.github/README.pdf) 
 
--  *Big Strata:* Sketch of the derivation of the ATE variance estimator under cluster-level treatment assignment: [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/cluster.pdf)
+-  *Large Strata:* Sketch of the derivation of the ATE variance estimator under cluster-level treatment assignment: [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/cluster.pdf)
 
--  *Big Strata:* Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/multiple.pdf)
+-  *Large Strata:* Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/multiple.pdf)
 
 - *Small Strata:* Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/expressions%20(1).pdf)
 
@@ -172,7 +172,7 @@ Observations: 2710
 Clusters: 100 
 Number of treatments: 2 
 Number of strata: 10 
-Setup: big strata 
+Setup: large strata
 Standard errors: adjusted (HC1) 
 Treatment assignment: cluster level 
 Covariates used in linear adjustments: 
@@ -263,7 +263,7 @@ Saturated Model Estimation Results under CAR
 Observations: 215 
 Number of treatments: 2 
 Number of strata: 5 
-Setup: big strata 
+Setup: large strata
 Standard errors: adjusted (HC1) 
 Treatment assignment: individual level 
 Covariates used in linear adjustments: 
@@ -292,7 +292,7 @@ Saturated Model Estimation Results under CAR with linear adjustments
 Observations: 215 
 Number of treatments: 2 
 Number of strata: 5 
-Setup: big strata 
+Setup: large strata
 Standard errors: adjusted (HC1) 
 Treatment assignment: individual level 
 Covariates used in linear adjustments: pills, age
@@ -522,4 +522,3 @@ Bai, Y., Romano, J. P., and Shaikh, A. M. (2022). Inference in Experiments With 
 Liu, J. (2024). Inference for Two-stage Experiments under Covariate-Adaptive Randomization. doi:10.48550/arXiv.2301.09016.
 
 Cytrynbaum, M. (2024). Covariate Adjustment in Stratified Experiments. *Quantitative Economics*, 15(4), 971–998, doi:10.3982/QE2475
-

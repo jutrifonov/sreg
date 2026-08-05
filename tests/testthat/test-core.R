@@ -928,7 +928,7 @@ test_that("data: small strata, option: small strata", {
   )
 })
 
-test_that("data: big strata, option: big strata", {
+test_that("data: large strata, option: large strata", {
   # sim_data: small strata, option: small strata
   set.seed(123)
   tau.vec <- c(0.2, 0.9, 1.5)
@@ -962,8 +962,8 @@ test_that("data: big strata, option: big strata", {
   expect_equal(round(result$se.rob, 7), c(0.1279147, 0.1237890, 0.1269721))
 })
 
-test_that("data: small strata, option: big strata", {
-  # sim_data: small strata, option: big strata
+test_that("data: small strata, option: large strata", {
+  # sim_data: small strata, option: large strata
   set.seed(123)
   tau.vec <- c(0.2, 0.8)
   n.treat <- length(tau.vec)
@@ -1104,7 +1104,7 @@ test_that("data: small strata, option: big strata", {
   )
 })
 
-test_that("data: big strata, option: small strata", {
+test_that("data: large strata, option: small strata", {
   set.seed(123)
   tau.vec <- c(0.2, 0.9)
   n.treat <- length(tau.vec)
@@ -1240,7 +1240,7 @@ test_that("data: mixed design, option: small strata", {
   )
 })
 
-test_that("data: mixed design, option: big strata", {
+test_that("data: mixed design, option: large strata", {
   set.seed(123)
   tau.vec <- c(0.2, 0.9)
   n.treat <- length(tau.vec)
@@ -1507,7 +1507,7 @@ test_that("data: small strata, option: small strata", {
   )
 })
 
-test_that("data: big strata, option: big strata", {
+test_that("data: large strata, option: large strata", {
   set.seed(123)
   tau.vec <- c(0.2, 0.9, 1.5)
   n.treat <- length(tau.vec)
@@ -1580,7 +1580,7 @@ test_that("data: big strata, option: big strata", {
   )
 })
 
-test_that("data: small strata, option: big strata", {
+test_that("data: small strata, option: large strata", {
   set.seed(123)
   tau.vec <- c(0.2, 0.8)
   n.treat <- length(tau.vec)
@@ -1701,7 +1701,7 @@ test_that("data: small strata, option: big strata", {
   )
 })
 
-test_that("data: big strata, option: small strata", {
+test_that("data: large strata, option: small strata", {
   set.seed(123)
   tau.vec <- c(0.2, 0.9)
   n.treat <- length(tau.vec)
@@ -1887,7 +1887,7 @@ test_that("data: mixed design, option: small strata", {
   )
 })
 
-test_that("data: mixed design, option: big strata", {
+test_that("data: mixed design, option: large strata", {
   set.seed(123)
   tau.vec <- c(0.2, 0.9)
   n.treat <- length(tau.vec)
@@ -2070,7 +2070,7 @@ test_that("data: mixed design, option: big strata", {
   expect_equal(round(result$se.rob, 7), c(0.1168205, 0.1142299))
 })
 
-test_that("print.sreg outputs expected information for big strata", {
+test_that("print.sreg outputs expected information for large strata", {
   set.seed(123)
   data_sim <- sreg.rgen(n = 200, tau.vec = c(0.2, 0.5), n.strata = 4, cluster = FALSE)
   Y <- data_sim$Y
@@ -2088,7 +2088,7 @@ test_that("print.sreg outputs expected information for big strata", {
   expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
   expect_true(any(grepl("Covariates used in linear adjustments: x_1, x_2", output)))
   expect_true(any(grepl("Treatment assignment: individual level", output)))
-  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Setup: large strata", output)))
   expect_true(any(grepl("Number of strata: 4", output)))
   expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
 
@@ -2115,7 +2115,7 @@ test_that("print.sreg outputs expected information for big strata", {
   expect_true(any(grepl("Standard errors: unadjusted", output))) # if HC1 = TRUE by default
   expect_true(any(grepl("Covariates used in linear adjustments: data_sim.x_1", output)))
   expect_true(any(grepl("Treatment assignment: cluster level", output)))
-  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Setup: large strata", output)))
   expect_true(any(grepl("Number of strata: 6", output)))
   expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
 
@@ -2130,7 +2130,7 @@ test_that("print.sreg outputs expected information for big strata", {
   expect_true(any(grepl("Standard errors: unadjusted", output))) # if HC1 = TRUE by default
   expect_true(any(grepl("Covariates used in linear adjustments: ", output)))
   expect_true(any(grepl("Treatment assignment: cluster level", output)))
-  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Setup: large strata", output)))
   expect_true(any(grepl("Number of strata: 6", output)))
   expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
 
@@ -2146,7 +2146,7 @@ test_that("print.sreg outputs expected information for big strata", {
   expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
   expect_true(any(grepl("Covariates used in linear adjustments: ", output)))
   expect_true(any(grepl("Treatment assignment: individual level", output)))
-  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Setup: large strata", output)))
   expect_true(any(grepl("Number of strata: 6", output)))
   expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
 
@@ -2172,7 +2172,7 @@ test_that("print.sreg outputs expected information for big strata", {
   expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
   expect_true(any(grepl("Covariates used in linear adjustments: ", output)))
   expect_true(any(grepl("Treatment assignment: cluster level", output)))
-  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Setup: large strata", output)))
   expect_true(any(grepl("Number of strata: 6", output)))
   expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
 
@@ -2195,7 +2195,7 @@ test_that("print.sreg outputs expected information for big strata", {
   expect_true(any(grepl("Standard errors: adjusted \\(HC1\\)", output))) # if HC1 = TRUE by default
   expect_true(any(grepl("Covariates used in linear adjustments: x_1, x_2, Ng", output)))
   expect_true(any(grepl("Treatment assignment: cluster level", output)))
-  expect_true(any(grepl("Setup: big strata", output)))
+  expect_true(any(grepl("Setup: large strata", output)))
   expect_true(any(grepl("Number of strata: 6", output)))
   expect_true(any(grepl("Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1", output, fixed = TRUE)))
 })

@@ -47,7 +47,7 @@ print.sreg <- function(x, ...) {
     } else if (!is.null(x$small.strata) && x$small.strata) {
       "small strata"
     } else {
-      "big strata"
+      "large strata"
     },
     "\n"
   ))
