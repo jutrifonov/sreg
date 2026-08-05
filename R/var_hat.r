@@ -274,7 +274,11 @@ as.var.creg <- function(model = NULL, fit, HC1)
       Xi.tilde.0 <- (mu.hat.d - mu.hat.0) -
         (Ng * Y.bar.g - mu.hat.0) / pi.hat.0
 
-      data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.Ng = Y.bar.g * Ng)
+      Xi.tilde.other <- mu.hat.d - mu.hat.0
+      data$I.other <- as.numeric(data$A == -999999)
+
+      data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Xi.tilde.other,
+        Y.Ng = Y.bar.g * Ng)
 
       count.Xi.1 <- data %>%
         group_by(.data$S, .data$A) %>%
@@ -323,13 +327,27 @@ as.var.creg <- function(model = NULL, fit, HC1)
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean - tau.est[d] * (Ng - N.g.bar.cl)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (Ng - N.g.bar.cl)
+      Xi.hat.other <- Xi.tilde.other -
+        stats::ave(Xi.tilde.other, data$S, FUN = mean) -
+        tau.est[d] * (Ng - N.g.bar.cl)
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
 
-      sigma.hat.sq <- mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2) + Xi.hat.2^2) / (mean(Ng))^2
+      within.var <- mean(
+        as.numeric(data$A == 1) * Xi.hat.1^2 +
+          as.numeric(data$A == 0) * Xi.hat.0^2 +
+          data$I.other * Xi.hat.other^2
+      )
+      sigma.hat.sq <- (within.var + mean(Xi.hat.2^2)) / (mean(Ng))^2
 
       if (HC1 == TRUE) {
-        var.vec[d] <- ((mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2))) * (n / (n - (max(data$S) + max(data$D) * max(data$S)))) +
-          mean(Xi.hat.2^2)) / (mean(Ng))^2
+        adj_denom <- n - (max(data$S) + max(data$D) * max(data$S))
+        if (adj_denom <= 0 || is.nan(adj_denom)) {
+          warning("HC1 adjustment unstable or undefined due to degenerate strata-treatment structure; reverting to unadjusted estimator.")
+          var.vec[d] <- sigma.hat.sq
+        } else {
+          var.vec[d] <- (within.var * (n / adj_denom) +
+            mean(Xi.hat.2^2)) / (mean(Ng))^2
+        }
       } else {
         var.vec[d] <- sigma.hat.sq
       }
@@ -355,7 +373,11 @@ as.var.creg <- function(model = NULL, fit, HC1)
       Xi.tilde.0 <- (mu.hat.d - mu.hat.0) -
         (Ng * Y.bar.g - mu.hat.0) / pi.hat.0
 
-      data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Y.Ng = Y.bar.g * Ng)
+      Xi.tilde.other <- rep(0, n)
+      data$I.other <- as.numeric(data$A == -999999)
+
+      data <- data.frame(data, Xi.tilde.1, Xi.tilde.0, Xi.tilde.other,
+        Y.Ng = Y.bar.g * Ng)
 
       count.Xi.1 <- data %>%
         group_by(.data$S, .data$A) %>%
@@ -404,21 +426,29 @@ as.var.creg <- function(model = NULL, fit, HC1)
 
       Xi.hat.1 <- Xi.tilde.1 - Xi.1.mean - tau.est[d] * (Ng - N.g.bar.cl)
       Xi.hat.0 <- Xi.tilde.0 - Xi.0.mean - tau.est[d] * (Ng - N.g.bar.cl)
+      Xi.hat.other <- Xi.tilde.other -
+        stats::ave(Xi.tilde.other, data$S, FUN = mean) -
+        tau.est[d] * (Ng - N.g.bar.cl)
       Xi.hat.2 <- Y.g.bar.cl.1 - Y.g.bar.cl.0 - tau.est[d] * N.g.bar.cl
+
+      within.var <- mean(
+        as.numeric(data$A == 1) * Xi.hat.1^2 +
+          as.numeric(data$A == 0) * Xi.hat.0^2 +
+          data$I.other * Xi.hat.other^2
+      )
+      sigma.hat.sq <- (within.var + mean(Xi.hat.2^2)) / (mean(Ng))^2
 
       if (HC1 == TRUE) {
         adj_denom <- n - (max(data$S) + max(data$D) * max(data$S))
         if (adj_denom <= 0 || is.nan(adj_denom)) {
           warning("HC1 adjustment unstable or undefined due to degenerate strata-treatment structure; reverting to unadjusted estimator.")
-          var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2)) +
-            mean(Xi.hat.2^2)) / (mean(Ng))^2
+          var.vec[d] <- sigma.hat.sq
         } else {
           adj_factor <- n / adj_denom
-          var.vec[d] <- (mean(data$I * (data$A * Xi.hat.1^2 + (1 - data$A) * Xi.hat.0^2)) * adj_factor +
+          var.vec[d] <- (within.var * adj_factor +
             mean(Xi.hat.2^2)) / (mean(Ng))^2
         }
       } else {
-        sigma.hat.sq <- mean(data$I * (data$A * (Xi.hat.1)^2 + (1 - data$A) * (Xi.hat.0)^2) + Xi.hat.2^2) / (mean(Ng))^2
         var.vec[d] <- sigma.hat.sq
       }
       n.vec[d] <- n
