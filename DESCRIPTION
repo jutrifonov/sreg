@@ -32,3 +32,4 @@ VignetteBuilder: knitr
 URL: https://github.com/jutrifonov/sreg
 BugReports: https://github.com/jutrifonov/sreg/issues
 Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.2

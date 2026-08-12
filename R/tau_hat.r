@@ -227,150 +227,69 @@ tau.hat.sreg.ss <- function(Y, D, X = NULL, S)
   return(ret_list)
 }
 #-------------------------------------------------------------------
-tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng)
-#-------------------------------------------------------------------
-{
-  if (!is.null(X)) {
-    tau.hat <- numeric(max(D))
-
-    beta.hat <- matrix(ncol = ncol(X), nrow = max(D))
-
-    if (!is.null(Ng)) {
-      working.df <- data.frame(Y, S, D, G.id, Ng, X)
-    } else {
-      working.df <- data.frame(Y, S, D, G.id, X)
-      working.df <- working.df %>%
-        group_by(G.id) %>%
-        mutate(Ng = n()) %>%
-        ungroup() %>%
-        select(Y, S, D, G.id, Ng, all_of(names(X)))
-      working.df <- as.data.frame(working.df)
-    }
-
-    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng")))])
-    cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
-    data <- cl.lvl.data
-    N.bar.G <- mean(data$Ng) # nolint: object_usage_linter.
-
-    covariate_cols <- names(X)
-
-    for (d in 1:max(D))
-    {
-      # Compute averages for treated and control within each stratum
-      agg_data <- data %>%
-        group_split(S) %>%
-        map_dfr(~ {
-          df <- .
-          covariate_cols <- names(X)
-          list(
-            S = df$S[1],
-            Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
-            Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
-            X_treated = list(colMeans(df[df$D == d, covariate_cols, drop = FALSE], na.rm = TRUE)),
-            X_control = list(colMeans(df[df$D == 0, covariate_cols, drop = FALSE], na.rm = TRUE)),
-            k = nrow(df), # Total units in stratum (should be 2)
-            l = sum(df$D == d),
-            q = sum(df$D == 0)
-          )
-        })
-
-      # Create Y_diff vector
-      Y_diff <- with(agg_data, Y_treated - Y_control)
-
-      # Compute differences correctly: row-wise for each pair of treated/control vectors
-      X_diff_mat <- map2(
-        agg_data$X_treated, agg_data$X_control,
-        ~ .x - .y
-      ) %>%
-        do.call(rbind, .)
-
-      # run the linear model for covariate adjustments
-      lm_model <- lm(Y_diff ~ ., data = as.data.frame(cbind(Y_diff, X_diff_mat)))
-
-      beta_hat <- unname(lm_model$coefficients[-1])
-
-      covariate_cols <- names(X)
-      X_mat <- as.matrix(data[, covariate_cols, drop = FALSE])
-
-      X_bar <- colMeans(X_mat)
-      X_dem <- sweep(X_mat, 2, X_bar)
-
-      # adjusted estimator:
-      G_1 <- sum((data$D == d) * data$Ng)
-      G_0 <- sum((data$D == 0) * data$Ng)
-      theta_hat_adj <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
-        sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng) -
-        as.numeric(t(colSums(X_dem[data$D == d, , drop = FALSE]) / G_1 -
-          colSums(X_dem[data$D == 0, , drop = FALSE]) / G_0) %*% beta_hat)
-
-      tau.hat[d] <- theta_hat_adj
-      beta.hat[d, ] <- beta_hat
-    }
+# Build one observation per cluster for small-strata estimation.
+# The expanded outcome is T_g = N_g * Ybar_g.
+.creg_ss_cluster_data <- function(Y, S, D, G.id, Ng, X = NULL) {
+  if (is.null(Ng)) {
+    working <- data.frame(Y, S, D, G.id)
+    working <- working %>%
+      dplyr::group_by(.data$G.id) %>%
+      dplyr::mutate(Ng = dplyr::n()) %>%
+      dplyr::ungroup()
   } else {
-    tau.hat <- numeric(max(D))
-
-    if (!is.null(Ng)) {
-      working.df <- data.frame(Y, S, D, G.id, Ng)
-    } else {
-      working.df <- data.frame(Y, S, D, G.id)
-      working.df <- working.df %>%
-        group_by(G.id) %>%
-        mutate(Ng = n()) %>%
-        ungroup() %>%
-        select(Y, S, D, G.id, Ng)
-      working.df <- as.data.frame(working.df)
-    }
-
-    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")])
-    cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
-    data <- cl.lvl.data
-    N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
-
-    for (d in 1:max(D))
-    {
-      # Compute averages for treated and control within each stratum
-      agg_data <- data %>%
-        group_split(S) %>%
-        map_dfr(~ {
-          df <- .
-          list(
-            S = df$S[1],
-            Y_treated = mean(df$Y.bar[df$D == d] * N.bar.G, na.rm = TRUE),
-            Y_control = mean(df$Y.bar[df$D == 0] * N.bar.G, na.rm = TRUE),
-            k = nrow(df), # Total units in stratum (should be 2)
-            l = sum(df$D == d),
-            q = sum(df$D == 0)
-          )
-        })
-
-      # Create Y_diff vector
-      Y_diff <- with(agg_data, Y_treated - Y_control)
-
-
-      # run the linear model for covariate adjustments
-      beta_hat <- 0
-
-      # adjusted estimator:
-      G_1 <- sum((data$D == d) * data$Ng)
-      G_0 <- sum((data$D == 0) * data$Ng)
-
-
-      theta_hat <- sum((data$Y.bar * data$Ng * (data$D == d))) / sum((data$D == d) * data$Ng) -
-        sum(data$Y.bar * data$Ng * (data$D == 0)) / sum((data$D == 0) * data$Ng)
-
-
-      tau.hat[d] <- theta_hat
-      beta.hat <- NULL
-    }
+    working <- data.frame(Y, S, D, G.id, Ng)
   }
-  ret_list <- list(
-    tau.hat = tau.hat,
-    beta.hat = beta.hat
-  )
+  ybar <- stats::aggregate(Y ~ G.id, working, mean)
+  base <- unique(working[, c("G.id", "D", "S", "Ng")])
+  names(ybar)[names(ybar) == "Y"] <- "Y.bar"
+  data <- dplyr::left_join(base, ybar, by = "G.id")
+  if (!is.null(X)) {
+    x_names <- paste0(".creg_x_", seq_len(ncol(X)))
+    x_working <- data.frame(G.id, X, check.names = FALSE)
+    names(x_working)[-1L] <- x_names
+    x_cluster <- x_working %>%
+      dplyr::group_by(.data$G.id) %>%
+      dplyr::summarise(
+        dplyr::across(dplyr::all_of(x_names), mean), .groups = "drop"
+      )
+    data <- dplyr::left_join(data, x_cluster, by = "G.id")
+  }
+  data$T <- data$Ng * data$Y.bar
+  data
+}
 
-  return(ret_list)
+#-------------------------------------------------------------------
+tau.hat.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng) {
+  data <- .creg_ss_cluster_data(Y, S, D, G.id, Ng, X)
+  nbar <- mean(data$Ng)
+  treatments <- sort(setdiff(unique(data$D), 0))
+  tau.hat <- numeric(max(treatments))
+  beta.hat <- if (is.null(X)) NULL else matrix(NA_real_, max(treatments), ncol(X))
+
+  for (d in treatments) {
+    if (!is.null(X)) {
+      x_names <- paste0(".creg_x_", seq_len(ncol(X)))
+      by_s <- split(data, data$S)
+      y_diff <- vapply(by_s, function(z) {
+        mean(z$T[z$D == d]) - mean(z$T[z$D == 0])
+      }, numeric(1))
+      x_diff <- do.call(rbind, lapply(by_s, function(z) {
+        colMeans(z[z$D == d, x_names, drop = FALSE]) -
+          colMeans(z[z$D == 0, x_names, drop = FALSE])
+      }))
+      fit <- stats::lm(y_diff ~ ., data = data.frame(y_diff, x_diff))
+      beta <- unname(stats::coef(fit)[-1])
+      x_mat <- as.matrix(data[, x_names, drop = FALSE])
+      x_dem <- sweep(x_mat, 2, colMeans(x_mat))
+      qhat <- mean(data$T[data$D == d]) - mean(data$T[data$D == 0]) -
+        as.numeric((colMeans(x_dem[data$D == d, , drop = FALSE]) -
+          colMeans(x_dem[data$D == 0, , drop = FALSE])) %*% beta)
+      beta.hat[d, ] <- beta
+    } else {
+      qhat <- mean(data$T[data$D == d]) - mean(data$T[data$D == 0])
+    }
+    tau.hat[d] <- qhat / nbar
+  }
+
+  list(tau.hat = tau.hat, beta.hat = beta.hat)
 }

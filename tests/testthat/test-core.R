@@ -1444,20 +1444,20 @@ test_that("data: small strata, option: small strata", {
   data_sim <- sreg.rgen(n = n_1, tau.vec = tau.vec, n.strata = 4, cluster = TRUE, small.strata = TRUE, treat.sizes = c(1, 1, 1), k = 3)
 
   result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = FALSE, small.strata = TRUE)
-  expect_equal(round(result$tau.hat, 7), c(0.1321043, 0.8705829))
-  expect_equal(round(result$se.rob, 7), c(0.1015669, 0.1052238))
+  expect_equal(round(result$tau.hat, 7), c(0.1399429, 0.8776288))
+  expect_equal(round(result$se.rob, 7), c(0.1016263, 0.1037135))
 
   result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
-  expect_equal(round(result$tau.hat, 7), c(0.1321043, 0.8705829))
-  expect_equal(round(result$se.rob, 7), c(0.1015669, 0.1052238))
+  expect_equal(round(result$tau.hat, 7), c(0.1399429, 0.8776288))
+  expect_equal(round(result$se.rob, 7), c(0.1018004, 0.1038905))
 
   result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
-  expect_equal(round(result$tau.hat, 7), c(0.1399561, 0.8402642))
-  expect_equal(round(result$se.rob, 7), c(0.0455854, 0.0522454))
+  expect_equal(round(result$tau.hat, 7), c(0.1488319, 0.8483516))
+  expect_equal(round(result$se.rob, 7), c(0.0455431, 0.0502474))
 
   result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = FALSE, small.strata = TRUE)
-  expect_equal(round(result$tau.hat, 7), c(0.1399561, 0.8402642))
-  expect_equal(round(result$se.rob, 7), c(0.0453538, 0.0519852))
+  expect_equal(round(result$tau.hat, 7), c(0.1488319, 0.8483516))
+  expect_equal(round(result$se.rob, 7), c(0.0453126, 0.0499999))
 
   invisible(
     suppressWarnings(
@@ -1466,12 +1466,12 @@ test_that("data: small strata, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(0.1399561, 0.8402642))
-  expect_equal(round(result$se.rob, 7), c(0.0453538, 0.0519852))
+  expect_equal(round(result$tau.hat, 7), c(0.1488319, 0.8483516))
+  expect_equal(round(result$se.rob, 7), c(0.0453126, 0.0499999))
 
   result <- sreg(Y = data_sim$Y, D = data_sim$D, S = data_sim$S, X = data.frame(data_sim$x_1, data_sim$x_2, data_sim$Ng), G.id = data_sim$G.id, Ng = data_sim$Ng, HC1 = TRUE, small.strata = TRUE)
-  expect_equal(round(result$tau.hat, 7), c(0.1400713, 0.8409700))
-  expect_equal(round(result$se.rob, 7), c(0.0456655, 0.0525556))
+  expect_equal(round(result$tau.hat, 7), c(0.1452239, 0.8324173))
+  expect_equal(round(result$se.rob, 7), c(0.0456056, 0.0478545))
 
   invisible(
     suppressWarnings(
@@ -1480,8 +1480,8 @@ test_that("data: small strata, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(0.1254917, 0.8627286))
-  expect_equal(round(result$se.rob, 7), c(0.1016849, 0.1038816))
+  expect_equal(round(result$tau.hat, 7), c(0.1294104, 0.8531470))
+  expect_equal(round(result$se.rob, 7), c(0.1016740, 0.1006998))
 
   expect_error(
     invisible(capture.output({
@@ -1775,8 +1775,8 @@ test_that("data: mixed design, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(0.1271195, 0.8889266))
-  expect_equal(round(result$se.rob, 7), c(0.0708899, 0.0691259))
+  expect_equal(round(result$tau.hat, 7), c(0.1167869, 0.9120387))
+  expect_equal(round(result$se.rob, 7), c(0.0709697, 0.0640425))
 
   invisible(
     suppressWarnings(
@@ -1785,8 +1785,8 @@ test_that("data: mixed design, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(0.1264854, 0.8898737))
-  expect_equal(round(result$se.rob, 7), c(0.0686176, 0.0671122))
+  expect_equal(round(result$tau.hat, 7), c(0.1140158, 0.8958596))
+  expect_equal(round(result$se.rob, 7), c(0.0687820, 0.0670661))
   invisible(
     suppressWarnings(
       capture.output({
@@ -1794,8 +1794,8 @@ test_that("data: mixed design, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(-0.0696856, 0.7064452))
-  expect_equal(round(result$se.rob, 7), c(0.1151464, 0.1125664))
+  expect_equal(round(result$tau.hat, 7), c(-0.0747915, 0.7039973))
+  expect_equal(round(result$se.rob, 7), c(0.1149833, 0.1132604))
 
   invisible(
     suppressWarnings(
@@ -1804,8 +1804,8 @@ test_that("data: mixed design, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(-0.0696856, 0.7064452))
-  expect_equal(round(result$se.rob, 7), c(0.1163102, 0.1132260))
+  expect_equal(round(result$tau.hat, 7), c(-0.0747915, 0.7039973))
+  expect_equal(round(result$se.rob, 7), c(0.1163968, 0.1141746))
 
   invisible(
     suppressWarnings(
@@ -1814,8 +1814,8 @@ test_that("data: mixed design, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(0.1264854, 0.8898737))
-  expect_equal(round(result$se.rob, 7), c(0.0708252, 0.0685859))
+  expect_equal(round(result$tau.hat, 7), c(0.1140158, 0.8958596))
+  expect_equal(round(result$se.rob, 7), c(0.0709874, 0.0685359))
   invisible(
     suppressWarnings(
       capture.output({
@@ -1823,8 +1823,8 @@ test_that("data: mixed design, option: small strata", {
       })
     )
   )
-  expect_equal(round(result$tau.hat, 7), c(0.1264854, 0.8898737))
-  expect_equal(round(result$se.rob, 7), c(0.0686176, 0.0671122))
+  expect_equal(round(result$tau.hat, 7), c(0.1140158, 0.8958596))
+  expect_equal(round(result$se.rob, 7), c(0.0687820, 0.0670661))
 
   expect_error(
     invisible(capture.output({

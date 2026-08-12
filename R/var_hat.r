@@ -568,142 +568,82 @@ as.var.sreg.ss <- function(Y, D, X = NULL, S, fit = NULL, HC1 = TRUE)
   return(V)
 }
 #-------------------------------------------------------------------
-as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE)
-#-------------------------------------------------------------------
-{
-  n <- max(S)
-  if (!is.null(X)) {
-    if (!is.null(Ng)) {
-      working.df <- data.frame(Y, S, D, G.id, Ng, X)
-    } else {
-      working.df <- data.frame(Y, S, D, G.id, X)
-      working.df <- working.df %>%
-        group_by(G.id) %>%
-        mutate(Ng = n()) %>%
-        ungroup() %>%
-        select(Y, S, D, G.id, Ng, all_of(names(X)))
-      working.df <- as.data.frame(working.df)
-    }
-    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", setdiff(names(working.df), c("Y", "S", "D", "G.id", "Ng")))])
-  } else {
-    if (!is.null(Ng)) {
-      working.df <- data.frame(Y, S, D, G.id, Ng)
-    } else {
-      working.df <- data.frame(Y, S, D, G.id)
-      working.df <- working.df %>%
-        group_by(G.id) %>%
-        mutate(Ng = n()) %>%
-        ungroup() %>%
-        select(Y, S, D, G.id, Ng)
-      working.df <- as.data.frame(working.df)
-    }
-    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
-    cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")])
-  }
-  cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
-  data <- cl.lvl.data
-  N.bar.G <- mean(data$Ng) # ??? Why is this so weird?
-  # n = number of blocks
-  if (!is.null(X)) {
-    covariate_cols <- names(X)
-    X_mat <- as.matrix(data[, covariate_cols, drop = FALSE])
-    X_bar <- colMeans(X_mat)
-    X_dem <- sweep(X_mat, 2, X_bar)
-  }
-  pi_hat_vec <- pi.hat.creg(data$S, data$D, vector = TRUE)
-  pi_hat_0 <- pi.hat.creg(data$S, data$D, vector = TRUE, inverse = TRUE)[1]
-  V <- numeric(max(data$D))
+# Small-strata cluster variance with the common-denominator correction.
+as.var.creg.ss <- function(Y, D, X = NULL, S, G.id, Ng, fit = NULL, HC1 = TRUE) {
+  data <- .creg_ss_cluster_data(Y, S, D, G.id, Ng, X)
+  strata <- sort(unique(data$S))
+  n <- length(strata)
+  if (n %% 2L != 0L) stop("The paired-strata variance estimator requires an even number of strata.")
+  nbar <- mean(data$Ng)
+  arms <- sort(unique(data$D))
+  treatments <- setdiff(arms, 0)
+  pi <- vapply(arms, function(r) mean(data$D == r), numeric(1))
+  names(pi) <- as.character(arms)
+  idx1 <- seq(1, n, 2)
+  idx2 <- seq(2, n, 2)
+  V <- numeric(max(treatments))
 
-  for (d in 1:max(data$D))
-  {
+  if (is.null(fit)) fit <- tau.hat.creg.ss(Y, D, X, S, G.id, Ng)
+
+  for (d in treatments) {
+    tau <- fit$tau.hat[d]
     if (!is.null(X)) {
-      beta_hat <- fit$beta.hat[d, ]
-      Y_a <- (data$Ng / mean(data$Ng)) * data$Y.bar - X_dem %*% beta_hat * (1 / N.bar.G)
+      x_names <- paste0(".creg_x_", seq_len(ncol(X)))
+      x_mat <- as.matrix(data[, x_names, drop = FALSE])
+      x_dem <- sweep(x_mat, 2, colMeans(x_mat))
+      beta <- as.numeric(fit$beta.hat[d, ])
+      residual_total <- data$T - as.numeric(x_dem %*% beta)
+      K <- length(beta) + 1L
     } else {
-      beta_hat <- 0
-      Y_a <- (data$Ng / mean(data$Ng)) * data$Y.bar
+      residual_total <- data$T
+      K <- 1L
     }
-    l <- sum(data$D == d) / n
-    q <- sum(data$D == 0) / n
-    pi_hat <- pi_hat_vec[d]
-    # Compute Gamma_hat_1 and Gamma_hat_0
-    Gamma_hat_1 <- sum(Y_a[data$D == d]) * (1 / sum(data$D == d))
-    Gamma_hat_0 <- sum(Y_a[data$D == 0]) * (1 / sum(data$D == 0))
 
-    # Precompute sums of Y_a for treated & untreated in each block
-    sums_treated <- as.numeric(tapply(Y_a * (data$D == d), data$S, sum))
-    sums_untreated <- as.numeric(tapply(Y_a * (data$D == 0), data$S, sum))
+    # Signed arm-specific terms in the linearization of Qhat / Nbar.
+    W <- -tau * pi[as.character(data$D)] * data$Ng / nbar
+    W[data$D == d] <- W[data$D == d] + residual_total[data$D == d] / nbar
+    W[data$D == 0] <- W[data$D == 0] - residual_total[data$D == 0] / nbar
 
+    gamma <- sigma <- numeric(length(arms))
+    names(gamma) <- names(sigma) <- as.character(arms)
+    arm_sums <- matrix(0, nrow = n, ncol = length(arms),
+      dimnames = list(as.character(strata), as.character(arms)))
+    k_arm <- numeric(length(arms))
+    names(k_arm) <- as.character(arms)
 
-    #----------------------------------------
-    # Compute rho_hat_00 and rho_hat_11
-    # We consider pairs of adjacent blocks: (1,2), (3,4), ...
-    #----------------------------------------
-    # Indices of pairs
-    idx1 <- seq(1, n, 2)
-    idx2 <- seq(2, n, 2)
+    for (r in arms) {
+      key <- as.character(r)
+      Wr <- W[data$D == r]
+      gamma[key] <- mean(Wr)
+      sigma[key] <- mean((Wr - gamma[key])^2)
+      sums <- tapply(W * (data$D == r), factor(data$S, levels = strata), sum)
+      arm_sums[, key] <- as.numeric(sums)
+      k_arm[key] <- sum(data$D == r) / n
+    }
 
-    # zeta_0 = sum of products of untreated across pairs of blocks
-    zeta_0 <- sum(sums_untreated[idx1] * sums_untreated[idx2]) / (q^2)
-
-    # zeta_1 = sum of products of treated across pairs of blocks
-    zeta_1 <- sum(sums_treated[idx1] * sums_treated[idx2]) / (l^2)
-
-    # Multiply each by (2/n) to get rho_00 and rho_11
-    rho_hat_00 <- zeta_0 * (2 / n)
-    rho_hat_11 <- zeta_1 * (2 / n)
-
-    #----------------------------------------
-    # Compute rho_hat_10
-    # sum_rho_10 = sum over j of ( (sum of treated)*(sum of untreated) / (l*(k-l)) )
-    # Then divide by n
-    #----------------------------------------
-    sum_rho_10 <- sum((sums_treated * sums_untreated) / (l * q))
-    rho_hat_10 <- sum_rho_10 / n
-
-    #----------------------------------------
-    # Compute sigma_hat_1 and sigma_hat_0
-    #----------------------------------------
-    sigma_hat_1 <- sum((Y_a - Gamma_hat_1)^2 * (data$D == d)) * (1 / (n * l))
-    sigma_hat_0 <- sum((Y_a - Gamma_hat_0)^2 * (data$D == 0)) * (1 / (n * q))
-
-    #----------------------------------------
-    # Compute the final variance components
-    #----------------------------------------
-    # v_hat_1_1 and v_hat_1_0
-    v_hat_1_1 <- sigma_hat_1 - (rho_hat_11 - Gamma_hat_1^2)
-    v_hat_1_0 <- sigma_hat_0 - (rho_hat_00 - Gamma_hat_0^2)
-
-    # v_hat_2_11, v_hat_2_00, v_hat_2_10
-    v_hat_2_11 <- rho_hat_11 - Gamma_hat_1 * Gamma_hat_1
-
-    v_hat_2_00 <- rho_hat_00 - Gamma_hat_0 * Gamma_hat_0
-
-    v_hat_2_10 <- rho_hat_10 - Gamma_hat_1 * Gamma_hat_0
-
-    # Final V
-    if (!is.null(X)) {
-      if (HC1 == TRUE) {
-        beta_hat <- fit$beta.hat[d, ]
-        K <- length(beta_hat) + 1
-        V_d <- (1 / pi_hat) * (n / (n - K)) * v_hat_1_1 +
-          (1 / pi_hat_0) * (n / (n - K)) * v_hat_1_0 +
-          v_hat_2_11 + v_hat_2_00 -
-          2 * v_hat_2_10
-      } else {
-        V_d <- (1 / pi_hat) * v_hat_1_1 +
-          (1 / pi_hat_0) * v_hat_1_0 +
-          v_hat_2_11 + v_hat_2_00 -
-          2 * v_hat_2_10
+    rho <- matrix(NA_real_, length(arms), length(arms),
+      dimnames = list(as.character(arms), as.character(arms)))
+    for (r in arms) {
+      rkey <- as.character(r)
+      rho[rkey, rkey] <- (2 / n) *
+        sum(arm_sums[idx1, rkey] * arm_sums[idx2, rkey]) / k_arm[rkey]^2
+    }
+    if (length(arms) > 1L) {
+      for (i in seq_along(arms)[-length(arms)]) {
+        for (j in (i + 1L):length(arms)) {
+          rkey <- as.character(arms[i])
+          tkey <- as.character(arms[j])
+          rho[rkey, tkey] <- rho[tkey, rkey] <-
+            mean(arm_sums[, rkey] * arm_sums[, tkey]) /
+            (k_arm[rkey] * k_arm[tkey])
+        }
       }
-    } else {
-      V_d <- (1 / pi_hat) * v_hat_1_1 +
-        (1 / pi_hat_0) * v_hat_1_0 +
-        v_hat_2_11 + v_hat_2_00 -
-        2 * v_hat_2_10
     }
-    V[d] <- V_d
+
+    v2 <- rho - outer(gamma, gamma)
+    v1 <- sigma - diag(v2)
+    hc <- if (isTRUE(HC1)) n / (n - K) else 1
+    V[d] <- sum(hc * v1 / pi) + sum(v2)
   }
-  return(V)
+  V
 }
