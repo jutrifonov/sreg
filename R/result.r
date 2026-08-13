@@ -294,6 +294,28 @@ res.creg.ss <- function(Y, S, D, G.id, Ng, X = NULL, HC1 = TRUE)
   return(res.list)
 }
 
+.validate_mixed_large_adjustment <- function(res_big, X_big) {
+  if (is.null(X_big)) return(invisible(NULL))
+
+  coefficients <- unlist(res_big$ols.iter, recursive = TRUE, use.names = FALSE)
+  invalid_coefficients <- length(coefficients) == 0L ||
+    any(!is.finite(coefficients))
+  invalid_standard_errors <- any(!is.finite(res_big$se.rob))
+
+  if (invalid_coefficients || invalid_standard_errors) {
+    stop(
+      paste0(
+        "The large-strata component of the mixed design cannot support ",
+        "the requested covariate adjustment because one or more ",
+        "treatment-by-stratum regressions are unidentified. Reduce the ",
+        "number of covariates or rerun sreg() with X = NULL."
+      ),
+      call. = FALSE
+    )
+  }
+  invisible(NULL)
+}
+
 res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE,
                            k = NULL) {
   # Step 1: Prepare data and classify strata
@@ -311,6 +333,7 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE,
   # Step 3: Extract covariates
   X_names <- if (!is.null(X)) colnames(X) else character(0)
   X_small <- if (length(X_names) > 0) data_small[, X_names, drop = FALSE] else NULL
+  X_big <- if (length(X_names) > 0) data_big[, X_names, drop = FALSE] else NULL
 
   # Step 4: Run estimators
   res_small <- res.sreg.ss(
@@ -327,9 +350,10 @@ res.sreg.mixed <- function(Y, S, D, X = NULL, HC1 = TRUE, small.strata = TRUE,
     Y = data_big$Y,
     D = data_big$D,
     S = S_big_reset,
-    X = NULL,
+    X = X_big,
     HC1 = HC1
   )
+  .validate_mixed_large_adjustment(res_big, X_big)
 
   # Step 5: Combine estimates
   N_small <- nrow(data_small)
@@ -393,6 +417,7 @@ res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE,
 
   X_names <- if (!is.null(X)) colnames(X) else character(0)
   X_small <- if (length(X_names) > 0) data_small[, X_names, drop = FALSE] else NULL
+  X_big <- if (length(X_names) > 0) data_big[, X_names, drop = FALSE] else NULL
 
   res_small <- res.creg.ss(
     Y = data_small$Y, D = data_small$D, S = data_small$S,
@@ -404,17 +429,29 @@ res.creg.mixed <- function(Y, S, D, G.id, Ng = NULL, X = NULL, HC1 = TRUE,
   res_big <- res.creg(
     Y = data_big$Y, D = data_big$D, S = S_big_reset,
     G.id = data_big$G.id, Ng = data_big$Ng,
-    X = NULL, HC1 = HC1
+    X = X_big, HC1 = HC1
   )
+  .validate_mixed_large_adjustment(res_big, X_big)
 
-  N_small <- nrow(data_small)
-  N_big <- nrow(data_big)
+  # Component weights target shares of the represented individual
+  # population. Use one cluster size per cluster: nrow() is generally the
+  # number sampled and need not equal the supplied population size Ng.
+  cluster_sizes <- dplyr::distinct(data_all, G.id, stratum_type, Ng)
+  N_small <- sum(cluster_sizes$Ng[cluster_sizes$stratum_type == "small"])
+  N_big <- sum(cluster_sizes$Ng[cluster_sizes$stratum_type == "big"])
   N_total <- N_small + N_big
 
-  tau_hat <- (N_small / N_total) * res_small$tau.hat + (N_big / N_total) * res_big$tau.hat
-  se_combined <- sqrt((N_small / N_total)^2 * res_small$se.rob^2 +
-    (N_big / N_total)^2 * res_big$se.rob^2 +
-    (N_big * N_small / N_total^3) * (res_small$tau.hat - res_big$tau.hat)^2)
+  p_small <- N_small / N_total
+  p_big <- N_big / N_total
+  G_total <- nrow(cluster_sizes)
+  N_bar <- N_total / G_total
+  is_big <- as.numeric(cluster_sizes$stratum_type == "big")
+  V_p <- mean(cluster_sizes$Ng^2 * (is_big - p_big)^2) / N_bar^2
+
+  tau_hat <- p_small * res_small$tau.hat + p_big * res_big$tau.hat
+  se_combined <- sqrt(p_small^2 * res_small$se.rob^2 +
+    p_big^2 * res_big$se.rob^2 +
+    (V_p / G_total) * (res_small$tau.hat - res_big$tau.hat)^2)
 
   t.stat <- tau_hat / se_combined
   p.value <- 2 * pmin(pnorm(t.stat), 1 - pnorm(t.stat))

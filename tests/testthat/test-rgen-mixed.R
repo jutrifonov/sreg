@@ -15,7 +15,7 @@ test_that("sreg.rgen generates mixed individual-level designs", {
 
   fit <- suppressWarnings(sreg(
     Y = sim$Y, S = sim$S, D = sim$D,
-    X = sim[c("x_1", "x_2")], small.strata = TRUE
+    X = NULL, small.strata = TRUE
   ))
   expect_true(fit$mixed.design)
 })
@@ -39,7 +39,7 @@ test_that("sreg.rgen generates mixed cluster-level designs", {
 
   fit <- suppressWarnings(sreg(
     Y = sim$Y, S = sim$S, D = sim$D, G.id = sim$G.id, Ng = sim$Ng,
-    X = sim[c("x_1", "x_2")], small.strata = TRUE
+    X = NULL, small.strata = TRUE
   ))
   expect_true(fit$mixed.design)
 })
