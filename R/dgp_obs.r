@@ -7,14 +7,21 @@
 dgp.obs.sreg <- function(baseline, I.S, pi.vec, n.treat, is.cov = TRUE)
 #----------------------------------------------------------------------
 {
-  if (n.treat != length(pi.vec)) {
-    stop("The number of treatments doesn't match the length of vector pi.vec.")
-  }
   num.strata <- ncol(I.S)
+  if (is.matrix(pi.vec)) {
+    if (!all(dim(pi.vec) == c(n.treat, num.strata))) {
+      stop("The dimensions of pi.vec must equal n.treat by the number of strata.")
+    }
+    pi.matr.w <- pi.vec
+  } else {
+    if (n.treat != length(pi.vec)) {
+      stop("The number of treatments doesn't match the length of vector pi.vec.")
+    }
+    pi.matr <- matrix(1, ncol = num.strata, nrow = n.treat)
+    pi.matr.w <- pi.matr * pi.vec
+  }
   n <- length(baseline$Y.0)
   A <- cbind(rep(0, n))
-  pi.matr <- matrix(1, ncol = num.strata, nrow = n.treat)
-  pi.matr.w <- pi.matr * pi.vec
 
   for (k in 1:num.strata)
   {

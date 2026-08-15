@@ -16,7 +16,10 @@ sreg.rgen(
   k = 3,
   treat.sizes = c(1, 1, 1),
   mixed.strata = FALSE,
-  n.small = NULL
+  n.small = NULL,
+  allocation.probs = NULL,
+  stratum.effects = NULL,
+  treatment.effects.by.stratum = NULL
 )
 }
 \arguments{
@@ -43,6 +46,12 @@ sreg.rgen(
 \item{mixed.strata}{a \code{TRUE/FALSE} argument indicating whether to generate both small and large strata. When \code{TRUE}, \code{small.strata} is ignored, \code{n.small} units (or clusters when \code{cluster = TRUE}) are generated in strata of size \code{k}, and the remaining units or clusters are generated in \code{n.strata} large strata}
 
 \item{n.small}{the number of units (or clusters when \code{cluster = TRUE}) assigned to the small-strata component when \code{mixed.strata = TRUE}. It must be divisible by \code{k}; if \code{NULL}, the largest multiple of \code{k} not exceeding half of \code{n} is used}
+
+\item{allocation.probs}{an optional \code{n.strata} by \code{(length(tau.vec) + 1)} matrix of stratum-specific treatment probabilities for large-strata individual-level designs. Columns correspond to control and the active treatment arms and every row must sum to one. If \code{NULL}, equal treatment probabilities are used in every stratum}
+
+\item{stratum.effects}{an optional numeric vector of length \code{n.strata} added to every potential outcome in the corresponding stratum for large-strata individual-level designs}
+
+\item{treatment.effects.by.stratum}{an optional \code{n.strata} by \code{length(tau.vec)} matrix whose entries give the stratum-specific mean effects of the active treatments relative to control for large-strata individual-level designs. If \code{NULL}, \code{tau.vec} is used in every stratum}
 }
 \value{
 A \code{data.frame} containing the generated values of the following variables (with \code{n} rows for individual-level designs and one row per observation within the \code{n} generated clusters for cluster-level designs):

@@ -402,6 +402,9 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE,
 #' @param treat.sizes a numeric \eqn{1 \times (|\mathcal A| + 1)} \code{vector} specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units (\eqn{D = 0}), the second to the first treatment (\eqn{D = 1}), and so on. When omitted for a mixed design, the \code{k} positions are allocated across arms as evenly as possible
 #' @param mixed.strata a \code{TRUE/FALSE} argument indicating whether to generate both small and large strata. When \code{TRUE}, \code{small.strata} is ignored, \code{n.small} units (or clusters when \code{cluster = TRUE}) are generated in strata of size \code{k}, and the remaining units or clusters are generated in \code{n.strata} large strata
 #' @param n.small the number of units (or clusters when \code{cluster = TRUE}) assigned to the small-strata component when \code{mixed.strata = TRUE}. It must be divisible by \code{k}; if \code{NULL}, the largest multiple of \code{k} not exceeding half of \code{n} is used
+#' @param allocation.probs an optional \code{n.strata} by \code{(length(tau.vec) + 1)} matrix of stratum-specific treatment probabilities for large-strata individual-level designs. Columns correspond to control and the active treatment arms and every row must sum to one. If \code{NULL}, equal treatment probabilities are used in every stratum
+#' @param stratum.effects an optional numeric vector of length \code{n.strata} added to every potential outcome in the corresponding stratum for large-strata individual-level designs
+#' @param treatment.effects.by.stratum an optional \code{n.strata} by \code{length(tau.vec)} matrix whose entries give the stratum-specific mean effects of the active treatments relative to control for large-strata individual-level designs. If \code{NULL}, \code{tau.vec} is used in every stratum
 #' @return A \code{data.frame} containing the generated values of the following variables (with \code{n} rows for individual-level designs and one row per observation within the \code{n} generated clusters for cluster-level designs):
 #' \itemize{
 #' \item \code{Y}: a numeric \eqn{n \times 1} \code{vector} of observed outcomes
@@ -445,7 +448,18 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
                       tau.vec = c(0), gamma.vec = c(0.4, 0.2, 1),
                       cluster = TRUE, is.cov = TRUE, small.strata = FALSE, k = 3,
                       treat.sizes = c(1, 1, 1), mixed.strata = FALSE,
-                      n.small = NULL) {
+                      n.small = NULL, allocation.probs = NULL,
+                      stratum.effects = NULL,
+                      treatment.effects.by.stratum = NULL) {
+  custom.large.dgp <- !is.null(allocation.probs) ||
+    !is.null(stratum.effects) || !is.null(treatment.effects.by.stratum)
+  if (custom.large.dgp && (cluster || small.strata || mixed.strata)) {
+    stop(paste0(
+      "allocation.probs, stratum.effects, and ",
+      "treatment.effects.by.stratum are currently supported only when ",
+      "cluster = FALSE, small.strata = FALSE, and mixed.strata = FALSE."
+    ))
+  }
   if (!is.logical(mixed.strata) || length(mixed.strata) != 1L || is.na(mixed.strata)) {
     stop("mixed.strata must be either TRUE or FALSE.")
   }
@@ -587,7 +601,57 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
       strata <- form.strata.sreg(pot.outcomes, num.strata = n.strata)
       strata_set <- data.frame(strata)
       strata_set$S <- max.col(strata_set)
-      pi.vec <- rep(c(1 / (n.treat + 1)), n.treat) # vector of target proportions (equal allocation)
+
+      if (!is.null(stratum.effects)) {
+        if (!is.numeric(stratum.effects) || length(stratum.effects) != n.strata ||
+            anyNA(stratum.effects) || any(!is.finite(stratum.effects))) {
+          stop("stratum.effects must be a finite numeric vector of length n.strata.")
+        }
+        for (arm in 0:n.treat) {
+          outcome_name <- paste0("Y.", arm)
+          pot.outcomes[[outcome_name]] <- pot.outcomes[[outcome_name]] +
+            stratum.effects[strata_set$S]
+        }
+      }
+
+      if (!is.null(treatment.effects.by.stratum)) {
+        valid.effects <- is.matrix(treatment.effects.by.stratum) &&
+          is.numeric(treatment.effects.by.stratum) &&
+          all(dim(treatment.effects.by.stratum) == c(n.strata, n.treat)) &&
+          !anyNA(treatment.effects.by.stratum) &&
+          all(is.finite(treatment.effects.by.stratum))
+        if (!valid.effects) {
+          stop(paste0(
+            "treatment.effects.by.stratum must be a finite numeric matrix ",
+            "with n.strata rows and length(tau.vec) columns."
+          ))
+        }
+        for (arm in seq_len(n.treat)) {
+          outcome_name <- paste0("Y.", arm)
+          pot.outcomes[[outcome_name]] <- pot.outcomes[[outcome_name]] +
+            treatment.effects.by.stratum[cbind(strata_set$S, arm)] -
+            tau.vec[arm]
+        }
+      }
+
+      if (is.null(allocation.probs)) {
+        pi.vec <- rep(c(1 / (n.treat + 1)), n.treat)
+      } else {
+        valid.probs <- is.matrix(allocation.probs) &&
+          is.numeric(allocation.probs) &&
+          all(dim(allocation.probs) == c(n.strata, n.treat + 1L)) &&
+          !anyNA(allocation.probs) && all(is.finite(allocation.probs)) &&
+          all(allocation.probs > 0) &&
+          all(abs(rowSums(allocation.probs) - 1) < 1e-10)
+        if (!valid.probs) {
+          stop(paste0(
+            "allocation.probs must be a strictly positive numeric matrix ",
+            "with n.strata rows and length(tau.vec) + 1 columns, and every ",
+            "row must sum to one."
+          ))
+        }
+        pi.vec <- t(allocation.probs[, -1, drop = FALSE])
+      }
       data.test <- dgp.obs.sreg(pot.outcomes,
         I.S = strata,
         pi.vec = pi.vec, n.treat = n.treat, is.cov = is.cov
