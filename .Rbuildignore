@@ -10,3 +10,4 @@
 ^revdep$
 ^\.lintr$
 ^sim_results$
+^sreg-reference-manual.*\.pdf$

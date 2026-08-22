@@ -33,9 +33,9 @@ sreg.rgen(
 
 \item{gamma.vec}{a numeric \eqn{1 \times 3} \code{vector} of parameters corresponding to covariates}
 
-\item{cluster}{a \code{TRUE/FALSE} argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level}
+\item{cluster}{a \code{TRUE/FALSE} argument indicating whether the data-generating process should use cluster-level or individual-level treatment assignment}
 
-\item{is.cov}{a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not}
+\item{is.cov}{a \code{TRUE/FALSE} argument indicating whether the data-generating process should include covariates}
 
 \item{small.strata}{a \code{TRUE/FALSE} argument indicating whether the data-generating process should use a small-strata design (e.g., matched pairs, n-tuples)}
 
@@ -54,13 +54,14 @@ sreg.rgen(
 \item{treatment.effects.by.stratum}{an optional \code{n.strata} by \code{length(tau.vec)} matrix whose entries give the stratum-specific mean effects of the active treatments relative to control for large-strata individual-level designs. If \code{NULL}, \code{tau.vec} is used in every stratum}
 }
 \value{
-A \code{data.frame} containing the generated values of the following variables (with \code{n} rows for individual-level designs and one row per observation within the \code{n} generated clusters for cluster-level designs):
+A \code{data.frame} with one row per generated individual. Under individual-level assignment it contains \code{n} rows; under cluster-level assignment, \code{n} is the number of generated clusters and the number of rows equals the total number of individuals generated across those clusters. The returned columns are:
 \itemize{
-\item \code{Y}: a numeric \eqn{n \times 1} \code{vector} of observed outcomes
-\item \code{S}: a numeric \eqn{n \times 1} \code{vector} of strata indicators
-\item \code{D}: a numeric \eqn{n \times 1} \code{vector} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
-\item \code{G.id}: a numeric \eqn{n \times 1} \code{vector} of cluster indicators
-\item \code{X}: a \code{data.frame} with columns representing the covariate values for every observation
+\item \code{Y}: the observed outcome
+\item \code{S}: the stratum indicator
+\item \code{D}: the treatment indicator indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{D = 0} denotes control
+\item \code{G.id}: the cluster indicator, included when \code{cluster = TRUE}
+\item \code{Ng}: the generated cluster size, included when \code{cluster = TRUE}
+\item \code{x_1}, \code{x_2}: generated covariate columns, included when \code{is.cov = TRUE}
 }
 }
 \description{

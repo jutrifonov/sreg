@@ -38,20 +38,46 @@ sreg(
 \value{
 An object of class \code{sreg} that is a list containing the following elements:
 \itemize{
-\item \code{tau.hat}: a \eqn{1 \times |\mathcal A|} \code{vector} of ATE estimates, where \eqn{|\mathcal A|} represents the number of treatments
-\item \code{se.rob}: a \eqn{1 \times |\mathcal A|} \code{vector} of standard errors estimates, where \eqn{|\mathcal A|} represents the number of treatments
-\item \code{t.stat}: a \eqn{1 \times |\mathcal A|} \code{vector} of \eqn{t}-statistics, where \eqn{|\mathcal A|} represents the number of treatments
-\item \code{p.value}: a \eqn{1 \times |\mathcal A|} \code{vector} of corresponding \eqn{p}-values, where \eqn{|\mathcal A|} represents the number of treatments
-\item \code{CI.left}: a \eqn{1 \times |\mathcal A|} \code{vector} of the left bounds of the 95\% as. confidence interval
-\item \code{CI.right}: a \eqn{1 \times |\mathcal A|} \code{vector} of the right bounds of the 95\% as. confidence interval
-\item \code{data}: an original data of the form \code{data.frame(Y, S, D, G.id, Ng, X)}
-\item \code{lin.adj}: a \code{data.frame} representing the covariates that were used in implementing linear adjustments
-\item \code{small.strata}: a \code{TRUE/FALSE} logical argument indicating whether the estimators for small strata (e.g., matched pairs or n-tuples) were used
-\item \code{HC1}: a \code{TRUE/FALSE} logical argument indicating whether the small sample correction (HC1) was applied to the variance estimator
+\item \code{tau.hat}: a numeric vector of ATE estimates, one for each active treatment arm relative to control
+\item \code{se.rob}: a numeric vector of estimated standard errors
+\item \code{t.stat}: a numeric vector of test statistics
+\item \code{p.value}: a numeric vector of corresponding \eqn{p}-values
+\item \code{CI.left}, \code{CI.right}: numeric vectors containing the lower and upper endpoints of the 95\% asymptotic confidence intervals
+\item \code{as.CI}: the confidence-interval endpoints combined as \code{c(CI.left, CI.right)}
+\item \code{data}: the data used for estimation, including the outcome, strata, treatment, and any supplied cluster or covariate variables
+\item \code{lin.adj}: the covariates used for linear adjustment, or \code{NULL} when no adjustment is used
+\item \code{small.strata}: a logical value recording the requested strata procedure
+\item \code{HC1}: a logical value recording whether the HC1 finite-sample correction was applied
+\item \code{mixed.design}: present and \code{TRUE} for mixed designs
+\item \code{res.small}, \code{res.big}: for mixed designs, the fitted \code{sreg} objects for the small- and large-strata components
 }
+Depending on the selected design, the object may additionally contain the
+estimated adjustment coefficients in \code{ols.iter} or \code{beta.hat}.
 }
 \description{
 Estimate the ATE(s) and the corresponding standard error(s) for a (collection of) treatment(s) relative to a control.
+}
+\details{
+Supplying \code{G.id} selects cluster-level assignment; otherwise, treatment
+is treated as assigned at the individual level. Setting
+\code{small.strata = FALSE} selects the large-strata procedure. With
+\code{small.strata = TRUE}, a common observed stratum size selects the
+small-strata procedure, whereas varying stratum sizes select the mixed
+procedure. The optional \code{k} validates the common size in a uniform
+small-strata design and identifies the small-stratum size in a general
+mixed design.
+
+Under cluster-level assignment, adjustment is performed using cluster-level
+covariates. Covariates supplied with one row per individual are replaced by
+their within-cluster means. The package computes the mean outcome among the
+available observations from each cluster and uses \code{Ng} as its represented
+cluster size. If \code{Ng = NULL}, the represented cluster size is set equal
+to the number of available observations in that cluster.
+
+When covariates are supplied in a mixed design, they are used in both the
+small- and large-strata components. If the large-strata component cannot
+support the required treatment-by-stratum regressions, \code{sreg()} returns
+an error suggesting fewer covariates or \code{X = NULL}.
 }
 \examples{
 ### Large strata with covariate adjustment
@@ -108,7 +134,7 @@ Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-
 
 Bugni, F., Canay, I., Shaikh, A., and Tabord-Meehan, M. (2024+). Inference for Cluster Randomized Experiments with Non-ignorable Cluster Sizes. \emph{Forthcoming in the Journal of Political Economy: Microeconomics}, \doi{10.48550/arXiv.2204.08356}.
 
-Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. \emph{Forthcoming in Review of Economics and Statistics}, \doi{10.48550/arXiv.2204.08356}.
+Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. \emph{Forthcoming in Review of Economics and Statistics}, \doi{10.48550/arXiv.2201.13004}.
 
 Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariate adjustment in experiments with matched pairs. \emph{Journal of Econometrics}, 241(1), \doi{10.1016/j.jeconom.2024.105740}.
 

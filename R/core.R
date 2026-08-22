@@ -21,25 +21,50 @@
 #' @param HC1 a \code{TRUE/FALSE} logical argument indicating whether the small sample correction should be applied to the variance estimator
 #' @param small.strata a \code{TRUE/FALSE} logical argument indicating whether the estimators for small strata (i.e., strata with few units, such as matched pairs or n-tuples) should be used.
 #' @param k an optional positive integer specifying the number of units per small stratum, or the number of clusters per small stratum in cluster-randomized designs. When \code{NULL}, mixed designs retain the automatic detection rule for matched pairs and triplets. Supply \code{k} for general k-tuple mixed designs.
+#' @details
+#' Supplying \code{G.id} selects cluster-level assignment; otherwise, treatment
+#' is treated as assigned at the individual level. Setting
+#' \code{small.strata = FALSE} selects the large-strata procedure. With
+#' \code{small.strata = TRUE}, a common observed stratum size selects the
+#' small-strata procedure, whereas varying stratum sizes select the mixed
+#' procedure. The optional \code{k} validates the common size in a uniform
+#' small-strata design and identifies the small-stratum size in a general
+#' mixed design.
+#'
+#' Under cluster-level assignment, adjustment is performed using cluster-level
+#' covariates. Covariates supplied with one row per individual are replaced by
+#' their within-cluster means. The package computes the mean outcome among the
+#' available observations from each cluster and uses \code{Ng} as its represented
+#' cluster size. If \code{Ng = NULL}, the represented cluster size is set equal
+#' to the number of available observations in that cluster.
+#'
+#' When covariates are supplied in a mixed design, they are used in both the
+#' small- and large-strata components. If the large-strata component cannot
+#' support the required treatment-by-stratum regressions, \code{sreg()} returns
+#' an error suggesting fewer covariates or \code{X = NULL}.
 #' @return An object of class \code{sreg} that is a list containing the following elements:
 #' \itemize{
-#' \item \code{tau.hat}: a \eqn{1 \times |\mathcal A|} \code{vector} of ATE estimates, where \eqn{|\mathcal A|} represents the number of treatments
-#' \item \code{se.rob}: a \eqn{1 \times |\mathcal A|} \code{vector} of standard errors estimates, where \eqn{|\mathcal A|} represents the number of treatments
-#' \item \code{t.stat}: a \eqn{1 \times |\mathcal A|} \code{vector} of \eqn{t}-statistics, where \eqn{|\mathcal A|} represents the number of treatments
-#' \item \code{p.value}: a \eqn{1 \times |\mathcal A|} \code{vector} of corresponding \eqn{p}-values, where \eqn{|\mathcal A|} represents the number of treatments
-#' \item \code{CI.left}: a \eqn{1 \times |\mathcal A|} \code{vector} of the left bounds of the 95\% as. confidence interval
-#' \item \code{CI.right}: a \eqn{1 \times |\mathcal A|} \code{vector} of the right bounds of the 95\% as. confidence interval
-#' \item \code{data}: an original data of the form \code{data.frame(Y, S, D, G.id, Ng, X)}
-#' \item \code{lin.adj}: a \code{data.frame} representing the covariates that were used in implementing linear adjustments
-#' \item \code{small.strata}: a \code{TRUE/FALSE} logical argument indicating whether the estimators for small strata (e.g., matched pairs or n-tuples) were used
-#' \item \code{HC1}: a \code{TRUE/FALSE} logical argument indicating whether the small sample correction (HC1) was applied to the variance estimator
+#' \item \code{tau.hat}: a numeric vector of ATE estimates, one for each active treatment arm relative to control
+#' \item \code{se.rob}: a numeric vector of estimated standard errors
+#' \item \code{t.stat}: a numeric vector of test statistics
+#' \item \code{p.value}: a numeric vector of corresponding \eqn{p}-values
+#' \item \code{CI.left}, \code{CI.right}: numeric vectors containing the lower and upper endpoints of the 95\% asymptotic confidence intervals
+#' \item \code{as.CI}: the confidence-interval endpoints combined as \code{c(CI.left, CI.right)}
+#' \item \code{data}: the data used for estimation, including the outcome, strata, treatment, and any supplied cluster or covariate variables
+#' \item \code{lin.adj}: the covariates used for linear adjustment, or \code{NULL} when no adjustment is used
+#' \item \code{small.strata}: a logical value recording the requested strata procedure
+#' \item \code{HC1}: a logical value recording whether the HC1 finite-sample correction was applied
+#' \item \code{mixed.design}: present and \code{TRUE} for mixed designs
+#' \item \code{res.small}, \code{res.big}: for mixed designs, the fitted \code{sreg} objects for the small- and large-strata components
 #' }
+#' Depending on the selected design, the object may additionally contain the
+#' estimated adjustment coefficients in \code{ols.iter} or \code{beta.hat}.
 #' @references
 #' Bugni, F. A., Canay, I. A., and Shaikh, A. M. (2018). Inference Under Covariate-Adaptive Randomization. \emph{Journal of the American Statistical Association}, 113(524), 1784–1796, \doi{10.1080/01621459.2017.1375934}.
 #'
 #' Bugni, F., Canay, I., Shaikh, A., and Tabord-Meehan, M. (2024+). Inference for Cluster Randomized Experiments with Non-ignorable Cluster Sizes. \emph{Forthcoming in the Journal of Political Economy: Microeconomics}, \doi{10.48550/arXiv.2204.08356}.
 #'
-#' Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. \emph{Forthcoming in Review of Economics and Statistics}, \doi{10.48550/arXiv.2204.08356}.
+#' Jiang, L., Linton, O. B., Tang, H., and Zhang, Y. (2023+). Improving Estimation Efficiency via Regression-Adjustment in Covariate-Adaptive Randomizations with Imperfect Compliance. \emph{Forthcoming in Review of Economics and Statistics}, \doi{10.48550/arXiv.2201.13004}.
 #'
 #' Bai, Y., Jiang, L., Romano, J. P., Shaikh, A. M., and Zhang, Y. (2024). Covariate adjustment in experiments with matched pairs. \emph{Journal of Econometrics}, 241(1), \doi{10.1016/j.jeconom.2024.105740}.
 #'
@@ -395,8 +420,8 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE,
 #' @param n.strata an integer specifying the number of strata
 #' @param tau.vec a numeric \eqn{1 \times |\mathcal A|} \code{vector} of treatment effects, where \eqn{|\mathcal A|} represents the number of treatments
 #' @param gamma.vec a numeric \eqn{1 \times 3} \code{vector} of parameters corresponding to covariates
-#' @param cluster a \code{TRUE/FALSE} argument indicating whether the dgp should use a cluster-level treatment assignment or individual-level
-#' @param is.cov a \code{TRUE/FALSE} argument indicating whether the dgp should include covariates or not
+#' @param cluster a \code{TRUE/FALSE} argument indicating whether the data-generating process should use cluster-level or individual-level treatment assignment
+#' @param is.cov a \code{TRUE/FALSE} argument indicating whether the data-generating process should include covariates
 #' @param small.strata a \code{TRUE/FALSE} argument indicating whether the data-generating process should use a small-strata design (e.g., matched pairs, n-tuples)
 #' @param k an integer specifying the number of units per stratum when \code{small.strata = TRUE}
 #' @param treat.sizes a numeric \eqn{1 \times (|\mathcal A| + 1)} \code{vector} specifying the number of units assigned to each treatment within a stratum; the first element corresponds to control units (\eqn{D = 0}), the second to the first treatment (\eqn{D = 1}), and so on. When omitted for a mixed design, the \code{k} positions are allocated across arms as evenly as possible
@@ -405,13 +430,14 @@ sreg <- function(Y, S = NULL, D, G.id = NULL, Ng = NULL, X = NULL, HC1 = TRUE,
 #' @param allocation.probs an optional \code{n.strata} by \code{(length(tau.vec) + 1)} matrix of stratum-specific treatment probabilities for large-strata individual-level designs. Columns correspond to control and the active treatment arms and every row must sum to one. If \code{NULL}, equal treatment probabilities are used in every stratum
 #' @param stratum.effects an optional numeric vector of length \code{n.strata} added to every potential outcome in the corresponding stratum for large-strata individual-level designs
 #' @param treatment.effects.by.stratum an optional \code{n.strata} by \code{length(tau.vec)} matrix whose entries give the stratum-specific mean effects of the active treatments relative to control for large-strata individual-level designs. If \code{NULL}, \code{tau.vec} is used in every stratum
-#' @return A \code{data.frame} containing the generated values of the following variables (with \code{n} rows for individual-level designs and one row per observation within the \code{n} generated clusters for cluster-level designs):
+#' @return A \code{data.frame} with one row per generated individual. Under individual-level assignment it contains \code{n} rows; under cluster-level assignment, \code{n} is the number of generated clusters and the number of rows equals the total number of individuals generated across those clusters. The returned columns are:
 #' \itemize{
-#' \item \code{Y}: a numeric \eqn{n \times 1} \code{vector} of observed outcomes
-#' \item \code{S}: a numeric \eqn{n \times 1} \code{vector} of strata indicators
-#' \item \code{D}: a numeric \eqn{n \times 1} \code{vector} of treatments indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{\code{D} = 0} denotes the control
-#' \item \code{G.id}: a numeric \eqn{n \times 1} \code{vector} of cluster indicators
-#' \item \code{X}: a \code{data.frame} with columns representing the covariate values for every observation
+#' \item \code{Y}: the observed outcome
+#' \item \code{S}: the stratum indicator
+#' \item \code{D}: the treatment indicator indexed by \eqn{\{0, 1, 2, \ldots\}}, where \eqn{D = 0} denotes control
+#' \item \code{G.id}: the cluster indicator, included when \code{cluster = TRUE}
+#' \item \code{Ng}: the generated cluster size, included when \code{cluster = TRUE}
+#' \item \code{x_1}, \code{x_2}: generated covariate columns, included when \code{is.cov = TRUE}
 #' }
 #' @export
 #'
@@ -574,7 +600,11 @@ sreg.rgen <- function(n, Nmax = 50, n.strata = 10,
       X <- data.sim$X
       Ng <- data.sim$Ng
       G.id <- data.sim$G.id
-      data.sim <- data.frame(Y, S, D, G.id, Ng, X)
+      if (is.cov) {
+        data.sim <- data.frame(Y, S, D, G.id, Ng, X)
+      } else {
+        data.sim <- data.frame(Y, S, D, G.id, Ng)
+      }
     }
   } else {
     if (small.strata) {
