@@ -75,7 +75,7 @@ library(sreg)
 #> / ___||  _ \| ____/ ___|     Experiments
 #> \___ \| |_) |  _|| |  _  
 #>  ___) |  _ <| |__| |_| |  
-#> |____/|_| \_\_____\____| version 2.0.2
+#> |____/|_| \_\_____\____| version 2.1.0
 
 #> Type 'citation("sreg")' for citing this R package in publications. 
 ```
