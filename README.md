@@ -1,4 +1,4 @@
-# sreg: Stratified Randomized Experiments<br><img src="man/figures/sreg-logo.png" alt="sreg logo" align="right" height="250" />
+# sreg: Stratified Randomized Experiments<br><a href="https://CRAN.R-project.org/package=sreg"><img src="man/figures/sreg-logo.png" alt="sreg logo" align="right" height="250" /></a>
 ![version](https://img.shields.io/badge/sreg-v.2.1.0-green?style=flat&logo=github&labelColor=2A2523)
 [![Static Badge](https://img.shields.io/badge/CRAN-v.2.1.0-orange?logo=R&labelColor=2A2523)](https://CRAN.R-project.org/package=sreg)
 [![R-CMD-check](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml)
