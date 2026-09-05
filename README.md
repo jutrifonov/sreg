@@ -1,4 +1,4 @@
-# sreg: Stratified Randomized Experiments<br><img src="https://github.com/jutrifonov/sreg.dev/blob/main/logo.png" align="right" height="250" />
+# sreg: Stratified Randomized Experiments<br><img src="man/figures/sreg-logo.png" alt="sreg logo" align="right" height="250" />
 ![version](https://img.shields.io/badge/sreg-v.2.1.0-green?style=flat&logo=github&labelColor=2A2523)
 [![Static Badge](https://img.shields.io/badge/CRAN-v.2.1.0-orange?logo=R&labelColor=2A2523)](https://CRAN.R-project.org/package=sreg)
 [![R-CMD-check](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jutrifonov/sreg/actions/workflows/R-CMD-check.yaml)
@@ -23,16 +23,11 @@ The `sreg` package for `R`, offers a toolkit for estimating average treatment ef
 
 - Max Tabord-Meehan m.tabordmeehan@utoronto.ca
 
-## Supplementary files 
-- PDF version of the manual: [Download PDF](https://github.com/jutrifonov/sreg/blob/main/.github/README.pdf) 
+## Supplementary files
 
--  *Large Strata:* Sketch of the derivation of the ATE variance estimator under cluster-level treatment assignment: [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/cluster.pdf)
+- Package manual: [Download PDF](.github/README.pdf?raw=1)
 
--  *Large Strata:* Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/multiple.pdf)
-
-- *Small Strata:* Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/expressions%20(1).pdf)
-
-- *Mixed Design:* Expressions for the multiple treatment case (with and without clusters): [Download PDF](https://github.com/jutrifonov/sreg.dev/blob/main/Small_Strata_Expressions.pdf)
+- Estimator formulas for large-strata, small-strata, and mixed designs under individual- and cluster-level treatment assignment: [Download PDF](.github/assets/sreg-estimator-formulas.pdf?raw=1)
 
 
 
