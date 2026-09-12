@@ -96,8 +96,10 @@ tau.hat.creg <- function(Y, S, D, G.id, Ng, X = NULL, model = NULL)
         select(Y, S, D, G.id, Ng)
       working.df <- as.data.frame(working.df)
     }
-    Y.bar.full <- aggregate(Y ~ G.id, working.df, mean)$Y
+    Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
     cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng")])
+    # Keep cluster means aligned with first-appearance cluster metadata.
+    Y.bar.full <- Y.bar.g$Y[match(cl.lvl.data$G.id, Y.bar.g$G.id)]
     Ng.full <- cl.lvl.data$Ng
 
     for (d in 1:max(D))

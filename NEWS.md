@@ -1,3 +1,10 @@
+# Development version
+
+* Fixed cluster-ID alignment in adjusted and unadjusted large-strata
+  estimation, including the large component of mixed designs. Reordering
+  observations now preserves estimates, standard errors, tests and intervals,
+  with either supplied or inferred cluster sizes.
+
 # sreg 2.1.0
 
 ## Estimation and inference

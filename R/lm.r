@@ -50,7 +50,12 @@ lm.iter.creg <- function(Y, S, D, G.id, Ng, X)
   }
   Y.bar.g <- aggregate(Y ~ G.id, working.df, mean)
   cl.lvl.data <- unique(working.df[, c("G.id", "D", "S", "Ng", names(working.df)[6:ncol(working.df)])])
-  cl.lvl.data <- data.frame("Y.bar" = Y.bar.g$Y, cl.lvl.data)
+  # aggregate() sorts IDs; unique() retains first-appearance order.
+  # Align outcomes by cluster ID before attaching them to cluster metadata.
+  cl.lvl.data <- data.frame(
+    "Y.bar" = Y.bar.g$Y[match(cl.lvl.data$G.id, Y.bar.g$G.id)],
+    cl.lvl.data
+  )
   data <- cl.lvl.data
   theta.list <- rep(list(matrix(NA, ncol = ncol(X), nrow = max(S))), (max(D) + 1))
   for (d in 0:max(D))
